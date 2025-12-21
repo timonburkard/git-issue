@@ -112,13 +112,16 @@ cargo clippy
 
 ## Architecture
 
-- `src/main.rs`  -- CLI parsing with clap
-- `src/model.rs` -- Shared data types, functions and utilities
-- `src/init.rs`  -- Initialize `.gitissues/` directory and copy default config
-- `src/list.rs`  -- List all issues
-- `src/new.rs`   -- Create new issues with ID allocation
-- `src/show.rs`  -- Show details of an issue
-- `src/state.rs` -- Change issue state
+- `config/`
+  - `config-default.yaml` -- Default configuration, applied at `git issue init`
+- `src/`
+  - `main.rs`  -- CLI parsing with clap
+  - `model.rs` -- Shared data types, functions and utilities
+  - `init.rs`  -- Initialize `.gitissues/` directory and copy default config
+  - `list.rs`  -- List all issues
+  - `new.rs`   -- Create new issues with ID allocation
+  - `show.rs`  -- Show details of an issue
+  - `state.rs` -- Change issue state
 
 ## Dependencies
 
