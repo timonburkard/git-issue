@@ -4,8 +4,8 @@ use std::path::Path;
 use serde::Deserialize;
 
 pub fn run(id: u32) -> Result<(), String> {
-    let id_str = format!("{:010}", id);
-    let issue_path = format!(".gitissues/issues/{}", id_str);
+    let id_str = format!("{id:010}");
+    let issue_path = format!(".gitissues/issues/{id_str}");
     let path = Path::new(&issue_path);
 
     // Precondition: .gitissues/issues/ID must exist
@@ -38,7 +38,7 @@ pub fn run(id: u32) -> Result<(), String> {
         Err(_) => return Err("issue.md not found.".to_string()),
     };
 
-    println!("Description:\n{}", md_raw);
+    println!("Description:\n{md_raw}");
 
     Ok(())
 }

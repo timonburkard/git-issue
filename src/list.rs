@@ -18,13 +18,11 @@ pub fn run() -> Result<(), String> {
     // Collect issue metadata
     let mut issues: Vec<Meta> = Vec::new();
 
-    for entry in
-        fs::read_dir(path).map_err(|e| format!("Failed to read issues directory: {}", e))?
-    {
-        let entry = entry.map_err(|e| format!("Failed to read entry: {}", e))?;
+    for entry in fs::read_dir(path).map_err(|e| format!("Failed to read issues directory: {e}"))? {
+        let entry = entry.map_err(|e| format!("Failed to read entry: {e}"))?;
         if !entry
             .file_type()
-            .map_err(|e| format!("Failed to read file type: {}", e))?
+            .map_err(|e| format!("Failed to read file type: {e}"))?
             .is_dir()
         {
             continue;
@@ -57,7 +55,7 @@ pub fn run() -> Result<(), String> {
     issues.sort_by_key(|m| m.id.clone());
 
     // Print header and rows
-    println!("{:<11} {:<10} {}", "ID", "State", "Title");
+    println!("{:<11} {:<10} Title", "ID", "State");
     for meta in issues {
         println!("{:<11} {:<10} {}", meta.id, meta.state, meta.title);
     }

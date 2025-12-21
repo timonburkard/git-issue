@@ -11,7 +11,7 @@ pub fn run() -> Result<(), String> {
 
     // Create the directory structure
     fs::create_dir_all(&issues_dir)
-        .map_err(|e| format!("Failed to create {}: {}", issues_dir.display(), e))?;
+        .map_err(|e| format!("Failed to create {}: {e}", issues_dir.display()))?;
 
     println!("Initialization done");
 

@@ -9,18 +9,17 @@ pub fn run(title: String) -> Result<(), String> {
     let issue_id = allocate_id()?;
 
     // Step 2: Create the issue directory
-    let issue_dir = format!(".gitissues/issues/{}", issue_id);
-    fs::create_dir_all(&issue_dir)
-        .map_err(|e| format!("Failed to create issue directory: {}", e))?;
+    let issue_dir = format!(".gitissues/issues/{issue_id}");
+    fs::create_dir_all(&issue_dir).map_err(|e| format!("Failed to create issue directory: {e}"))?;
 
     // Step 3: Write issue.md
-    let issue_md_path = format!("{}/issue.md", issue_dir);
-    let issue_md_content = format!("# {}\n\n## Description\n\nTBD\n", title);
+    let issue_md_path = format!("{issue_dir}/issue.md");
+    let issue_md_content = format!("# {title}\n\n## Description\n\nTBD\n");
     fs::write(&issue_md_path, issue_md_content)
-        .map_err(|e| format!("Failed to write issue.md: {}", e))?;
+        .map_err(|e| format!("Failed to write issue.md: {e}"))?;
 
     // Step 4: Write meta.yaml
-    let meta_yaml_path = format!("{}/meta.yaml", issue_dir);
+    let meta_yaml_path = format!("{issue_dir}/meta.yaml");
     let timestamp = current_timestamp();
     let meta = Meta {
         id: issue_id.clone(),
@@ -31,10 +30,9 @@ pub fn run(title: String) -> Result<(), String> {
     };
     let meta_yaml =
         serde_yaml::to_string(&meta).map_err(|_| "Failed to serialize meta.yaml".to_string())?;
-    fs::write(&meta_yaml_path, meta_yaml)
-        .map_err(|e| format!("Failed to write meta.yaml: {}", e))?;
+    fs::write(&meta_yaml_path, meta_yaml).map_err(|e| format!("Failed to write meta.yaml: {e}"))?;
 
-    println!("Created issue {}", issue_id);
+    println!("Created issue {issue_id}");
 
     Ok(())
 }
@@ -57,10 +55,8 @@ fn allocate_id() -> Result<String, String> {
     let mut max_id = 0u32;
 
     // Read directory entries and find the highest numeric ID
-    for entry in
-        fs::read_dir(path).map_err(|e| format!("Failed to read issues directory: {}", e))?
-    {
-        let entry = entry.map_err(|e| format!("Failed to read entry: {}", e))?;
+    for entry in fs::read_dir(path).map_err(|e| format!("Failed to read issues directory: {e}"))? {
+        let entry = entry.map_err(|e| format!("Failed to read entry: {e}"))?;
         let file_name = entry.file_name();
         let name_str = file_name.to_string_lossy();
 
@@ -74,7 +70,7 @@ fn allocate_id() -> Result<String, String> {
     }
 
     let next_id = max_id + 1;
-    Ok(format!("{:010}", next_id))
+    Ok(format!("{next_id:010}"))
 }
 
 #[derive(Debug, Serialize)]

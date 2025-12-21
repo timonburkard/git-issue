@@ -49,35 +49,35 @@ fn main() {
     match args.command {
         Commands::Init => {
             if let Err(e) = init::run() {
-                eprintln!("Error: {}", e);
+                eprintln!("Error: {e}");
                 std::process::exit(1);
             }
         }
 
         Commands::New { title } => {
             if let Err(e) = new::run(title) {
-                eprintln!("Error: {}", e);
+                eprintln!("Error: {e}");
                 std::process::exit(1);
             }
         }
 
         Commands::List => {
             if let Err(e) = list::run() {
-                eprintln!("Error: {}", e);
+                eprintln!("Error: {e}");
                 std::process::exit(1);
             }
         }
 
         Commands::Show { id } => {
             if let Err(e) = show::run(id) {
-                eprintln!("Error: {}", e);
+                eprintln!("Error: {e}");
                 std::process::exit(1);
             }
         }
 
         Commands::State { id, state } => {
             if let Err(e) = state::run(id, state) {
-                eprintln!("Error: {}", e);
+                eprintln!("Error: {e}");
                 std::process::exit(1);
             }
         }
