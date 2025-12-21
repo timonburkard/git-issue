@@ -30,7 +30,7 @@ Issues live in `.gitissues/issues/{ID}/`:
     └── ...
 ```
 
--  `meta.yaml` (metadata: id, title, status, timestamps)
+-  `meta.yaml` (metadata: id, title, state, timestamps)
 - `issue.md` (human-readable markdown description)
 - IDs are 10-digit zero-padded (0000000001, 0000000002, …)
 
@@ -39,7 +39,7 @@ Issues live in `.gitissues/issues/{ID}/`:
 ```yaml
 id: 0000000001
 title: "Fix login bug"
-status: new
+state: new
 created: 2025-12-21T15:54:52Z
 updated: 2025-12-21T15:54:52Z
 ```

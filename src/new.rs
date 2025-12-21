@@ -22,7 +22,7 @@ pub fn run(title: String) -> Result<(), String> {
     let meta_yaml_path = format!("{}/meta.yaml", issue_dir);
     let timestamp = current_timestamp();
     let meta_content = format!(
-        "id: {}\ntitle: \"{}\"\nstatus: new\ncreated: {}\nupdated: {}\n",
+        "id: {}\ntitle: \"{}\"\nstate: new\ncreated: {}\nupdated: {}\n",
         issue_id, title, timestamp, timestamp
     );
     fs::write(&meta_yaml_path, meta_content)
