@@ -16,6 +16,10 @@ jobs:
 
     steps:
     - uses: actions/checkout@v4
+    - name: Install Rust toolchain
+      run: |
+        rustup component add rustfmt
+        rustup component add clippy
     - name: Build
       run: cargo build --verbose
     - name: Format
