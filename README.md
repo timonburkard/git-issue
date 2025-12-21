@@ -14,46 +14,6 @@ Issues live alongside your code inside `.gitissues/`, making them platform-indep
 - ✅ Git integration                -- Auto-commit `.gitissues/` changes (configurable)
 - 🚧 Testing                        -- CI/CD automated tests
 
-## Storage Layout
-
-Issues live in `.gitissues/issues/{ID}/`:
-
-```
-.gitissues/
-└── issues/
-    └── 0000000001/
-        ├── meta.yaml      # Structured metadata
-        └── issue.md       # Markdown description
-    ├── 0000000002
-        ├── meta.yaml      # Structured metadata
-        └── issue.md       # Markdown description
-    └── ...
-```
-
-- `meta.yaml` (metadata: id, title, state, timestamps)
-- `issue.md` (human-readable markdown description)
-- Directory names are the 10-digit zero-padded IDs (0000000001, 0000000002, …)
-
-### meta.yaml Format
-
-```yaml
-id: 1234
-title: Fix login bug
-state: new
-created: 2025-12-21T15:54:52Z
-updated: 2025-12-21T15:54:52Z
-```
-
-### issue.md Format
-
-```markdown
-# Fix login bug
-
-## Description
-
-TBD
-```
-
 ## Usage
 
 ```bash
@@ -94,6 +54,27 @@ commit_message: "[issue] {action} #{id} - {title}"
   - `{title}`: Issue title
   - `{action}`: Command that triggered the commit (`new`, `state change`)
 
+## Installation
+
+Download the latest release from GitHub and put the binary on your PATH.
+
+1) Go to the Releases page and download the binary for your platform:
+   - `git-issue-linux-x86_64`
+   - `git-issue-macos-x86_64` or `git-issue-macos-aarch64`
+   - `git-issue-windows-x86_64.exe`
+2) Rename to the canonical name and place on your PATH
+   - Linux/macOS:
+     ```bash
+     mv git-issue-<your-platform> git-issue
+     chmod +x git-issue
+     sudo mv git-issue /usr/local/bin/
+     ```
+   - Windows: rename `git-issue-windows-x86_64.exe` to `git-issue.exe` and move it to a directory on your PATH.
+3) Verify:
+   ```bash
+   git issue -h
+   ```
+
 ## Building & Development
 
 ```bash
@@ -108,6 +89,46 @@ cargo fmt
 
 # Lint
 cargo clippy
+```
+
+## Storage Layout
+
+Issues live in `.gitissues/issues/{ID}/`:
+
+```
+.gitissues/
+└── issues/
+    └── 0000000001/
+        ├── meta.yaml      # Structured metadata
+        └── issue.md       # Markdown description
+    ├── 0000000002
+        ├── meta.yaml      # Structured metadata
+        └── issue.md       # Markdown description
+    └── ...
+```
+
+- `meta.yaml` (metadata: id, title, state, timestamps)
+- `issue.md` (human-readable markdown description)
+- Directory names are the 10-digit zero-padded IDs (0000000001, 0000000002, …)
+
+### meta.yaml Format
+
+```yaml
+id: 1234
+title: Fix login bug
+state: new
+created: 2025-12-21T15:54:52Z
+updated: 2025-12-21T15:54:52Z
+```
+
+### issue.md Format
+
+```markdown
+# Fix login bug
+
+## Description
+
+TBD
 ```
 
 ## Architecture
