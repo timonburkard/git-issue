@@ -29,8 +29,8 @@ pub fn run(title: String) -> Result<(), String> {
         created: timestamp.clone(),
         updated: timestamp,
     };
-    let meta_yaml = serde_yaml::to_string(&meta)
-        .map_err(|_| "Failed to serialize meta.yaml".to_string())?;
+    let meta_yaml =
+        serde_yaml::to_string(&meta).map_err(|_| "Failed to serialize meta.yaml".to_string())?;
     fs::write(&meta_yaml_path, meta_yaml)
         .map_err(|e| format!("Failed to write meta.yaml: {}", e))?;
 
