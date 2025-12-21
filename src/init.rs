@@ -13,6 +13,16 @@ pub fn run() -> Result<(), String> {
     fs::create_dir_all(&issues_dir)
         .map_err(|e| format!("Failed to create {}: {e}", issues_dir.display()))?;
 
+    // Copy default config file
+    const DEFAULT_CONFIG: &str = include_str!("../config/config-default.yaml");
+    let config_dst = Path::new(".gitissues").join("config.yaml");
+    fs::write(&config_dst, DEFAULT_CONFIG).map_err(|e| {
+        format!(
+            "Failed to write default config to {}: {e}",
+            config_dst.display()
+        )
+    })?;
+
     println!("Initialization done");
 
     Ok(())
