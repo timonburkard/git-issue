@@ -32,12 +32,12 @@ Issues live in `.gitissues/issues/{ID}/`:
 
 - `meta.yaml` (metadata: id, title, state, timestamps)
 - `issue.md` (human-readable markdown description)
-- IDs are 10-digit zero-padded (0000000001, 0000000002, …)
+- Directory names are the 10-digit zero-padded IDs (0000000001, 0000000002, …)
 
 ### meta.yaml Format
 
 ```yaml
-id: '0000000001'
+id: 1234
 title: Fix login bug
 state: new
 created: 2025-12-21T15:54:52Z
@@ -67,10 +67,10 @@ git issue new "Fix login redirect bug"
 git issue list
 
 # Show issue details
-git issue show 0000000001
+git issue show 1234
 
 # Close an issue
-git issue state 0000000001 resolved
+git issue state 1234 resolved
 ```
 
 ## Building & Development
