@@ -8,7 +8,7 @@ Issues live alongside your code inside `.gitissues/`, making them platform-indep
 
 - ✅ `git issue init` -- Initialize `.gitissues/` in your repository
 - ✅ `git issue new <"title">` -- Create a new issue with auto-incremented ID
-- 🚧 `git issue list` -- List all issues
+- ✅ `git issue list` -- List all issues
 - 🚧 `git issue show <id>` -- Display issue details
 - 🚧 `git issue state <id> <state>` -- Change issue state
 - 🚧 Git integration -- Auto-commit `.gitissues/` changes
@@ -94,6 +94,7 @@ cargo clippy
 - `src/main.rs` -- CLI parsing with clap
 - `src/init.rs` -- Initialize `.gitissues/` directory
 - `src/new.rs` -- Create new issues with ID allocation
+- `src/list.rs` -- List all issues
 
 ## Dependencies
 

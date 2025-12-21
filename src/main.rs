@@ -1,6 +1,7 @@
 use clap::{Parser, Subcommand};
 
 mod init;
+mod list;
 mod new;
 
 #[derive(Parser)]
@@ -21,6 +22,9 @@ enum Commands {
         /// Issue title
         title: String,
     },
+
+    /// List all issues
+    List,
 }
 
 fn main() {
@@ -36,6 +40,13 @@ fn main() {
 
         Commands::New { title } => {
             if let Err(e) = new::run(title) {
+                eprintln!("Error: {}", e);
+                std::process::exit(1);
+            }
+        }
+
+        Commands::List => {
+            if let Err(e) = list::run() {
                 eprintln!("Error: {}", e);
                 std::process::exit(1);
             }
