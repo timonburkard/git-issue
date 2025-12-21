@@ -4,6 +4,7 @@ mod init;
 mod list;
 mod new;
 mod show;
+mod state;
 
 #[derive(Parser)]
 #[command(name = "git-issue")]
@@ -31,6 +32,14 @@ enum Commands {
     Show {
         /// Issue ID
         id: u32,
+    },
+
+    /// Change issue state
+    State {
+        /// Issue ID
+        id: u32,
+        /// New issue state
+        state: String,
     },
 }
 
@@ -61,6 +70,13 @@ fn main() {
 
         Commands::Show { id } => {
             if let Err(e) = show::run(id) {
+                eprintln!("Error: {}", e);
+                std::process::exit(1);
+            }
+        }
+
+        Commands::State { id, state } => {
+            if let Err(e) = state::run(id, state) {
                 eprintln!("Error: {}", e);
                 std::process::exit(1);
             }
