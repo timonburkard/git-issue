@@ -10,7 +10,7 @@ Issues live alongside your code inside `.gitissues/`, making them platform-indep
 - ✅ `git issue new <"title">`      -- Create a new issue with auto-incremented ID
 - ✅ `git issue list`               -- List all issues
 - ✅ `git issue show <id>`          -- Display issue details
-- 🚧 `git issue state <id> <state>` -- Change issue state
+- ✅ `git issue state <id> <state>` -- Change issue state
 - 🚧 Git integration                -- Auto-commit `.gitissues/` changes
 - 🚧 Testing                        -- CI/CD automated tests
 
