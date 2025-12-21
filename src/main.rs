@@ -1,6 +1,7 @@
 use clap::{Parser, Subcommand};
 
 mod init;
+mod new;
 
 #[derive(Parser)]
 #[command(name = "git-issue")]
@@ -33,6 +34,11 @@ fn main() {
             }
         }
 
-        Commands::New { title } => println!("Running: new with title '{}'", title),
+        Commands::New { title } => {
+            if let Err(e) = new::run(title) {
+                eprintln!("Error: {}", e);
+                std::process::exit(1);
+            }
+        }
     }
 }
