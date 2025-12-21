@@ -37,8 +37,8 @@ Issues live in `.gitissues/issues/{ID}/`:
 ### meta.yaml Format
 
 ```yaml
-id: 0000000001
-title: "Fix login bug"
+id: '0000000001'
+title: Fix login bug
 state: new
 created: 2025-12-21T15:54:52Z
 updated: 2025-12-21T15:54:52Z

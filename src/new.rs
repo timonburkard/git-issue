@@ -2,6 +2,7 @@ use std::fs;
 use std::path::Path;
 
 use chrono::Utc;
+use serde::Serialize;
 
 pub fn run(title: String) -> Result<(), String> {
     // Step 1: Allocate the next issue ID
@@ -18,14 +19,19 @@ pub fn run(title: String) -> Result<(), String> {
     fs::write(&issue_md_path, issue_md_content)
         .map_err(|e| format!("Failed to write issue.md: {}", e))?;
 
-    // Step 4: Write meta.yml
+    // Step 4: Write meta.yaml
     let meta_yaml_path = format!("{}/meta.yaml", issue_dir);
     let timestamp = current_timestamp();
-    let meta_content = format!(
-        "id: {}\ntitle: \"{}\"\nstate: new\ncreated: {}\nupdated: {}\n",
-        issue_id, title, timestamp, timestamp
-    );
-    fs::write(&meta_yaml_path, meta_content)
+    let meta = Meta {
+        id: issue_id.clone(),
+        title: title.clone(),
+        state: "new".to_string(),
+        created: timestamp.clone(),
+        updated: timestamp,
+    };
+    let meta_yaml = serde_yaml::to_string(&meta)
+        .map_err(|_| "Failed to serialize meta.yaml".to_string())?;
+    fs::write(&meta_yaml_path, meta_yaml)
         .map_err(|e| format!("Failed to write meta.yaml: {}", e))?;
 
     println!("Created issue {}", issue_id);
@@ -69,6 +75,15 @@ fn allocate_id() -> Result<String, String> {
 
     let next_id = max_id + 1;
     Ok(format!("{:010}", next_id))
+}
+
+#[derive(Debug, Serialize)]
+struct Meta {
+    id: String,
+    title: String,
+    state: String,
+    created: String,
+    updated: String,
 }
 
 /// Generate a proper ISO 8601 timestamp using chrono.
