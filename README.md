@@ -6,13 +6,13 @@ Issues live alongside your code inside `.gitissues/`, making them platform-indep
 
 ## Features
 
-- ✅ `git issue init` -- Initialize `.gitissues/` in your repository
-- ✅ `git issue new <"title">` -- Create a new issue with auto-incremented ID
-- ✅ `git issue list` -- List all issues
-- 🚧 `git issue show <id>` -- Display issue details
+- ✅ `git issue init`               -- Initialize `.gitissues/` in your repository
+- ✅ `git issue new <"title">`      -- Create a new issue with auto-incremented ID
+- ✅ `git issue list`               -- List all issues
+- ✅ `git issue show <id>`          -- Display issue details
 - 🚧 `git issue state <id> <state>` -- Change issue state
-- 🚧 Git integration -- Auto-commit `.gitissues/` changes
-- 🚧 Testing
+- 🚧 Git integration                -- Auto-commit `.gitissues/` changes
+- 🚧 Testing                        -- CI/CD automated tests
 
 ## Storage Layout
 
@@ -30,7 +30,7 @@ Issues live in `.gitissues/issues/{ID}/`:
     └── ...
 ```
 
--  `meta.yaml` (metadata: id, title, state, timestamps)
+- `meta.yaml` (metadata: id, title, state, timestamps)
 - `issue.md` (human-readable markdown description)
 - IDs are 10-digit zero-padded (0000000001, 0000000002, …)
 
@@ -93,10 +93,13 @@ cargo clippy
 
 - `src/main.rs` -- CLI parsing with clap
 - `src/init.rs` -- Initialize `.gitissues/` directory
-- `src/new.rs` -- Create new issues with ID allocation
 - `src/list.rs` -- List all issues
+- `src/new.rs`  -- Create new issues with ID allocation
+- `src/show.rs` -- Show details of an issue
 
 ## Dependencies
 
-- `clap` -- CLI argument parsing
-- `chrono` -- Timestamp generation
+- `clap`       -- CLI argument parsing
+- `chrono`     -- Timestamp generation
+- `serde`      -- Serialization framework
+- `serde_yaml` -- YAML parsing for meta.yaml files
