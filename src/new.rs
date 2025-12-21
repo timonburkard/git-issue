@@ -7,9 +7,10 @@ use serde::Serialize;
 pub fn run(title: String) -> Result<(), String> {
     // Step 1: Allocate the next issue ID
     let issue_id = allocate_id()?;
+    let id_str = format!("{issue_id:010}");
 
     // Step 2: Create the issue directory
-    let issue_dir = format!(".gitissues/issues/{issue_id}");
+    let issue_dir = format!(".gitissues/issues/{id_str}");
     fs::create_dir_all(&issue_dir).map_err(|e| format!("Failed to create issue directory: {e}"))?;
 
     // Step 3: Write issue.md
@@ -22,7 +23,7 @@ pub fn run(title: String) -> Result<(), String> {
     let meta_yaml_path = format!("{issue_dir}/meta.yaml");
     let timestamp = current_timestamp();
     let meta = Meta {
-        id: issue_id.clone(),
+        id: issue_id,
         title: title.clone(),
         state: "new".to_string(),
         created: timestamp.clone(),
@@ -32,15 +33,15 @@ pub fn run(title: String) -> Result<(), String> {
         serde_yaml::to_string(&meta).map_err(|_| "Failed to serialize meta.yaml".to_string())?;
     fs::write(&meta_yaml_path, meta_yaml).map_err(|e| format!("Failed to write meta.yaml: {e}"))?;
 
-    println!("Created issue {issue_id}");
+    println!("Created issue {id_str}");
 
     Ok(())
 }
 
 /// Allocate the next sequential issue ID.
 /// Scans .gitissues/issues/ for existing numeric directories,
-/// finds the max, and returns max+1 formatted as 10-digit zero-padded.
-fn allocate_id() -> Result<String, String> {
+/// finds the max, and returns max+1 as a u32.
+fn allocate_id() -> Result<u32, String> {
     let issues_base = ".gitissues/issues";
     let path = Path::new(issues_base);
 
@@ -70,12 +71,12 @@ fn allocate_id() -> Result<String, String> {
     }
 
     let next_id = max_id + 1;
-    Ok(format!("{next_id:010}"))
+    Ok(next_id)
 }
 
 #[derive(Debug, Serialize)]
 struct Meta {
-    id: String,
+    id: u32,
     title: String,
     state: String,
     created: String,

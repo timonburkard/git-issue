@@ -25,7 +25,7 @@ pub fn run(id: u32) -> Result<(), String> {
         Err(_) => return Err("meta.yaml malformatted.".to_string()),
     };
 
-    println!("ID:      {}", meta.id);
+    println!("ID:      {:010}", meta.id);
     println!("Title:   {}", meta.title);
     println!("State:   {}", meta.state);
     println!("Created: {}", meta.created);
@@ -45,7 +45,7 @@ pub fn run(id: u32) -> Result<(), String> {
 
 #[derive(Debug, Deserialize)]
 struct Meta {
-    id: String,
+    id: u32,
     title: String,
     state: String,
     created: String,

@@ -52,12 +52,12 @@ pub fn run() -> Result<(), String> {
     }
 
     // Sort by numeric ID
-    issues.sort_by_key(|m| m.id.clone());
+    issues.sort_by_key(|m| m.id);
 
     // Print header and rows
     println!("{:<11} {:<10} Title", "ID", "State");
     for meta in issues {
-        println!("{:<11} {:<10} {}", meta.id, meta.state, meta.title);
+        println!("{:010} {:<10} {}", meta.id, meta.state, meta.title);
     }
 
     Ok(())
@@ -65,7 +65,7 @@ pub fn run() -> Result<(), String> {
 
 #[derive(Debug, Deserialize)]
 struct Meta {
-    id: String,
+    id: u32,
     title: String,
     state: String,
 }

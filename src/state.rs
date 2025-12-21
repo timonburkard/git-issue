@@ -50,7 +50,7 @@ pub fn run(id: u32, state: String) -> Result<(), String> {
 
 #[derive(Debug, Deserialize, Serialize)]
 struct Meta {
-    id: String,
+    id: u32,
     title: String,
     state: String,
     created: String,
