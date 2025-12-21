@@ -55,9 +55,9 @@ pub fn run() -> Result<(), String> {
     issues.sort_by_key(|m| m.id);
 
     // Print header and rows
-    println!("{:<11} {:<10} Title", "ID", "State");
+    println!("{:<10} {:<10} Title", "ID", "State");
     for meta in issues {
-        println!("{:010} {:<10} {}", meta.id, meta.state, meta.title);
+        println!("{:<10} {:<10} {}", meta.id, meta.state, meta.title);
     }
 
     Ok(())

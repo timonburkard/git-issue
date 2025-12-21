@@ -25,7 +25,7 @@ pub fn run(id: u32) -> Result<(), String> {
         Err(_) => return Err("meta.yaml malformatted.".to_string()),
     };
 
-    println!("ID:      {:010}", meta.id);
+    println!("ID:      {}", meta.id);
     println!("Title:   {}", meta.title);
     println!("State:   {}", meta.state);
     println!("Created: {}", meta.created);
