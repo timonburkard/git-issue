@@ -54,7 +54,7 @@ pub fn git_commit(id: u32, title: String, action: &str) {
         .replace("{title}", &title);
 
     // Execute git add
-    let add_result = Command::new("git").args(&["add", ".gitissues"]).output();
+    let add_result = Command::new("git").args(["add", ".gitissues"]).output();
     if let Err(e) = add_result {
         eprintln!("Warning: failed to stage .gitissues: {e}");
         return;
@@ -62,7 +62,7 @@ pub fn git_commit(id: u32, title: String, action: &str) {
 
     // Execute git commit
     let commit_result = Command::new("git")
-        .args(&["commit", "-m", &commit_message])
+        .args(["commit", "-m", &commit_message])
         .output();
     if let Err(e) = commit_result {
         eprintln!("Warning: failed to commit: {e}");
