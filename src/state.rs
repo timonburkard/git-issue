@@ -1,7 +1,7 @@
 use std::fs;
 use std::path::Path;
 
-use crate::model::{Meta, current_timestamp};
+use crate::model::{Meta, current_timestamp, git_commit};
 
 pub fn run(id: u32, state: String) -> Result<(), String> {
     let id_str = format!("{id:010}");
@@ -39,6 +39,9 @@ pub fn run(id: u32, state: String) -> Result<(), String> {
         .map_err(|_| "Failed to serialize meta.yaml".to_string())?;
 
     fs::write(&meta_path, updated_yaml).map_err(|_| "Failed to write meta.yaml".to_string())?;
+
+    // git commit
+    git_commit(id, updated_meta.title, "state change");
 
     println!("Updated issue state");
 

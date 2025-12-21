@@ -1,7 +1,7 @@
 use std::fs;
 use std::path::Path;
 
-use crate::model::{Meta, current_timestamp};
+use crate::model::{Meta, current_timestamp, git_commit};
 
 pub fn run(title: String) -> Result<(), String> {
     // Step 1: Allocate the next issue ID
@@ -31,6 +31,9 @@ pub fn run(title: String) -> Result<(), String> {
     let meta_yaml =
         serde_yaml::to_string(&meta).map_err(|_| "Failed to serialize meta.yaml".to_string())?;
     fs::write(&meta_yaml_path, meta_yaml).map_err(|e| format!("Failed to write meta.yaml: {e}"))?;
+
+    // Step 5: git commit
+    git_commit(issue_id, title, "new");
 
     println!("Created issue {id_str}");
 

@@ -11,7 +11,7 @@ Issues live alongside your code inside `.gitissues/`, making them platform-indep
 - ✅ `git issue list`               -- List all issues
 - ✅ `git issue show <id>`          -- Display issue details
 - ✅ `git issue state <id> <state>` -- Change issue state
-- 🚧 Git integration                -- Auto-commit `.gitissues/` changes
+- ✅ Git integration                -- Auto-commit `.gitissues/` changes (configurable)
 - 🚧 Testing                        -- CI/CD automated tests
 
 ## Storage Layout
@@ -69,9 +69,30 @@ git issue list
 # Show issue details
 git issue show 1234
 
-# Close an issue
+# Change issue state
 git issue state 1234 resolved
 ```
+
+## Configuration
+
+After running `git issue init`, a default config file is created at `.gitissues/config.yaml`:
+
+```yaml
+# Automatically create a git commit after mutating commands
+commit_auto: true
+
+# Commit message template
+# Available placeholders: {action}, {id}, {title}
+commit_message: "[issue] {action} #{id} - {title}"
+```
+
+### Configuration Options
+
+- `commit_auto` (boolean): If `true`, automatically commit changes to `.gitissues/`. Default: `true`
+- `commit_message` (string): Template for git commit messages. Supports placeholders:
+  - `{id}`: Issue ID
+  - `{title}`: Issue title
+  - `{action}`: Command that triggered the commit (`new`, `state change`)
 
 ## Building & Development
 
@@ -91,11 +112,13 @@ cargo clippy
 
 ## Architecture
 
-- `src/main.rs` -- CLI parsing with clap
-- `src/init.rs` -- Initialize `.gitissues/` directory
-- `src/list.rs` -- List all issues
-- `src/new.rs`  -- Create new issues with ID allocation
-- `src/show.rs` -- Show details of an issue
+- `src/main.rs`  -- CLI parsing with clap
+- `src/model.rs` -- Shared data types, functions and utilities
+- `src/init.rs`  -- Initialize `.gitissues/` directory and copy default config
+- `src/list.rs`  -- List all issues
+- `src/new.rs`   -- Create new issues with ID allocation
+- `src/show.rs`  -- Show details of an issue
+- `src/state.rs` -- Change issue state
 
 ## Dependencies
 

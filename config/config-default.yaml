@@ -1,0 +1,6 @@
+# Automatically create a git commit after mutating commands
+commit_auto: true
+
+# Commit message template
+# Available placeholders: {action}, {id}, {title}
+commit_message: "[issue] {action} #{id} -- {title}"
