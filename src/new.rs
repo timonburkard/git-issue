@@ -61,10 +61,10 @@ fn allocate_id() -> Result<String, String> {
         let name_str = file_name.to_string_lossy();
 
         // Try to parse the directory name as a u32
-        if let Ok(id) = name_str.parse::<u32>() {
-            if id > max_id {
-                max_id = id;
-            }
+        if let Ok(id) = name_str.parse::<u32>()
+            && id > max_id
+        {
+            max_id = id;
         }
         // Silently skip non-numeric directory names
     }
