@@ -3,6 +3,7 @@ use clap::{Parser, Subcommand};
 mod init;
 mod list;
 mod new;
+mod show;
 
 #[derive(Parser)]
 #[command(name = "git-issue")]
@@ -25,6 +26,12 @@ enum Commands {
 
     /// List all issues
     List,
+
+    /// Show issue details
+    Show {
+        /// Issue ID
+        id: u32,
+    },
 }
 
 fn main() {
@@ -47,6 +54,13 @@ fn main() {
 
         Commands::List => {
             if let Err(e) = list::run() {
+                eprintln!("Error: {}", e);
+                std::process::exit(1);
+            }
+        }
+
+        Commands::Show { id } => {
+            if let Err(e) = show::run(id) {
                 eprintln!("Error: {}", e);
                 std::process::exit(1);
             }
