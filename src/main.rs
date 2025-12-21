@@ -2,6 +2,7 @@ use clap::{Parser, Subcommand};
 
 mod init;
 mod list;
+mod model;
 mod new;
 mod show;
 mod state;

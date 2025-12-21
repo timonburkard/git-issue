@@ -1,10 +1,7 @@
 use std::fs;
 use std::path::Path;
 
-use serde::Deserialize;
-use serde::Serialize;
-
-use chrono::Utc;
+use crate::model::{Meta, current_timestamp};
 
 pub fn run(id: u32, state: String) -> Result<(), String> {
     let id_str = format!("{id:010}");
@@ -46,18 +43,4 @@ pub fn run(id: u32, state: String) -> Result<(), String> {
     println!("Updated issue state");
 
     Ok(())
-}
-
-#[derive(Debug, Deserialize, Serialize)]
-struct Meta {
-    id: u32,
-    title: String,
-    state: String,
-    created: String,
-    updated: String,
-}
-
-/// Generate a proper ISO 8601 timestamp using chrono.
-fn current_timestamp() -> String {
-    Utc::now().format("%Y-%m-%dT%H:%M:%SZ").to_string()
 }

@@ -1,8 +1,7 @@
 use std::fs;
 use std::path::Path;
 
-use chrono::Utc;
-use serde::Serialize;
+use crate::model::{Meta, current_timestamp};
 
 pub fn run(title: String) -> Result<(), String> {
     // Step 1: Allocate the next issue ID
@@ -72,18 +71,4 @@ fn allocate_id() -> Result<u32, String> {
 
     let next_id = max_id + 1;
     Ok(next_id)
-}
-
-#[derive(Debug, Serialize)]
-struct Meta {
-    id: u32,
-    title: String,
-    state: String,
-    created: String,
-    updated: String,
-}
-
-/// Generate a proper ISO 8601 timestamp using chrono.
-fn current_timestamp() -> String {
-    Utc::now().format("%Y-%m-%dT%H:%M:%SZ").to_string()
 }

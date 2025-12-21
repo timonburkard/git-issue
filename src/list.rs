@@ -1,7 +1,7 @@
 use std::fs;
 use std::path::Path;
 
-use serde::Deserialize;
+use crate::model::Meta;
 
 pub fn run() -> Result<(), String> {
     let issues_base = ".gitissues/issues";
@@ -61,11 +61,4 @@ pub fn run() -> Result<(), String> {
     }
 
     Ok(())
-}
-
-#[derive(Debug, Deserialize)]
-struct Meta {
-    id: u32,
-    title: String,
-    state: String,
 }
