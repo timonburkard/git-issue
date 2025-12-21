@@ -33,6 +33,10 @@ git issue show 1234
 git issue state 1234 resolved
 ```
 
+## Example
+
+Dummy example project to see how `git-issue` is used in a repo: https://github.com/timonburkard/example-project
+
 ## Configuration
 
 After running `git issue init`, a default config file is created at `.gitissues/config.yaml`:
