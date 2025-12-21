@@ -29,6 +29,7 @@ pub fn run(title: String) -> Result<(), String> {
         .map_err(|e| format!("Failed to write meta.yaml: {}", e))?;
 
     println!("Created issue {}", issue_id);
+
     Ok(())
 }
 

@@ -61,6 +61,7 @@ pub fn run() -> Result<(), String> {
     for meta in issues {
         println!("{:<11} {:<10} {}", meta.id, meta.state, meta.title);
     }
+
     Ok(())
 }
 

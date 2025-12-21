@@ -14,5 +14,6 @@ pub fn run() -> Result<(), String> {
         .map_err(|e| format!("Failed to create {}: {}", issues_dir.display(), e))?;
 
     println!("Initialization done");
+
     Ok(())
 }
