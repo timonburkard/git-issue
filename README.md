@@ -17,6 +17,9 @@ Issues live alongside your code inside `.gitissues/`, making them platform-indep
 ## Usage
 
 ```bash
+# Help page
+git issue -h
+
 # Initialize tracking in your repo
 git issue init
 
@@ -39,6 +42,8 @@ Dummy example project to see how `git-issue` is used in a repo: https://github.c
 
 ## Configuration
 
+### Config
+
 After running `git issue init`, a default config file is created at `.gitissues/config.yaml`:
 
 ```yaml
@@ -50,13 +55,32 @@ commit_auto: true
 commit_message: "[issue] {action} #{id} - {title}"
 ```
 
-### Configuration Options
+This config can be edited by the user.
+
+#### Config Options
 
 - `commit_auto` (boolean): If `true`, automatically commit changes to `.gitissues/`. Default: `true`
 - `commit_message` (string): Template for git commit messages. Supports placeholders:
   - `{id}`: Issue ID
   - `{title}`: Issue title
   - `{action}`: Command that triggered the commit (`new`, `state change`)
+
+### Description Template
+
+After running `git issue init`, a default description template file is created at `.gitissues/description.md`:
+
+```md
+# Description
+
+# Repro Steps
+
+# Expected Behavior
+
+# System Info
+
+```
+
+This template can be edited by the user.
 
 ## Installation
 
@@ -101,18 +125,20 @@ Issues live in `.gitissues/issues/{ID}/`:
 
 ```
 .gitissues/
+├── config.yaml     # Configuration
+├── description.md  # Description template
 └── issues/
     └── 0000000001/
-        ├── meta.yaml      # Structured metadata
-        └── description.md       # Markdown description
+        ├── meta.yaml       # Structured metadata
+        └── description.md  # Markdown description
     ├── 0000000002
-        ├── meta.yaml      # Structured metadata
-        └── description.md       # Markdown description
+        ├── meta.yaml       # Structured metadata
+        └── description.md  # Markdown description
     └── ...
 ```
 
-- `meta.yaml` (metadata: id, title, state, timestamps)
-- `description.md` (human-readable markdown description)
+- `meta.yaml`      -- metadata: id, title, state, timestamps
+- `description.md` -- template for the human-readable markdown description
 - Directory names are the 10-digit zero-padded IDs (0000000001, 0000000002, …)
 
 ### meta.yaml Format
@@ -121,24 +147,18 @@ Issues live in `.gitissues/issues/{ID}/`:
 id: 1234
 title: Fix login bug
 state: new
+type: ''
+labels: []
+assignee: ''
 created: 2025-12-21T15:54:52Z
 updated: 2025-12-21T15:54:52Z
-```
-
-### description.md Format
-
-```markdown
-# Fix login bug
-
-## Description
-
-TBD
 ```
 
 ## Architecture
 
 - `config/`
-  - `config-default.yaml` -- Default configuration, applied at `git issue init`
+  - `config-default.yaml`    -- Default configuration, applied at `git issue init`
+  - `description-default.md` -- Default description template, applied at `git issue init`
 - `src/`
   - `main.rs`  -- CLI parsing with clap
   - `model.rs` -- Shared data types, functions and utilities
