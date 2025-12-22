@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+    - [config] added `.gitissues/description.md` used as template when new issue is created (GitHub Issue #14)
+    - [structure] renamed `issue.md` to `description.md`
     - [meta] added fields `type`, `labels` and `assignee` (GitHub Issue #4, #5, #10)
     - [cmd/list] added option `--column` (GitHub Issue #12)
 
