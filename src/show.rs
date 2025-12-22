@@ -55,11 +55,11 @@ pub fn run(id: u32) -> Result<(), String> {
     println!("created:  {}", meta.created);
     println!("updated:  {}", meta.updated);
 
-    // Load issue.md
-    let md_path = path.join("issue.md");
+    // Load description.md
+    let md_path = path.join("description.md");
     let md_raw = match fs::read_to_string(&md_path) {
         Ok(s) => s,
-        Err(_) => return Err("issue.md not found.".to_string()),
+        Err(_) => return Err("description.md not found.".to_string()),
     };
 
     println!("description:\n{md_raw}");

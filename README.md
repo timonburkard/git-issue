@@ -104,15 +104,15 @@ Issues live in `.gitissues/issues/{ID}/`:
 └── issues/
     └── 0000000001/
         ├── meta.yaml      # Structured metadata
-        └── issue.md       # Markdown description
+        └── description.md       # Markdown description
     ├── 0000000002
         ├── meta.yaml      # Structured metadata
-        └── issue.md       # Markdown description
+        └── description.md       # Markdown description
     └── ...
 ```
 
 - `meta.yaml` (metadata: id, title, state, timestamps)
-- `issue.md` (human-readable markdown description)
+- `description.md` (human-readable markdown description)
 - Directory names are the 10-digit zero-padded IDs (0000000001, 0000000002, …)
 
 ### meta.yaml Format
@@ -125,7 +125,7 @@ created: 2025-12-21T15:54:52Z
 updated: 2025-12-21T15:54:52Z
 ```
 
-### issue.md Format
+### description.md Format
 
 ```markdown
 # Fix login bug
