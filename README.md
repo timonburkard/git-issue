@@ -9,7 +9,7 @@ Issues live alongside your code inside `.gitissues/`, making them platform-indep
 - ✅ `git issue init`                       -- Initialize `.gitissues/` in your repository
 - ✅ `git issue new <"title">`              -- Create a new issue with auto-incremented ID
 - ✅ `git issue list [--columns <columns>]` -- List all issues
-- ✅ `git issue show <id>`                  -- Display issue details
+- ✅ `git issue show <id>`                  -- Display all issue information as markdown in external editor
 - ✅ `git issue set <id> [--state <new_state> --type <new_type> --title <new_title> --assignee <new_assignee> --labels <add_labels>]` -- Change issue meta fields
 - ✅ `git issue remove <id> [--labels <remove_labels>]` -- Remove elements from issue meta fields (currently only for labels)
 - ✅ `git issue edit <id>`                  -- Edit issue description in external editor
@@ -33,7 +33,7 @@ git issue list
 git issue list --columns id,assignee,title
 git issue list --columns "*"
 
-# Show issue details
+# Show issue details -- launches external text editor
 git issue show 1234
 
 # Change issue meta fields
@@ -151,7 +151,8 @@ Issues live in `.gitissues/issues/{ID}/`:
 └── issues/
     └── 0000000001/
         ├── meta.yaml       # Structured metadata
-        └── description.md  # Markdown description
+        ├── description.md  # Markdown description
+        └── attachments/    # (Optional) attachments of markdown description
     ├── 0000000002/
         ├── meta.yaml       # Structured metadata
         └── description.md  # Markdown description
@@ -160,7 +161,9 @@ Issues live in `.gitissues/issues/{ID}/`:
 
 - `meta.yaml`      -- metadata: id, title, state, timestamps
 - `description.md` -- template for the human-readable markdown description
-- Directory names are the 10-digit zero-padded IDs (0000000001, 0000000002, …)
+- `XXXXXXXXXX/`    -- Directory names are the 10-digit zero-padded IDs (0000000001, 0000000002, ...)
+- `attachments/`   -- Optional subdirectory for markdown descriptions
+  - If attachments in markdown are used, the directory should be named exactly like this for the `show` command to work correctly
 
 ### meta.yaml Format
 
@@ -198,3 +201,4 @@ updated: 2025-12-21T15:54:52Z
 - `serde`       -- Serialization framework
 - `serde_yaml`  -- YAML parsing for meta.yaml files
 - `shell-words` -- Process command line according to parsing rules of Unix shell
+- `regex`       -- Regular expressions
