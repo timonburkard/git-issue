@@ -5,8 +5,8 @@ mod init;
 mod list;
 mod model;
 mod new;
+mod set;
 mod show;
-mod state;
 
 #[derive(Parser)]
 #[command(name = "git-issue")]
@@ -87,7 +87,7 @@ fn main() {
         }
 
         Commands::State { id, state } => {
-            if let Err(e) = state::run(id, state) {
+            if let Err(e) = set::run(id, "state".to_string(), state) {
                 eprintln!("Error: {e}");
                 std::process::exit(1);
             }
