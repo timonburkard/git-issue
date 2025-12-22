@@ -10,7 +10,7 @@ Issues live alongside your code inside `.gitissues/`, making them platform-indep
 - ✅ `git issue new <"title">`             -- Create a new issue with auto-incremented ID
 - ✅ `git issue list [--column <columns>]` -- List all issues
 - ✅ `git issue show <id>`                 -- Display issue details
-- ✅ `git issue state <id> <state>`        -- Change issue state
+- ✅ `git issue set <id> [--state <new_state> --type <new_type> --title <new_title> --assignee <new_assignee> --labels <add_labels>]` -- Change issue meta fields
 - ✅ `git issue edit <id>`                 -- Edit issue description in external editor
 - ✅ Git integration                       -- Auto-commit `.gitissues/` changes (configurable)
 - 🚧 Testing                               -- CI/CD automated tests
@@ -35,8 +35,13 @@ git issue list --column "*"
 # Show issue details
 git issue show 1234
 
-# Change issue state
-git issue state 1234 resolved
+# Change issue meta fields
+git issue set 1234 --state resolved
+git issue set 1234 --type bug
+git issue set 1234 --title "LCD driver has a problem"
+git issue set 1234 --assignee "t.burkard"
+git issue set 1234 --labels cli,driver
+git issue set 1234 --state resolved --type bug --title "LCD driver has a problem" --assignee "t.burkard" --labels cli,driver
 
 # Edit issue description (markdown) -- launches external text editor
 git issue edit 1234
@@ -73,7 +78,7 @@ This config can be edited by the user.
 - `commit_message` (string): Template for git commit messages. Supports placeholders:
   - `{id}`: Issue ID
   - `{title}`: Issue title
-  - `{action}`: Command that triggered the commit (`new`, `state change`)
+  - `{action}`: Command that triggered the commit (`new`, `set X`)
 - `editor` (string): External text editor (set `git` to use configured git core.editor)
 
 ### Description Template
@@ -142,7 +147,7 @@ Issues live in `.gitissues/issues/{ID}/`:
     └── 0000000001/
         ├── meta.yaml       # Structured metadata
         └── description.md  # Markdown description
-    ├── 0000000002
+    ├── 0000000002/
         ├── meta.yaml       # Structured metadata
         └── description.md  # Markdown description
     └── ...
@@ -173,12 +178,12 @@ updated: 2025-12-21T15:54:52Z
 - `src/`
   - `main.rs`  -- CLI parsing with clap
   - `model.rs` -- Shared data types, functions and utilities
-  - `edit.rs`  -- Edit issue description (markdown) with extern text editor
+  - `edit.rs`  -- Edit issue description (markdown) with external text editor
   - `init.rs`  -- Initialize `.gitissues/` directory and copy default config
   - `list.rs`  -- List all issues
   - `new.rs`   -- Create new issues with ID allocation
+  - `set.rs`   -- Change issue meta fields
   - `show.rs`  -- Show details of an issue
-  - `state.rs` -- Change issue state
 
 ## Dependencies
 

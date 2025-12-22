@@ -5,8 +5,8 @@ mod init;
 mod list;
 mod model;
 mod new;
+mod set;
 mod show;
-mod state;
 
 #[derive(Parser)]
 #[command(name = "git-issue")]
@@ -39,12 +39,30 @@ enum Commands {
         id: u32,
     },
 
-    /// Change issue state
-    State {
+    /// Change issue meta fields
+    Set {
         /// Issue ID
         id: u32,
-        /// New issue state
-        state: String,
+
+        /// Issue meta field: state
+        #[arg(long)]
+        state: Option<String>,
+
+        /// Issue meta field: title
+        #[arg(long)]
+        title: Option<String>,
+
+        /// Issue meta field: type
+        #[arg(long)]
+        type_: Option<String>,
+
+        /// Issue meta field: assignee
+        #[arg(long)]
+        assignee: Option<String>,
+
+        /// Issue meta field: labels
+        #[arg(long, value_delimiter = ',')]
+        labels: Option<Vec<String>>,
     },
 
     /// Edit issue description (markdown)
@@ -86,8 +104,15 @@ fn main() {
             }
         }
 
-        Commands::State { id, state } => {
-            if let Err(e) = state::run(id, state) {
+        Commands::Set {
+            id,
+            state,
+            title,
+            type_,
+            assignee,
+            labels,
+        } => {
+            if let Err(e) = set::run(id, state, title, type_, assignee, labels) {
                 eprintln!("Error: {e}");
                 std::process::exit(1);
             }
