@@ -94,8 +94,8 @@ fn print_default_list(issues: &Vec<Meta>) {
     }
 }
 
-fn get_column_value(col: &String, meta: &Meta) -> String {
-    return match col.as_str() {
+fn get_column_value(col: &str, meta: &Meta) -> String {
+    match col {
         "id" => meta.id.to_string(),
         "title" => meta.title.clone(),
         "state" => meta.state.clone(),
@@ -123,7 +123,7 @@ fn get_column_value(col: &String, meta: &Meta) -> String {
         "created" => meta.created.clone(),
         "updated" => meta.updated.clone(),
         _ => "-".to_string(),
-    };
+    }
 }
 
 fn calculate_column_widths(
