@@ -84,11 +84,26 @@ fn open_editor(mut editor: String, desc_path: String) -> Result<(), String> {
     // Add the file to edit
     cmd.arg(&desc_path);
 
-    // Execute editor
-    let status = cmd
-        .status()
-        .map_err(|e| format!("Failed to open editor: {e}"))?;
+    // Execute editor (with Windows-specific shell fallback for PATH/PATHEXT resolution)
+    #[allow(unused_mut)]
+    let mut status = cmd.status();
 
+    #[cfg(windows)]
+    if let Err(e) = &status {
+        use std::io::ErrorKind;
+        if e.kind() == ErrorKind::NotFound {
+            // Build a single command line for cmd.exe to resolve (e.g., code -> code.cmd)
+            let quoted_path = if desc_path.contains(' ') {
+                format!("\"{}\"", desc_path)
+            } else {
+                desc_path.clone()
+            };
+            let full = format!("{} {}", editor, quoted_path);
+            status = Command::new("cmd").args(["/c", &full]).status();
+        }
+    }
+
+    let status = status.map_err(|e| format!("Failed to open editor: {e}"))?;
     if !status.success() {
         return Err(format!(
             "Editor exited with error code: {:?}",
