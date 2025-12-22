@@ -27,13 +27,10 @@ pub fn run(id: u32, state: String) -> Result<(), String> {
 
     // Update state and updated timestamp
     let updated_timestamp = current_timestamp();
-    let updated_meta = Meta {
-        id: meta.id,
-        title: meta.title,
-        state,
-        created: meta.created,
-        updated: updated_timestamp,
-    };
+    let mut updated_meta = meta;
+
+    updated_meta.state = state;
+    updated_meta.updated = updated_timestamp;
 
     let updated_yaml = serde_yaml::to_string(&updated_meta)
         .map_err(|_| "Failed to serialize meta.yaml".to_string())?;
