@@ -6,14 +6,14 @@ Issues live alongside your code inside `.gitissues/`, making them platform-indep
 
 ## Features
 
-- ✅ `git issue init`                      -- Initialize `.gitissues/` in your repository
-- ✅ `git issue new <"title">`             -- Create a new issue with auto-incremented ID
-- ✅ `git issue list [--column <columns>]` -- List all issues
-- ✅ `git issue show <id>`                 -- Display issue details
+- ✅ `git issue init`                       -- Initialize `.gitissues/` in your repository
+- ✅ `git issue new <"title">`              -- Create a new issue with auto-incremented ID
+- ✅ `git issue list [--columns <columns>]` -- List all issues
+- ✅ `git issue show <id>`                  -- Display issue details
 - ✅ `git issue set <id> [--state <new_state> --type <new_type> --title <new_title> --assignee <new_assignee> --labels <add_labels>]` -- Change issue meta fields
-- ✅ `git issue edit <id>`                 -- Edit issue description in external editor
-- ✅ Git integration                       -- Auto-commit `.gitissues/` changes (configurable)
-- 🚧 Testing                               -- CI/CD automated tests
+- ✅ `git issue edit <id>`                  -- Edit issue description in external editor
+- ✅ Git integration                        -- Auto-commit `.gitissues/` changes (configurable)
+- 🚧 Testing                                -- CI/CD automated tests
 
 ## Usage
 
@@ -29,8 +29,8 @@ git issue new "Fix login redirect bug"
 
 # List issues
 git issue list
-git issue list --column id,assignee,title
-git issue list --column "*"
+git issue list --columns id,assignee,title
+git issue list --columns "*"
 
 # Show issue details
 git issue show 1234
