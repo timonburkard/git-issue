@@ -27,39 +27,27 @@ pub fn run(id: u32) -> Result<(), String> {
         Err(_) => return Err("meta.yaml malformatted.".to_string()),
     };
 
-    // Create tmp directory structure if not already exists
+    // Create per-issue tmp directory
+    let tmp_issue_dir = format!(".gitissues/.tmp/show-{id}");
+    let tmp_issue_path = Path::new(&tmp_issue_dir);
+    fs::create_dir_all(tmp_issue_path)
+        .map_err(|e| format!("Failed to create {}: {e}", tmp_issue_path.display()))?;
 
-    let tmp = ".gitissues/.tmp";
-    let tmp_dir = Path::new(tmp);
-
-    if !Path::new(tmp_dir).exists() {
-        // Create the directory structure
-        fs::create_dir_all(&tmp_dir)
-            .map_err(|e| format!("Failed to create {}: {e}", tmp_dir.display()))?;
-    }
-
+    // Generate markdown content
     let mut content: String = generate_content_metadata(id, &meta);
-
     add_content_description(path, &mut content)?;
 
-    // Copy attachments and rewrite links in content
+    // Write markdown file
+    let tmp_file = tmp_issue_path.join("show.md");
+    fs::write(&tmp_file, content)
+        .map_err(|e| format!("Failed to write {}: {e}", tmp_file.display()))?;
+
+    // Copy attachments to tmp directory
     let attachments_src = path.join("attachments");
-    let tmp_attachments = format!(".gitissues/.tmp/attachments-{id}");
-    let tmp_attachments_dir = Path::new(&tmp_attachments);
-
     if attachments_src.exists() {
-        copy_dir_recursive(&attachments_src, tmp_attachments_dir)?;
-        // Rewrite markdown links to point at temp attachments folder
-        content = content
-            .replace("(attachments/", &format!("(attachments-{id}/"))
-            .replace("](attachments/", &format!("](attachments-{id}/"))
-            .replace("src=\"attachments/", &format!("src=\"attachments-{id}/"))
-            .replace("href=\"attachments/", &format!("href=\"attachments-{id}/"));
+        let tmp_attachments = tmp_issue_path.join("attachments");
+        copy_dir_recursive(&attachments_src, &tmp_attachments)?;
     }
-
-    // Write file
-    let tmp_file = format!(".gitissues/.tmp/show-{id}.md");
-    fs::write(&tmp_file, content).map_err(|e| format!("Failed to write {}: {e}", tmp_file))?;
 
     // Load configuration
     let config_path = Path::new(".gitissues/config.yaml");
@@ -73,13 +61,10 @@ pub fn run(id: u32) -> Result<(), String> {
         Err(_) => return Err("config.yaml malformatted.".to_string()),
     };
 
-    open_editor(config.editor, tmp_file.clone())?;
+    open_editor(config.editor, tmp_file.to_string_lossy().to_string())?;
 
-    // Clean up temp artifacts
-    let _ = fs::remove_file(&tmp_file);
-    if attachments_src.exists() {
-        let _ = fs::remove_dir_all(tmp_attachments_dir);
-    }
+    // Clean up entire per-issue tmp directory
+    let _ = fs::remove_dir_all(tmp_issue_path);
 
     Ok(())
 }
@@ -88,11 +73,11 @@ fn generate_content_metadata(id: u32, meta: &Meta) -> String {
     let mut content = String::new();
 
     content.push_str("<!-- READ-ONLY VIEW -->\n");
-    content.push_str("\n");
+    content.push('\n');
     content.push_str(&format!("# Issue #{} -- {}\n", id, meta.title));
-    content.push_str("\n");
+    content.push('\n');
     content.push_str("## Meta Data\n");
-    content.push_str("\n");
+    content.push('\n');
     content.push_str("| **field**    | **value** |\n");
     content.push_str("| ------------ | --------- |\n");
     content.push_str(&format!("| **id**       | {} |\n", meta.id));
@@ -125,7 +110,7 @@ fn generate_content_metadata(id: u32, meta: &Meta) -> String {
     content.push_str(&format!("| **created**  | {} |\n", meta.created));
     content.push_str(&format!("| **updated**  | {} |\n", meta.updated));
 
-    return content;
+    content
 }
 
 fn add_content_description(path: &Path, content: &mut String) -> Result<(), String> {
@@ -141,9 +126,9 @@ fn add_content_description(path: &Path, content: &mut String) -> Result<(), Stri
     // Replace # with ###
     let desc_nested = re.replace_all(&desc_raw, "###");
 
-    content.push_str("\n");
-    content.push_str(&format!("## Description\n"));
-    content.push_str("\n");
+    content.push('\n');
+    content.push_str("## Description\n");
+    content.push('\n');
     content.push_str(&format!("{desc_nested}"));
 
     Ok(())
