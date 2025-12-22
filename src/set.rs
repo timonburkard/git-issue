@@ -3,7 +3,7 @@ use std::path::Path;
 
 use crate::model::{Meta, current_timestamp, git_commit};
 
-pub fn run(id: u32, field: String, value: String) -> Result<(), String> {
+pub fn run(id: u32, state: Option<String>) -> Result<(), String> {
     let id_str = format!("{id:010}");
     let issue_path = format!(".gitissues/issues/{id_str}");
     let path = Path::new(&issue_path);
@@ -29,9 +29,8 @@ pub fn run(id: u32, field: String, value: String) -> Result<(), String> {
     let updated_timestamp = current_timestamp();
     let mut updated_meta = meta;
 
-    match field.as_str() {
-        "state" => updated_meta.state = value,
-        _ => return Err("Unsupported field.".to_string()),
+    if !state.is_none() {
+        updated_meta.state = state.unwrap();
     }
 
     updated_meta.updated = updated_timestamp;
@@ -42,9 +41,9 @@ pub fn run(id: u32, field: String, value: String) -> Result<(), String> {
     fs::write(&meta_path, updated_yaml).map_err(|_| "Failed to write meta.yaml".to_string())?;
 
     // git commit
-    git_commit(id, updated_meta.title, &format!("{field} change"));
+    git_commit(id, updated_meta.title, &format!("set state"));
 
-    println!("Updated issue {field}");
+    println!("Updated issue state");
 
     Ok(())
 }

@@ -39,12 +39,14 @@ enum Commands {
         id: u32,
     },
 
-    /// Change issue state
-    State {
+    /// Change issue meta fields
+    Set {
         /// Issue ID
         id: u32,
-        /// New issue state
-        state: String,
+
+        /// Issue meta field: state
+        #[arg(long)]
+        state: Option<String>,
     },
 
     /// Edit issue description (markdown)
@@ -86,8 +88,8 @@ fn main() {
             }
         }
 
-        Commands::State { id, state } => {
-            if let Err(e) = set::run(id, "state".to_string(), state) {
+        Commands::Set { id, state } => {
+            if let Err(e) = set::run(id, state) {
                 eprintln!("Error: {e}");
                 std::process::exit(1);
             }
