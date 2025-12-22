@@ -21,6 +21,7 @@ pub struct Meta {
 pub struct Config {
     pub commit_auto: bool,
     pub commit_message: String,
+    pub editor: String,
 }
 
 /// Generate a proper ISO 8601 timestamp using chrono.
