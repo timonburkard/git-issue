@@ -3,7 +3,7 @@ use std::path::Path;
 
 use crate::model::Meta;
 
-pub fn run(column: Option<Vec<String>>) -> Result<(), String> {
+pub fn run(columns: Option<Vec<String>>) -> Result<(), String> {
     let issues_base = ".gitissues/issues";
     let path = Path::new(issues_base);
 
@@ -54,13 +54,13 @@ pub fn run(column: Option<Vec<String>>) -> Result<(), String> {
     // Sort by numeric ID
     issues.sort_by_key(|m| m.id);
 
-    if column.is_none() {
+    if columns.is_none() {
         print_default_list(&issues);
 
         return Ok(());
     }
 
-    print_custom_list(&issues, column.unwrap())?;
+    print_custom_list(&issues, columns.unwrap())?;
 
     Ok(())
 }
