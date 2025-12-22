@@ -3,7 +3,14 @@ use std::path::Path;
 
 use crate::model::{Meta, current_timestamp, git_commit};
 
-pub fn run(id: u32, state: Option<String>) -> Result<(), String> {
+pub fn run(
+    id: u32,
+    state: Option<String>,
+    title: Option<String>,
+    type_: Option<String>,
+    assignee: Option<String>,
+    labels: Option<Vec<String>>,
+) -> Result<(), String> {
     let id_str = format!("{id:010}");
     let issue_path = format!(".gitissues/issues/{id_str}");
     let path = Path::new(&issue_path);
@@ -25,25 +32,64 @@ pub fn run(id: u32, state: Option<String>) -> Result<(), String> {
         Err(_) => return Err("meta.yaml malformatted.".to_string()),
     };
 
-    // Update state and updated timestamp
-    let updated_timestamp = current_timestamp();
-    let mut updated_meta = meta;
+    // Update meta fields
+    let mut updated_meta = meta.clone();
 
-    if !state.is_none() {
-        updated_meta.state = state.unwrap();
+    let mut fields = Vec::new();
+
+    if let Some(value) = state {
+        if updated_meta.state != value {
+            updated_meta.state = value;
+            fields.push("state");
+        }
     }
 
-    updated_meta.updated = updated_timestamp;
+    if let Some(value) = title {
+        if updated_meta.title != value {
+            updated_meta.title = value;
+            fields.push("title");
+        }
+    }
+
+    if let Some(value) = type_ {
+        if updated_meta.type_ != value {
+            updated_meta.type_ = value;
+            fields.push("type");
+        }
+    }
+
+    if let Some(value) = assignee {
+        if updated_meta.assignee != value {
+            updated_meta.assignee = value;
+            fields.push("assignee");
+        }
+    }
+    if let Some(value) = labels {
+        for label in value {
+            if !updated_meta.labels.contains(&label) {
+                updated_meta.labels.push(label);
+
+                if !fields.contains(&"labels") {
+                    fields.push("labels");
+                }
+            }
+        }
+    }
+
+    if fields.is_empty() {
+        return Err("No fields changed".to_string());
+    }
+
+    updated_meta.updated = current_timestamp();
 
     let updated_yaml = serde_yaml::to_string(&updated_meta)
         .map_err(|_| "Failed to serialize meta.yaml".to_string())?;
 
     fs::write(&meta_path, updated_yaml).map_err(|_| "Failed to write meta.yaml".to_string())?;
 
-    // git commit
-    git_commit(id, updated_meta.title, &format!("set state"));
+    git_commit(id, updated_meta.title, &format!("set {}", fields.join(",")));
 
-    println!("Updated issue state");
+    println!("Updated issue field(s)");
 
     Ok(())
 }

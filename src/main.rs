@@ -47,6 +47,22 @@ enum Commands {
         /// Issue meta field: state
         #[arg(long)]
         state: Option<String>,
+
+        /// Issue meta field: title
+        #[arg(long)]
+        title: Option<String>,
+
+        /// Issue meta field: type
+        #[arg(long)]
+        type_: Option<String>,
+
+        /// Issue meta field: assignee
+        #[arg(long)]
+        assignee: Option<String>,
+
+        /// Issue meta field: labels
+        #[arg(long, value_delimiter = ',')]
+        labels: Option<Vec<String>>,
     },
 
     /// Edit issue description (markdown)
@@ -88,8 +104,15 @@ fn main() {
             }
         }
 
-        Commands::Set { id, state } => {
-            if let Err(e) = set::run(id, state) {
+        Commands::Set {
+            id,
+            state,
+            title,
+            type_,
+            assignee,
+            labels,
+        } => {
+            if let Err(e) = set::run(id, state, title, type_, assignee, labels) {
                 eprintln!("Error: {e}");
                 std::process::exit(1);
             }
