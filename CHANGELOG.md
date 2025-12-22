@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+    - [cmd] added `remove` command to remove elements from issue meta fields of type list, currently only for labels (GitHub Issue #22)
     - [cmd] added `set` command to change all editable issue meta fields (GitHub Issue #18)
     - [cmd] added `edit` command to edit issue descriptions (markdown) with external text editor (GitHub Issue #8)
     - [config] added `.gitissues/description.md` used as template when new issue is created (GitHub Issue #14)
