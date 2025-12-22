@@ -25,6 +25,9 @@ pub fn run(title: String) -> Result<(), String> {
         id: issue_id,
         title: title.clone(),
         state: "new".to_string(),
+        type_: "".to_string(),
+        labels: vec![],
+        assignee: "".to_string(),
         created: timestamp.clone(),
         updated: timestamp,
     };

@@ -9,6 +9,10 @@ pub struct Meta {
     pub id: u32,
     pub title: String,
     pub state: String,
+    #[serde(rename = "type")]
+    pub type_: String,
+    pub labels: Vec<String>,
+    pub assignee: String,
     pub created: String,
     pub updated: String,
 }

@@ -25,11 +25,35 @@ pub fn run(id: u32) -> Result<(), String> {
         Err(_) => return Err("meta.yaml malformatted.".to_string()),
     };
 
-    println!("ID:      {}", meta.id);
-    println!("Title:   {}", meta.title);
-    println!("State:   {}", meta.state);
-    println!("Created: {}", meta.created);
-    println!("Updated: {}", meta.updated);
+    println!("ID:       {}", meta.id);
+    println!("Title:    {}", meta.title);
+    println!("State:    {}", meta.state);
+    println!(
+        "Type:     {}",
+        if meta.type_.is_empty() {
+            "-".to_string()
+        } else {
+            meta.type_
+        }
+    );
+    println!(
+        "Labels:   {}",
+        if meta.labels.is_empty() {
+            "-".to_string()
+        } else {
+            meta.labels.join(",")
+        }
+    );
+    println!(
+        "Assignee: {}",
+        if meta.assignee.is_empty() {
+            "-".to_string()
+        } else {
+            meta.assignee
+        }
+    );
+    println!("Created:  {}", meta.created);
+    println!("Updated:  {}", meta.updated);
 
     // Load issue.md
     let md_path = path.join("issue.md");
