@@ -4,3 +4,7 @@ commit_auto: true
 # Commit message template
 # Available placeholders: {action}, {id}, {title}
 commit_message: "[issue] {action} #{id} -- {title}"
+
+# Editor for editing issue descriptions
+# git = use the git-configured editor
+editor: git

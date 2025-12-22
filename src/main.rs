@@ -1,5 +1,6 @@
 use clap::{Parser, Subcommand};
 
+mod edit;
 mod init;
 mod list;
 mod model;
@@ -45,6 +46,12 @@ enum Commands {
         /// New issue state
         state: String,
     },
+
+    /// Edit issue description (markdown)
+    Edit {
+        /// Issue ID
+        id: u32,
+    },
 }
 
 fn main() {
@@ -81,6 +88,13 @@ fn main() {
 
         Commands::State { id, state } => {
             if let Err(e) = state::run(id, state) {
+                eprintln!("Error: {e}");
+                std::process::exit(1);
+            }
+        }
+
+        Commands::Edit { id } => {
+            if let Err(e) = edit::run(id) {
                 eprintln!("Error: {e}");
                 std::process::exit(1);
             }
