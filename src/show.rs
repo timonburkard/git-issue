@@ -25,11 +25,11 @@ pub fn run(id: u32) -> Result<(), String> {
         Err(_) => return Err("meta.yaml malformatted.".to_string()),
     };
 
-    println!("ID:       {}", meta.id);
-    println!("Title:    {}", meta.title);
-    println!("State:    {}", meta.state);
+    println!("id:       {}", meta.id);
+    println!("title:    {}", meta.title);
+    println!("state:    {}", meta.state);
     println!(
-        "Type:     {}",
+        "type:     {}",
         if meta.type_.is_empty() {
             "-".to_string()
         } else {
@@ -37,7 +37,7 @@ pub fn run(id: u32) -> Result<(), String> {
         }
     );
     println!(
-        "Labels:   {}",
+        "labels:   {}",
         if meta.labels.is_empty() {
             "-".to_string()
         } else {
@@ -45,15 +45,15 @@ pub fn run(id: u32) -> Result<(), String> {
         }
     );
     println!(
-        "Assignee: {}",
+        "assignee: {}",
         if meta.assignee.is_empty() {
             "-".to_string()
         } else {
             meta.assignee
         }
     );
-    println!("Created:  {}", meta.created);
-    println!("Updated:  {}", meta.updated);
+    println!("created:  {}", meta.created);
+    println!("updated:  {}", meta.updated);
 
     // Load issue.md
     let md_path = path.join("issue.md");
@@ -62,7 +62,7 @@ pub fn run(id: u32) -> Result<(), String> {
         Err(_) => return Err("issue.md not found.".to_string()),
     };
 
-    println!("Description:\n{md_raw}");
+    println!("description:\n{md_raw}");
 
     Ok(())
 }
