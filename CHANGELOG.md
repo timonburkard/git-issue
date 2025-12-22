@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+    - [cmd] added `edit` command to edit issue descriptions (markdown) with external text editor (GitHub Issue #8)
     - [config] added `.gitissues/description.md` used as template when new issue is created (GitHub Issue #14)
     - [meta] added fields `type`, `labels` and `assignee` (GitHub Issue #4, #5, #10)
     - [cmd/list] added option `--column` (GitHub Issue #12)
