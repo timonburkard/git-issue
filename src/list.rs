@@ -3,7 +3,7 @@ use std::path::Path;
 
 use crate::model::Meta;
 
-pub fn run() -> Result<(), String> {
+pub fn run(column: Option<Vec<String>>) -> Result<(), String> {
     let issues_base = ".gitissues/issues";
     let path = Path::new(issues_base);
 
@@ -54,10 +54,157 @@ pub fn run() -> Result<(), String> {
     // Sort by numeric ID
     issues.sort_by_key(|m| m.id);
 
-    // Print header and rows
-    println!("{:<10} {:<10} Title", "ID", "State");
+    if column.is_none() {
+        print_default_list(&issues);
+
+        return Ok(());
+    }
+
+    print_custom_list(&issues, column.unwrap())?;
+
+    Ok(())
+}
+
+fn print_default_list(issues: &Vec<Meta>) {
+    // Use dynamic widths like the custom printer
+    let columns = vec!["id".to_string(), "state".to_string(), "title".to_string()];
+    let column_widths = calculate_column_widths(issues, &columns);
+
+    // Header
+    for col in &columns {
+        print!(
+            "{:<width$}",
+            col,
+            width = column_widths.get(col).copied().unwrap_or(22)
+        );
+    }
+    println!();
+
+    // Rows
     for meta in issues {
-        println!("{:<10} {:<10} {}", meta.id, meta.state, meta.title);
+        for col in &columns {
+            let value = get_column_value(col, meta);
+            print!(
+                "{:<width$}",
+                value,
+                width = column_widths.get(col).copied().unwrap_or(22)
+            );
+        }
+        println!();
+    }
+}
+
+fn get_column_value(col: &String, meta: &Meta) -> String {
+    return match col.as_str() {
+        "id" => meta.id.to_string(),
+        "title" => meta.title.clone(),
+        "state" => meta.state.clone(),
+        "type" => {
+            if meta.type_.is_empty() {
+                "-".to_string()
+            } else {
+                meta.type_.clone()
+            }
+        }
+        "labels" => {
+            if meta.labels.is_empty() {
+                "-".to_string()
+            } else {
+                meta.labels.join(",")
+            }
+        }
+        "assignee" => {
+            if meta.assignee.is_empty() {
+                "-".to_string()
+            } else {
+                meta.assignee.clone()
+            }
+        }
+        "created" => meta.created.clone(),
+        "updated" => meta.updated.clone(),
+        _ => "-".to_string(),
+    };
+}
+
+fn calculate_column_widths(
+    issues: &[Meta],
+    columns: &[String],
+) -> std::collections::HashMap<String, usize> {
+    use std::collections::HashMap;
+    let mut widths: HashMap<String, usize> = HashMap::new();
+
+    // Initialize with header widths
+    for col in columns {
+        widths.insert(col.clone(), col.len());
+    }
+
+    // Update with max content widths
+    for meta in issues {
+        for col in columns {
+            let value = get_column_value(col, meta);
+            let width = widths.get(col).copied().unwrap_or(0);
+            widths.insert(col.clone(), width.max(value.len()));
+        }
+    }
+
+    // Add padding (2 spaces)
+    for width in widths.values_mut() {
+        *width += 2;
+    }
+
+    widths
+}
+
+fn print_custom_list(issues: &Vec<Meta>, mut columns: Vec<String>) -> Result<(), String> {
+    // Validate column names
+    for col in &columns {
+        if !&[
+            "id", "title", "state", "type", "labels", "assignee", "created", "updated", "*",
+        ]
+        .contains(&col.as_str())
+        {
+            return Err(format!("Invalid column name: {}", col));
+        }
+    }
+
+    // Wildcard
+    if columns.contains(&"*".to_string()) {
+        columns = vec![
+            "id".to_string(),
+            "state".to_string(),
+            "type".to_string(),
+            "labels".to_string(),
+            "assignee".to_string(),
+            "created".to_string(),
+            "updated".to_string(),
+            "title".to_string(),
+        ];
+    }
+
+    let column_widths = calculate_column_widths(issues, &columns);
+
+    // Print header
+    for col in &columns {
+        print!(
+            "{:<width$}",
+            col,
+            width = column_widths.get(col).copied().unwrap_or(22)
+        );
+    }
+
+    println!();
+
+    // Print rows
+    for meta in issues {
+        for col in &columns {
+            let value = get_column_value(col, meta);
+            print!(
+                "{:<width$}",
+                value,
+                width = column_widths.get(col).copied().unwrap_or(22)
+            );
+        }
+        println!();
     }
 
     Ok(())

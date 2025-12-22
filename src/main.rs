@@ -27,7 +27,10 @@ enum Commands {
     },
 
     /// List all issues
-    List,
+    List {
+        #[arg(long, value_delimiter = ',')]
+        column: Option<Vec<String>>,
+    },
 
     /// Show issue details
     Show {
@@ -62,8 +65,8 @@ fn main() {
             }
         }
 
-        Commands::List => {
-            if let Err(e) = list::run() {
+        Commands::List { column } => {
+            if let Err(e) = list::run(column) {
                 eprintln!("Error: {e}");
                 std::process::exit(1);
             }
