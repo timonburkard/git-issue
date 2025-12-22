@@ -16,7 +16,7 @@ pub fn run(id: u32) -> Result<(), String> {
 
     // Load configuration
     let config_path = Path::new(".gitissues/config.yaml");
-    let config_raw = match fs::read_to_string(&config_path) {
+    let config_raw = match fs::read_to_string(config_path) {
         Ok(s) => s,
         Err(_) => return Err("config.yaml not found.".to_string()),
     };
@@ -31,7 +31,7 @@ pub fn run(id: u32) -> Result<(), String> {
     // Load meta.yaml to get title for commit message
     let meta = format!(".gitissues/issues/{id_str}/meta.yaml");
     let meta_path = Path::new(&meta);
-    let meta_raw = match fs::read_to_string(&meta_path) {
+    let meta_raw = match fs::read_to_string(meta_path) {
         Ok(s) => s,
         Err(_) => return Err("meta.yaml not found.".to_string()),
     };
