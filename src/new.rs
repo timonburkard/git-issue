@@ -12,11 +12,11 @@ pub fn run(title: String) -> Result<(), String> {
     let issue_dir = format!(".gitissues/issues/{id_str}");
     fs::create_dir_all(&issue_dir).map_err(|e| format!("Failed to create issue directory: {e}"))?;
 
-    // Step 3: Write issue.md
-    let issue_md_path = format!("{issue_dir}/issue.md");
-    let issue_md_content = format!("# {title}\n\n## Description\n\nTBD\n");
-    fs::write(&issue_md_path, issue_md_content)
-        .map_err(|e| format!("Failed to write issue.md: {e}"))?;
+    // Step 3: Write description.md
+    let issue_desc_path = format!("{issue_dir}/description.md");
+
+    fs::copy(".gitissues/description.md", &issue_desc_path)
+        .map_err(|e| format!("Failed to write description.md: {e}"))?;
 
     // Step 4: Write meta.yaml
     let meta_yaml_path = format!("{issue_dir}/meta.yaml");
