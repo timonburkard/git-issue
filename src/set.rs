@@ -37,33 +37,34 @@ pub fn run(
 
     let mut fields = Vec::new();
 
-    if let Some(value) = state {
-        if updated_meta.state != value {
-            updated_meta.state = value;
-            fields.push("state");
-        }
+    if let Some(value) = state
+        && updated_meta.state != value
+    {
+        updated_meta.state = value;
+        fields.push("state");
     }
 
-    if let Some(value) = title {
-        if updated_meta.title != value {
-            updated_meta.title = value;
-            fields.push("title");
-        }
+    if let Some(value) = title
+        && updated_meta.title != value
+    {
+        updated_meta.title = value;
+        fields.push("title");
     }
 
-    if let Some(value) = type_ {
-        if updated_meta.type_ != value {
-            updated_meta.type_ = value;
-            fields.push("type");
-        }
+    if let Some(value) = type_
+        && updated_meta.type_ != value
+    {
+        updated_meta.type_ = value;
+        fields.push("type");
     }
 
-    if let Some(value) = assignee {
-        if updated_meta.assignee != value {
-            updated_meta.assignee = value;
-            fields.push("assignee");
-        }
+    if let Some(value) = assignee
+        && updated_meta.assignee != value
+    {
+        updated_meta.assignee = value;
+        fields.push("assignee");
     }
+
     if let Some(value) = labels {
         for label in value {
             if !updated_meta.labels.contains(&label) {
