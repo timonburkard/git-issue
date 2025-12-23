@@ -5,6 +5,21 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [unreleased]
+
+### Added
+
+    - [cmd/set] added option `--labels` to overwrite all labels (#26)
+    - [cmd/set] added option `--labels-remove` to remove specific labels (#26)
+
+### Changed
+
+    - [cmd/set] renamed option `--labels` to `--labels-add`, which added specific labels (#26)
+
+### Removed
+
+    - [cmd] removed `remove` command, replaced with `set --labels-remove` (#26)
+
 ## [v0.2.0] - 2025-12-23
 
 ### Added
