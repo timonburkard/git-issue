@@ -1,7 +1,9 @@
 use std::fs;
 use std::path::Path;
 
-pub fn run() -> Result<(), String> {
+use crate::model::git_commit_non_templated;
+
+pub fn run(no_commit: bool) -> Result<(), String> {
     let root = ".gitissues";
     let issues_dir = Path::new(".gitissues").join("issues");
 
@@ -32,6 +34,10 @@ pub fn run() -> Result<(), String> {
             desc_dst.display()
         )
     })?;
+
+    if !no_commit {
+        git_commit_non_templated("init");
+    }
 
     println!("Initialization done");
 
