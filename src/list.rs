@@ -60,7 +60,7 @@ pub fn run(columns: Option<Vec<String>>) -> Result<(), String> {
 fn validate_config_columns(columns: &Vec<String>) -> Result<(), String> {
     for col in columns {
         if ![
-            "id", "title", "state", "type", "labels", "assignee", "created", "updated",
+            "id", "title", "state", "type", "labels", "assignee", "created", "updated", "*",
         ]
         .contains(&col.as_str())
         {
@@ -77,9 +77,23 @@ fn validate_config_columns(columns: &Vec<String>) -> Result<(), String> {
 fn print_default_list(issues: &Vec<Meta>) -> Result<(), String> {
     let config = load_config()?;
 
-    let columns = config.list_columns;
+    let mut columns = config.list_columns;
 
     validate_config_columns(&columns)?;
+
+    // Wildcard expansion
+    if columns.contains(&"*".to_string()) {
+        columns = vec![
+            "id".to_string(),
+            "state".to_string(),
+            "assignee".to_string(),
+            "type".to_string(),
+            "labels".to_string(),
+            "title".to_string(),
+            "created".to_string(),
+            "updated".to_string(),
+        ];
+    }
 
     let column_widths = calculate_column_widths(issues, &columns);
 
