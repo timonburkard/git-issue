@@ -3,6 +3,7 @@ use std::path::Path;
 
 use crate::model::{Meta, current_timestamp, git_commit};
 
+#[allow(clippy::too_many_arguments)]
 pub fn run(
     id: u32,
     state: Option<String>,
@@ -10,6 +11,8 @@ pub fn run(
     type_: Option<String>,
     assignee: Option<String>,
     labels: Option<Vec<String>>,
+    labels_add: Option<Vec<String>>,
+    labels_remove: Option<Vec<String>>,
 ) -> Result<(), String> {
     let id_str = format!("{id:010}");
     let issue_path = format!(".gitissues/issues/{id_str}");
@@ -65,10 +68,29 @@ pub fn run(
         fields.push("assignee");
     }
 
-    if let Some(value) = labels {
+    if let Some(value) = labels
+        && updated_meta.labels != value
+    {
+        updated_meta.labels = value;
+        fields.push("labels");
+    }
+
+    if let Some(value) = labels_add {
         for label in value {
             if !updated_meta.labels.contains(&label) {
                 updated_meta.labels.push(label);
+
+                if !fields.contains(&"labels") {
+                    fields.push("labels");
+                }
+            }
+        }
+    }
+
+    if let Some(value) = labels_remove {
+        for label in value {
+            if updated_meta.labels.contains(&label) {
+                updated_meta.labels.retain(|l| l != &label);
 
                 if !fields.contains(&"labels") {
                     fields.push("labels");

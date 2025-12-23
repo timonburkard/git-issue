@@ -5,7 +5,6 @@ mod init;
 mod list;
 mod model;
 mod new;
-mod remove;
 mod set;
 mod show;
 
@@ -64,16 +63,14 @@ enum Commands {
         /// Issue meta field: labels
         #[arg(long, value_delimiter = ',')]
         labels: Option<Vec<String>>,
-    },
 
-    // Remove issue meta fields
-    Remove {
-        /// Issue ID
-        id: u32,
-
-        /// Issue meta field: labels
+        /// Issue meta field: labels-add
         #[arg(long, value_delimiter = ',')]
-        labels: Option<Vec<String>>,
+        labels_add: Option<Vec<String>>,
+
+        /// Issue meta field: labels-remove
+        #[arg(long, value_delimiter = ',')]
+        labels_remove: Option<Vec<String>>,
     },
 
     /// Edit issue description (markdown)
@@ -122,15 +119,19 @@ fn main() {
             type_,
             assignee,
             labels,
+            labels_add,
+            labels_remove,
         } => {
-            if let Err(e) = set::run(id, state, title, type_, assignee, labels) {
-                eprintln!("Error: {e}");
-                std::process::exit(1);
-            }
-        }
-
-        Commands::Remove { id, labels } => {
-            if let Err(e) = remove::run(id, labels) {
+            if let Err(e) = set::run(
+                id,
+                state,
+                title,
+                type_,
+                assignee,
+                labels,
+                labels_add,
+                labels_remove,
+            ) {
                 eprintln!("Error: {e}");
                 std::process::exit(1);
             }
