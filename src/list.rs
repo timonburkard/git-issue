@@ -172,12 +172,12 @@ fn print_custom_list(issues: &Vec<Meta>, mut columns: Vec<String>) -> Result<(),
         columns = vec![
             "id".to_string(),
             "state".to_string(),
+            "assignee".to_string(),
             "type".to_string(),
             "labels".to_string(),
-            "assignee".to_string(),
+            "title".to_string(),
             "created".to_string(),
             "updated".to_string(),
-            "title".to_string(),
         ];
     }
 
