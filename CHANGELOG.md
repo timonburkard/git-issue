@@ -9,16 +9,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-    - [cmd/set] added option `--labels` to overwrite all labels (#26)
-    - [cmd/set] added option `--labels-remove` to remove specific labels (#26)
+    - [cmd/set] added option `--labels` to overwrite all labels (GitHub Issue #26)
+    - [cmd/set] added option `--labels-remove` to remove specific labels (GitHub Issue #26)
 
 ### Changed
 
-    - [cmd/set] renamed option `--labels` to `--labels-add`, which added specific labels (#26)
+    - [cmd/set] renamed option `--labels` to `--labels-add`, which added specific labels (GitHub Issue #26)
 
 ### Removed
 
-    - [cmd] removed `remove` command, replaced with `set --labels-remove` (#26)
+    - [cmd] removed `remove` command, replaced with `set --labels-remove` (GitHub Issue #26)
 
 ## [v0.2.0] - 2025-12-23
 
