@@ -150,9 +150,9 @@ fn wildcard_expansion(columns: &mut Vec<String>) {
             "state".to_string(),
             "assignee".to_string(),
             "type".to_string(),
-            "labels".to_string(),
             "title".to_string(),
             "priority".to_string(),
+            "labels".to_string(),
             "created".to_string(),
             "updated".to_string(),
         ];
