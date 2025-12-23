@@ -81,19 +81,7 @@ fn print_default_list(issues: &Vec<Meta>) -> Result<(), String> {
 
     validate_config_columns(&columns)?;
 
-    // Wildcard expansion
-    if columns.contains(&"*".to_string()) {
-        columns = vec![
-            "id".to_string(),
-            "state".to_string(),
-            "assignee".to_string(),
-            "type".to_string(),
-            "labels".to_string(),
-            "title".to_string(),
-            "created".to_string(),
-            "updated".to_string(),
-        ];
-    }
+    wildcard_expansion(&mut columns);
 
     let column_widths = calculate_column_widths(issues, &columns);
 
@@ -135,19 +123,7 @@ fn print_custom_list(issues: &Vec<Meta>, mut columns: Vec<String>) -> Result<(),
         }
     }
 
-    // Wildcard
-    if columns.contains(&"*".to_string()) {
-        columns = vec![
-            "id".to_string(),
-            "state".to_string(),
-            "assignee".to_string(),
-            "type".to_string(),
-            "labels".to_string(),
-            "title".to_string(),
-            "created".to_string(),
-            "updated".to_string(),
-        ];
-    }
+    wildcard_expansion(&mut columns);
 
     let column_widths = calculate_column_widths(issues, &columns);
 
@@ -176,6 +152,21 @@ fn print_custom_list(issues: &Vec<Meta>, mut columns: Vec<String>) -> Result<(),
     }
 
     Ok(())
+}
+
+fn wildcard_expansion(columns: &mut Vec<String>) {
+    if columns.contains(&"*".to_string()) {
+        *columns = vec![
+            "id".to_string(),
+            "state".to_string(),
+            "assignee".to_string(),
+            "type".to_string(),
+            "labels".to_string(),
+            "title".to_string(),
+            "created".to_string(),
+            "updated".to_string(),
+        ];
+    }
 }
 
 fn get_column_value(col: &str, meta: &Meta) -> String {
