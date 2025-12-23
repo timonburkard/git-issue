@@ -13,6 +13,30 @@ env:
   CARGO_TERM_COLOR: always
 
 jobs:
+  verify:
+    name: Verify
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Rust (fmt + clippy)
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Install components
+        run: |
+          rustup component add rustfmt
+          rustup component add clippy
+
+      - name: Format check
+        run: cargo fmt -- --check
+
+      - name: Clippy
+        run: cargo clippy -- -D warnings
+
+      - name: Test
+        run: cargo test --verbose
+
   create-release:
     runs-on: ubuntu-latest
     outputs:
@@ -32,7 +56,7 @@ jobs:
           prerelease: false
 
   build:
-    needs: create-release
+    needs: [verify, create-release]
     strategy:
       matrix:
         include:

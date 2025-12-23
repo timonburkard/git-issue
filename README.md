@@ -13,11 +13,11 @@ Issues live alongside your code inside `.gitissues/`, making them platform-indep
 - ✅ Configurable: default columns for `list`, commit message template, external editor
 - ✅ External editor renders issue information as markdown
 - ✅ Git-integration: auto-commit of changes
+- ✅ Automated integration tests
 - 🚧 Filtering/sorting of `list` view
 - 🚧 Add `search` command across all issue titles and descriptions
 - 🚧 Relationships between issues
 - 🚧 Comments / discussions
-- 🚧 Automated tests
 
 ## Usage
 
