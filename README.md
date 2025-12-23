@@ -96,7 +96,7 @@ This config can be edited by the user.
 - `commit_message` (string): Template for git commit messages. Supports placeholders:
   - `{id}`: Issue ID
   - `{title}`: Issue title
-  - `{action}`: Command that triggered the commit (`new`, `edit`, `set X`)
+  - `{action}`: Command that triggered the commit (`new`, `edit description`, `set <field>`)
 - `editor` (string): External text editor (set `git` to use configured git core.editor)
 - `list_columns` (string list): Default columns shown in `list` command
 
