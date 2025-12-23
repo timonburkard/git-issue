@@ -1,46 +1,25 @@
-use std::fs;
-use std::path::Path;
-
-use crate::model::{Config, Meta, git_commit, open_editor};
+use crate::model::{
+    git_commit, issue_desc_path, issue_meta_path, load_config, load_meta, open_editor,
+};
 
 pub fn run(id: u32) -> Result<(), String> {
-    let id_str = format!("{id:010}");
-    let desc_path = format!(".gitissues/issues/{id_str}/description.md");
-    let path = Path::new(&desc_path);
+    let desc = issue_desc_path(id);
+    let path = desc.as_path();
 
     // Precondition: .gitissues/issues/ID/description.md must exist
     if !path.exists() {
         return Err("Not available: ID/description.md does not exist.".to_string());
     }
 
-    // Load configuration
-    let config_path = Path::new(".gitissues/config.yaml");
-    let config_raw = match fs::read_to_string(config_path) {
-        Ok(s) => s,
-        Err(_) => return Err("config.yaml not found.".to_string()),
-    };
+    let config = load_config()?;
 
-    let config: Config = match serde_yaml::from_str(&config_raw) {
-        Ok(m) => m,
-        Err(_) => return Err("config.yaml malformatted.".to_string()),
-    };
-
-    open_editor(config.editor, desc_path)?;
+    open_editor(config.editor, desc.to_string_lossy().to_string())?;
 
     // Load meta.yaml to get title for commit message
-    let meta = format!(".gitissues/issues/{id_str}/meta.yaml");
-    let meta_path = Path::new(&meta);
-    let meta_raw = match fs::read_to_string(meta_path) {
-        Ok(s) => s,
-        Err(_) => return Err("meta.yaml not found.".to_string()),
-    };
+    let meta_path = issue_meta_path(id);
+    let meta = load_meta(&meta_path)?;
 
-    let meta: Meta = match serde_yaml::from_str(&meta_raw) {
-        Ok(m) => m,
-        Err(_) => return Err("meta.yaml malformatted.".to_string()),
-    };
-
-    git_commit(id, meta.title, "edit description");
+    git_commit(id, meta.title, "edit description")?;
 
     Ok(())
 }

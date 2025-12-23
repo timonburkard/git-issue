@@ -21,6 +21,10 @@ Issues live alongside your code inside `.gitissues/`, making them platform-indep
 # Help page
 git issue -h
 
+# Version
+git issue -V
+git issue --version
+
 # Initialize tracking in your repo
 git issue init
 git issue init --no-commit

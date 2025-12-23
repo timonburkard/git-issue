@@ -9,11 +9,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+    - [cmd] added `--version` / `-V` command to print the version of git-issue
     - [cmd/set] added option `--labels` to overwrite all labels (GitHub Issue #26)
     - [cmd/set] added option `--labels-remove` to remove specific labels (GitHub Issue #26)
 
 ### Changed
 
+    - [git] commit does not silently fail anymore
     - [cmd/init] create a commit message by default, can be disabled by option `--no-commit` (GitHub Issue #23)
     - [cmd/set] renamed option `--labels` to `--labels-add`, which added specific labels (GitHub Issue #26)
 

@@ -11,6 +11,7 @@ mod show;
 #[derive(Parser)]
 #[command(name = "git-issue")]
 #[command(about = "Git-native issue tracker", long_about = None)]
+#[command(version = concat!("v", env!("CARGO_PKG_VERSION")))]
 struct Args {
     #[command(subcommand)]
     command: Commands,

@@ -30,26 +30,76 @@ pub fn current_timestamp() -> String {
     Utc::now().format("%Y-%m-%dT%H:%M:%SZ").to_string()
 }
 
-/// git commit based on template from config
-pub fn git_commit(id: u32, title: String, action: &str) {
-    use std::process::Command;
-    let path = Path::new(".gitissues/");
-
-    // Load configuration
-    let config_path = path.join("config.yaml");
-    let config_raw = match fs::read_to_string(&config_path) {
+pub fn load_config() -> Result<Config, String> {
+    let config_path = Path::new(".gitissues/config.yaml");
+    let config_raw = match fs::read_to_string(config_path) {
         Ok(s) => s,
-        Err(_) => return,
+        Err(_) => return Err("config.yaml not found.".to_string()),
     };
 
     let config: Config = match serde_yaml::from_str(&config_raw) {
         Ok(m) => m,
-        Err(_) => return,
+        Err(_) => return Err("config.yaml malformatted.".to_string()),
     };
+
+    Ok(config)
+}
+
+pub fn load_meta(path: &Path) -> Result<Meta, String> {
+    let meta_raw = match fs::read_to_string(path) {
+        Ok(s) => s,
+        Err(_) => return Err(format!("meta.yaml not found: {}", path.display())),
+    };
+
+    let meta: Meta = match serde_yaml::from_str(&meta_raw) {
+        Ok(m) => m,
+        Err(_) => return Err(format!("meta.yaml malformatted: {}", path.display())),
+    };
+
+    Ok(meta)
+}
+
+pub fn load_description(path: &Path) -> Result<String, String> {
+    let raw = fs::read_to_string(path)
+        .map_err(|_| format!("description.md not found: {}", path.display()))?;
+    Ok(raw)
+}
+
+fn padded_id(id: u32) -> String {
+    format!("{id:010}")
+}
+
+pub fn issue_dir(id: u32) -> std::path::PathBuf {
+    Path::new(".gitissues").join("issues").join(padded_id(id))
+}
+
+pub fn issue_meta_path(id: u32) -> std::path::PathBuf {
+    issue_dir(id).join("meta.yaml")
+}
+
+pub fn issue_desc_path(id: u32) -> std::path::PathBuf {
+    issue_dir(id).join("description.md")
+}
+
+pub fn issue_attachments_dir(id: u32) -> std::path::PathBuf {
+    issue_dir(id).join("attachments")
+}
+
+pub fn issue_tmp_show_dir(id: u32) -> std::path::PathBuf {
+    Path::new(".gitissues")
+        .join(".tmp")
+        .join(format!("show-{id}"))
+}
+
+/// git commit based on template from config
+pub fn git_commit(id: u32, title: String, action: &str) -> Result<(), String> {
+    use std::process::Command;
+
+    let config = load_config()?;
 
     // Check if auto-commit is enabled
     if !config.commit_auto {
-        return;
+        return Ok(());
     }
 
     // Prepare commit message
@@ -63,8 +113,7 @@ pub fn git_commit(id: u32, title: String, action: &str) {
     // Execute git add
     let add_result = Command::new("git").args(["add", ".gitissues"]).output();
     if let Err(e) = add_result {
-        eprintln!("Warning: failed to stage .gitissues: {e}");
-        return;
+        return Err(format!("Failed to stage .gitissues: {e}"));
     }
 
     // Execute git commit
@@ -72,12 +121,14 @@ pub fn git_commit(id: u32, title: String, action: &str) {
         .args(["commit", "-m", &commit_message])
         .output();
     if let Err(e) = commit_result {
-        eprintln!("Warning: failed to commit: {e}");
+        return Err(format!("Failed to commit: {e}"));
     }
+
+    Ok(())
 }
 
 /// Simple commit message not based on template or config
-pub fn git_commit_non_templated(msg: &str) {
+pub fn git_commit_non_templated(msg: &str) -> Result<(), String> {
     use std::process::Command;
 
     // Prepare commit message
@@ -86,8 +137,7 @@ pub fn git_commit_non_templated(msg: &str) {
     // Execute git add
     let add_result = Command::new("git").args(["add", ".gitissues"]).output();
     if let Err(e) = add_result {
-        eprintln!("Warning: failed to stage .gitissues: {e}");
-        return;
+        return Err(format!("Failed to stage .gitissues: {e}"));
     }
 
     // Execute git commit
@@ -95,8 +145,10 @@ pub fn git_commit_non_templated(msg: &str) {
         .args(["commit", "-m", &commit_message])
         .output();
     if let Err(e) = commit_result {
-        eprintln!("Warning: failed to commit: {e}");
+        return Err(format!("Failed to commit: {e}"));
     }
+
+    Ok(())
 }
 
 pub fn open_editor(mut editor: String, path: String) -> Result<(), String> {

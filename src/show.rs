@@ -3,12 +3,13 @@ use std::path::Path;
 
 use regex::Regex;
 
-use crate::model::{Config, Meta, open_editor};
+use crate::model::{
+    Meta, issue_attachments_dir, issue_dir, issue_meta_path, issue_tmp_show_dir, load_config,
+    load_description, load_meta, open_editor,
+};
 
 pub fn run(id: u32) -> Result<(), String> {
-    let id_str = format!("{id:010}");
-    let issue_path = format!(".gitissues/issues/{id_str}");
-    let path = Path::new(&issue_path);
+    let path = issue_dir(id);
 
     // Precondition: .gitissues/issues/ID must exist
     if !path.exists() {
@@ -16,26 +17,16 @@ pub fn run(id: u32) -> Result<(), String> {
     }
 
     // Load meta.yaml
-    let meta_path = path.join("meta.yaml");
-    let meta_raw = match fs::read_to_string(&meta_path) {
-        Ok(s) => s,
-        Err(_) => return Err("meta.yaml not found.".to_string()),
-    };
-
-    let meta: Meta = match serde_yaml::from_str(&meta_raw) {
-        Ok(m) => m,
-        Err(_) => return Err("meta.yaml malformatted.".to_string()),
-    };
+    let meta = load_meta(&issue_meta_path(id))?;
 
     // Create per-issue tmp directory
-    let tmp_issue_dir = format!(".gitissues/.tmp/show-{id}");
-    let tmp_issue_path = Path::new(&tmp_issue_dir);
-    fs::create_dir_all(tmp_issue_path)
+    let tmp_issue_path = issue_tmp_show_dir(id);
+    fs::create_dir_all(&tmp_issue_path)
         .map_err(|e| format!("Failed to create {}: {e}", tmp_issue_path.display()))?;
 
     // Generate markdown content
     let mut content: String = generate_content_metadata(id, &meta);
-    add_content_description(path, &mut content)?;
+    add_content_description(path.as_path(), &mut content)?;
 
     // Write markdown file
     let tmp_file = tmp_issue_path.join("show.md");
@@ -43,23 +34,13 @@ pub fn run(id: u32) -> Result<(), String> {
         .map_err(|e| format!("Failed to write {}: {e}", tmp_file.display()))?;
 
     // Copy attachments to tmp directory
-    let attachments_src = path.join("attachments");
+    let attachments_src = issue_attachments_dir(id);
     if attachments_src.exists() {
         let tmp_attachments = tmp_issue_path.join("attachments");
         copy_dir_recursive(&attachments_src, &tmp_attachments)?;
     }
 
-    // Load configuration
-    let config_path = Path::new(".gitissues/config.yaml");
-    let config_raw = match fs::read_to_string(config_path) {
-        Ok(s) => s,
-        Err(_) => return Err("config.yaml not found.".to_string()),
-    };
-
-    let config: Config = match serde_yaml::from_str(&config_raw) {
-        Ok(m) => m,
-        Err(_) => return Err("config.yaml malformatted.".to_string()),
-    };
+    let config = load_config()?;
 
     open_editor(config.editor, tmp_file.to_string_lossy().to_string())?;
 
@@ -116,10 +97,7 @@ fn generate_content_metadata(id: u32, meta: &Meta) -> String {
 fn add_content_description(path: &Path, content: &mut String) -> Result<(), String> {
     // Load description.md
     let desc_path = path.join("description.md");
-    let desc_raw = match fs::read_to_string(&desc_path) {
-        Ok(s) => s,
-        Err(_) => return Err("description.md not found.".to_string()),
-    };
+    let desc_raw = load_description(&desc_path)?;
 
     let re = Regex::new(r"(?m)^#").unwrap(); // (?m) enables multi-line mode
 

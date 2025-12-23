@@ -1,7 +1,6 @@
 use std::fs;
-use std::path::Path;
 
-use crate::model::{Meta, current_timestamp, git_commit};
+use crate::model::{current_timestamp, git_commit, issue_dir, issue_meta_path, load_meta};
 
 #[allow(clippy::too_many_arguments)]
 pub fn run(
@@ -14,9 +13,8 @@ pub fn run(
     labels_add: Option<Vec<String>>,
     labels_remove: Option<Vec<String>>,
 ) -> Result<(), String> {
-    let id_str = format!("{id:010}");
-    let issue_path = format!(".gitissues/issues/{id_str}");
-    let path = Path::new(&issue_path);
+    let dir = issue_dir(id);
+    let path = dir.as_path();
 
     // Precondition: .gitissues/issues/ID must exist
     if !path.exists() {
@@ -24,16 +22,8 @@ pub fn run(
     }
 
     // Load meta.yaml
-    let meta_path = path.join("meta.yaml");
-    let meta_raw = match fs::read_to_string(&meta_path) {
-        Ok(s) => s,
-        Err(_) => return Err("meta.yaml not found.".to_string()),
-    };
-
-    let meta: Meta = match serde_yaml::from_str(&meta_raw) {
-        Ok(m) => m,
-        Err(_) => return Err("meta.yaml malformatted.".to_string()),
-    };
+    let meta_path = issue_meta_path(id);
+    let meta = load_meta(&meta_path)?;
 
     // Update meta fields
     let mut updated_meta = meta.clone();
@@ -115,7 +105,7 @@ pub fn run(
 
     fs::write(&meta_path, updated_yaml).map_err(|_| "Failed to write meta.yaml".to_string())?;
 
-    git_commit(id, updated_meta.title, &format!("set {}", fields.join(",")));
+    git_commit(id, updated_meta.title, &format!("set {}", fields.join(",")))?;
 
     println!("Updated issue field(s)");
 
