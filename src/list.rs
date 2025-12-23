@@ -86,6 +86,61 @@ fn print_default_list(issues: &Vec<Meta>) {
     }
 }
 
+fn print_custom_list(issues: &Vec<Meta>, mut columns: Vec<String>) -> Result<(), String> {
+    // Validate column names
+    for col in &columns {
+        if !&[
+            "id", "title", "state", "type", "labels", "assignee", "created", "updated", "*",
+        ]
+        .contains(&col.as_str())
+        {
+            return Err(format!("Invalid column name: {}", col));
+        }
+    }
+
+    // Wildcard
+    if columns.contains(&"*".to_string()) {
+        columns = vec![
+            "id".to_string(),
+            "state".to_string(),
+            "assignee".to_string(),
+            "type".to_string(),
+            "labels".to_string(),
+            "title".to_string(),
+            "created".to_string(),
+            "updated".to_string(),
+        ];
+    }
+
+    let column_widths = calculate_column_widths(issues, &columns);
+
+    // Print header
+    for col in &columns {
+        print!(
+            "{:<width$}",
+            col,
+            width = column_widths.get(col).copied().unwrap_or(22)
+        );
+    }
+
+    println!();
+
+    // Print rows
+    for meta in issues {
+        for col in &columns {
+            let value = get_column_value(col, meta);
+            print!(
+                "{:<width$}",
+                value,
+                width = column_widths.get(col).copied().unwrap_or(22)
+            );
+        }
+        println!();
+    }
+
+    Ok(())
+}
+
 fn get_column_value(col: &str, meta: &Meta) -> String {
     match col {
         "id" => meta.id.to_string(),
@@ -145,59 +200,4 @@ fn calculate_column_widths(
     }
 
     widths
-}
-
-fn print_custom_list(issues: &Vec<Meta>, mut columns: Vec<String>) -> Result<(), String> {
-    // Validate column names
-    for col in &columns {
-        if !&[
-            "id", "title", "state", "type", "labels", "assignee", "created", "updated", "*",
-        ]
-        .contains(&col.as_str())
-        {
-            return Err(format!("Invalid column name: {}", col));
-        }
-    }
-
-    // Wildcard
-    if columns.contains(&"*".to_string()) {
-        columns = vec![
-            "id".to_string(),
-            "state".to_string(),
-            "assignee".to_string(),
-            "type".to_string(),
-            "labels".to_string(),
-            "title".to_string(),
-            "created".to_string(),
-            "updated".to_string(),
-        ];
-    }
-
-    let column_widths = calculate_column_widths(issues, &columns);
-
-    // Print header
-    for col in &columns {
-        print!(
-            "{:<width$}",
-            col,
-            width = column_widths.get(col).copied().unwrap_or(22)
-        );
-    }
-
-    println!();
-
-    // Print rows
-    for meta in issues {
-        for col in &columns {
-            let value = get_column_value(col, meta);
-            print!(
-                "{:<width$}",
-                value,
-                width = column_widths.get(col).copied().unwrap_or(22)
-            );
-        }
-        println!();
-    }
-
-    Ok(())
 }
