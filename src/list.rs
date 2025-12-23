@@ -57,10 +57,30 @@ pub fn run(columns: Option<Vec<String>>) -> Result<(), String> {
     Ok(())
 }
 
+fn validate_config_columns(columns: &Vec<String>) -> Result<(), String> {
+    for col in columns {
+        if ![
+            "id", "title", "state", "type", "labels", "assignee", "created", "updated",
+        ]
+        .contains(&col.as_str())
+        {
+            return Err(format!(
+                "Invalid column name in config.list_columns: {}",
+                col
+            ));
+        }
+    }
+
+    Ok(())
+}
+
 fn print_default_list(issues: &Vec<Meta>) -> Result<(), String> {
     let config = load_config()?;
 
     let columns = config.list_columns;
+
+    validate_config_columns(&columns)?;
+
     let column_widths = calculate_column_widths(issues, &columns);
 
     // Header
