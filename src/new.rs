@@ -2,11 +2,18 @@ use std::fs;
 use std::path::Path;
 
 use crate::model::{
-    Meta, Priority, current_timestamp, git_commit, issue_attachments_dir, issue_desc_path,
-    issue_dir, issue_meta_path,
+    Meta, Priority, current_timestamp, git_commit, is_valid_iso_date, issue_attachments_dir,
+    issue_desc_path, issue_dir, issue_meta_path,
 };
 
-pub fn run(title: String) -> Result<(), String> {
+pub fn run(
+    title: String,
+    type_: Option<String>,
+    assignee: Option<String>,
+    priority: Option<Priority>,
+    due_date: Option<String>,
+    labels: Option<Vec<String>>,
+) -> Result<(), String> {
     // Step 1: Allocate the next issue ID
     let issue_id = allocate_id()?;
 
@@ -36,14 +43,19 @@ pub fn run(title: String) -> Result<(), String> {
         id: issue_id,
         title: title.clone(),
         state: "new".to_string(),
-        type_: "".to_string(),
-        labels: vec![],
-        assignee: "".to_string(),
-        priority: Priority::P2,
-        due_date: "".to_string(),
+        type_: type_.unwrap_or_default(),
+        labels: labels.unwrap_or_default(),
+        assignee: assignee.unwrap_or_default(),
+        priority: priority.unwrap_or(Priority::P2),
+        due_date: due_date.unwrap_or_default(),
         created: timestamp.clone(),
         updated: timestamp,
     };
+
+    if !meta.due_date.is_empty() && !is_valid_iso_date(&meta.due_date) {
+        return Err("Invalid due_date format: Use YYYY-MM-DD".to_string());
+    }
+
     let meta_yaml =
         serde_yaml::to_string(&meta).map_err(|_| "Failed to serialize meta.yaml".to_string())?;
     fs::write(&meta_yaml_path, meta_yaml).map_err(|e| format!("Failed to write meta.yaml: {e}"))?;
