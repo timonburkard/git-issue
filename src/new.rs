@@ -1,25 +1,26 @@
 use std::fs;
 use std::path::Path;
 
-use crate::model::{Meta, current_timestamp, git_commit};
+use crate::model::{
+    Meta, current_timestamp, git_commit, issue_desc_path, issue_dir, issue_meta_path,
+};
 
 pub fn run(title: String) -> Result<(), String> {
     // Step 1: Allocate the next issue ID
     let issue_id = allocate_id()?;
-    let id_str = format!("{issue_id:010}");
 
     // Step 2: Create the issue directory
-    let issue_dir = format!(".gitissues/issues/{id_str}");
-    fs::create_dir_all(&issue_dir).map_err(|e| format!("Failed to create issue directory: {e}"))?;
+    let dir = issue_dir(issue_id);
+    fs::create_dir_all(&dir).map_err(|e| format!("Failed to create issue directory: {e}"))?;
 
     // Step 3: Write description.md
-    let issue_desc_path = format!("{issue_dir}/description.md");
+    let desc_path = issue_desc_path(issue_id);
 
-    fs::copy(".gitissues/description.md", &issue_desc_path)
+    fs::copy(".gitissues/description.md", &desc_path)
         .map_err(|e| format!("Failed to write description.md: {e}"))?;
 
     // Step 4: Write meta.yaml
-    let meta_yaml_path = format!("{issue_dir}/meta.yaml");
+    let meta_yaml_path = issue_meta_path(issue_id);
     let timestamp = current_timestamp();
     let meta = Meta {
         id: issue_id,

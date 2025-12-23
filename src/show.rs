@@ -3,12 +3,13 @@ use std::path::Path;
 
 use regex::Regex;
 
-use crate::model::{Meta, load_config, load_meta, open_editor};
+use crate::model::{
+    Meta, issue_attachments_dir, issue_dir, issue_meta_path, issue_tmp_show_dir, load_config,
+    load_meta, open_editor,
+};
 
 pub fn run(id: u32) -> Result<(), String> {
-    let id_str = format!("{id:010}");
-    let issue_path = format!(".gitissues/issues/{id_str}");
-    let path = Path::new(&issue_path);
+    let path = issue_dir(id);
 
     // Precondition: .gitissues/issues/ID must exist
     if !path.exists() {
@@ -16,18 +17,16 @@ pub fn run(id: u32) -> Result<(), String> {
     }
 
     // Load meta.yaml
-    let meta_path = path.join("meta.yaml");
-    let meta = load_meta(&meta_path)?;
+    let meta = load_meta(&issue_meta_path(id))?;
 
     // Create per-issue tmp directory
-    let tmp_issue_dir = format!(".gitissues/.tmp/show-{id}");
-    let tmp_issue_path = Path::new(&tmp_issue_dir);
-    fs::create_dir_all(tmp_issue_path)
+    let tmp_issue_path = issue_tmp_show_dir(id);
+    fs::create_dir_all(&tmp_issue_path)
         .map_err(|e| format!("Failed to create {}: {e}", tmp_issue_path.display()))?;
 
     // Generate markdown content
     let mut content: String = generate_content_metadata(id, &meta);
-    add_content_description(path, &mut content)?;
+    add_content_description(path.as_path(), &mut content)?;
 
     // Write markdown file
     let tmp_file = tmp_issue_path.join("show.md");
@@ -35,7 +34,7 @@ pub fn run(id: u32) -> Result<(), String> {
         .map_err(|e| format!("Failed to write {}: {e}", tmp_file.display()))?;
 
     // Copy attachments to tmp directory
-    let attachments_src = path.join("attachments");
+    let attachments_src = issue_attachments_dir(id);
     if attachments_src.exists() {
         let tmp_attachments = tmp_issue_path.join("attachments");
         copy_dir_recursive(&attachments_src, &tmp_attachments)?;

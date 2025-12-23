@@ -59,6 +59,32 @@ pub fn load_meta(path: &Path) -> Result<Meta, String> {
     Ok(meta)
 }
 
+fn padded_id(id: u32) -> String {
+    format!("{id:010}")
+}
+
+pub fn issue_dir(id: u32) -> std::path::PathBuf {
+    Path::new(".gitissues").join("issues").join(padded_id(id))
+}
+
+pub fn issue_meta_path(id: u32) -> std::path::PathBuf {
+    issue_dir(id).join("meta.yaml")
+}
+
+pub fn issue_desc_path(id: u32) -> std::path::PathBuf {
+    issue_dir(id).join("description.md")
+}
+
+pub fn issue_attachments_dir(id: u32) -> std::path::PathBuf {
+    issue_dir(id).join("attachments")
+}
+
+pub fn issue_tmp_show_dir(id: u32) -> std::path::PathBuf {
+    Path::new(".gitissues")
+        .join(".tmp")
+        .join(format!("show-{id}"))
+}
+
 /// git commit based on template from config
 pub fn git_commit(id: u32, title: String, action: &str) -> Result<(), String> {
     use std::process::Command;

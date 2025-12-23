@@ -1,7 +1,6 @@
 use std::fs;
-use std::path::Path;
 
-use crate::model::{current_timestamp, git_commit, load_meta};
+use crate::model::{current_timestamp, git_commit, issue_dir, issue_meta_path, load_meta};
 
 #[allow(clippy::too_many_arguments)]
 pub fn run(
@@ -14,9 +13,8 @@ pub fn run(
     labels_add: Option<Vec<String>>,
     labels_remove: Option<Vec<String>>,
 ) -> Result<(), String> {
-    let id_str = format!("{id:010}");
-    let issue_path = format!(".gitissues/issues/{id_str}");
-    let path = Path::new(&issue_path);
+    let dir = issue_dir(id);
+    let path = dir.as_path();
 
     // Precondition: .gitissues/issues/ID must exist
     if !path.exists() {
@@ -24,7 +22,7 @@ pub fn run(
     }
 
     // Load meta.yaml
-    let meta_path = path.join("meta.yaml");
+    let meta_path = issue_meta_path(id);
     let meta = load_meta(&meta_path)?;
 
     // Update meta fields

@@ -1,11 +1,10 @@
-use std::path::Path;
-
-use crate::model::{git_commit, load_config, load_meta, open_editor};
+use crate::model::{
+    git_commit, issue_desc_path, issue_meta_path, load_config, load_meta, open_editor,
+};
 
 pub fn run(id: u32) -> Result<(), String> {
-    let id_str = format!("{id:010}");
-    let desc_path = format!(".gitissues/issues/{id_str}/description.md");
-    let path = Path::new(&desc_path);
+    let desc = issue_desc_path(id);
+    let path = desc.as_path();
 
     // Precondition: .gitissues/issues/ID/description.md must exist
     if !path.exists() {
@@ -14,12 +13,11 @@ pub fn run(id: u32) -> Result<(), String> {
 
     let config = load_config()?;
 
-    open_editor(config.editor, desc_path)?;
+    open_editor(config.editor, desc.to_string_lossy().to_string())?;
 
     // Load meta.yaml to get title for commit message
-    let meta_path_str = format!(".gitissues/issues/{id_str}/meta.yaml");
-    let meta_path = Path::new(&meta_path_str);
-    let meta = load_meta(meta_path)?;
+    let meta_path = issue_meta_path(id);
+    let meta = load_meta(&meta_path)?;
 
     git_commit(id, meta.title, "edit description")?;
 
