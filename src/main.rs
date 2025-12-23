@@ -61,15 +61,15 @@ enum Commands {
         assignee: Option<String>,
 
         /// Issue meta field: labels
-        #[arg(long, value_delimiter = ',')]
+        #[arg(long, value_delimiter = ',', conflicts_with_all = ["labels_add", "labels_remove"])]
         labels: Option<Vec<String>>,
 
         /// Issue meta field: labels-add
-        #[arg(long, value_delimiter = ',')]
+        #[arg(long, value_delimiter = ',', conflicts_with_all = ["labels"])]
         labels_add: Option<Vec<String>>,
 
         /// Issue meta field: labels-remove
-        #[arg(long, value_delimiter = ',')]
+        #[arg(long, value_delimiter = ',', conflicts_with_all = ["labels"])]
         labels_remove: Option<Vec<String>>,
     },
 
