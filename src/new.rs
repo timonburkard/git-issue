@@ -38,7 +38,7 @@ pub fn run(title: String) -> Result<(), String> {
     // Step 5: git commit
     git_commit(issue_id, title, "new");
 
-    println!("Created issue {id_str}");
+    println!("Created issue #{issue_id}");
 
     Ok(())
 }
