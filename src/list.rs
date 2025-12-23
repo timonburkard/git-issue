@@ -1,7 +1,7 @@
 use std::fs;
 use std::path::Path;
 
-use crate::model::Meta;
+use crate::model::{Meta, load_meta};
 
 pub fn run(columns: Option<Vec<String>>) -> Result<(), String> {
     let issues_base = ".gitissues/issues";
@@ -38,15 +38,7 @@ pub fn run(columns: Option<Vec<String>>) -> Result<(), String> {
 
         // Load meta.yaml
         let meta_path = entry.path().join("meta.yaml");
-        let meta_raw = match fs::read_to_string(&meta_path) {
-            Ok(s) => s,
-            Err(_) => continue, // skip entries without readable meta
-        };
-
-        let meta: Meta = match serde_yaml::from_str(&meta_raw) {
-            Ok(m) => m,
-            Err(_) => continue, // skip malformed meta
-        };
+        let meta = load_meta(&meta_path)?;
 
         issues.push(meta);
     }

@@ -1,7 +1,7 @@
 use std::fs;
 use std::path::Path;
 
-use crate::model::{Meta, current_timestamp, git_commit};
+use crate::model::{current_timestamp, git_commit, load_meta};
 
 #[allow(clippy::too_many_arguments)]
 pub fn run(
@@ -25,15 +25,7 @@ pub fn run(
 
     // Load meta.yaml
     let meta_path = path.join("meta.yaml");
-    let meta_raw = match fs::read_to_string(&meta_path) {
-        Ok(s) => s,
-        Err(_) => return Err("meta.yaml not found.".to_string()),
-    };
-
-    let meta: Meta = match serde_yaml::from_str(&meta_raw) {
-        Ok(m) => m,
-        Err(_) => return Err("meta.yaml malformatted.".to_string()),
-    };
+    let meta = load_meta(&meta_path)?;
 
     // Update meta fields
     let mut updated_meta = meta.clone();

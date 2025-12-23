@@ -3,7 +3,7 @@ use std::path::Path;
 
 use regex::Regex;
 
-use crate::model::{Meta, load_config, open_editor};
+use crate::model::{Meta, load_config, load_meta, open_editor};
 
 pub fn run(id: u32) -> Result<(), String> {
     let id_str = format!("{id:010}");
@@ -17,15 +17,7 @@ pub fn run(id: u32) -> Result<(), String> {
 
     // Load meta.yaml
     let meta_path = path.join("meta.yaml");
-    let meta_raw = match fs::read_to_string(&meta_path) {
-        Ok(s) => s,
-        Err(_) => return Err("meta.yaml not found.".to_string()),
-    };
-
-    let meta: Meta = match serde_yaml::from_str(&meta_raw) {
-        Ok(m) => m,
-        Err(_) => return Err("meta.yaml malformatted.".to_string()),
-    };
+    let meta = load_meta(&meta_path)?;
 
     // Create per-issue tmp directory
     let tmp_issue_dir = format!(".gitissues/.tmp/show-{id}");

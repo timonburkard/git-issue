@@ -45,6 +45,20 @@ pub fn load_config() -> Result<Config, String> {
     Ok(config)
 }
 
+pub fn load_meta(path: &Path) -> Result<Meta, String> {
+    let meta_raw = match fs::read_to_string(path) {
+        Ok(s) => s,
+        Err(_) => return Err(format!("meta.yaml not found: {}", path.display())),
+    };
+
+    let meta: Meta = match serde_yaml::from_str(&meta_raw) {
+        Ok(m) => m,
+        Err(_) => return Err(format!("meta.yaml malformatted: {}", path.display())),
+    };
+
+    Ok(meta)
+}
+
 /// git commit based on template from config
 pub fn git_commit(id: u32, title: String, action: &str) -> Result<(), String> {
     use std::process::Command;
