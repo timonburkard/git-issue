@@ -89,6 +89,14 @@ fn generate_content_metadata(id: u32, meta: &Meta) -> String {
         }
     ));
     content.push_str(&format!("| **priority** | {:?} |\n", meta.priority));
+    content.push_str(&format!(
+        "| **due_date** | {} |\n",
+        if meta.due_date.is_empty() {
+            "-".to_string()
+        } else {
+            meta.due_date.clone()
+        }
+    ));
     content.push_str(&format!("| **created**  | {} |\n", meta.created));
     content.push_str(&format!("| **updated**  | {} |\n", meta.updated));
 

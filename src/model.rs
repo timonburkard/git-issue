@@ -2,7 +2,7 @@ use std::fs;
 use std::path::Path;
 use std::process::Command;
 
-use chrono::Utc;
+use chrono::{NaiveDate, Utc};
 use clap::ValueEnum;
 use serde::{Deserialize, Serialize};
 
@@ -31,6 +31,7 @@ pub struct Meta {
     pub labels: Vec<String>,
     pub assignee: String,
     pub priority: Priority,
+    pub due_date: String,
     pub created: String,
     pub updated: String,
 }
@@ -46,6 +47,11 @@ pub struct Config {
 /// Generate a proper ISO 8601 timestamp using chrono.
 pub fn current_timestamp() -> String {
     Utc::now().format("%Y-%m-%dT%H:%M:%SZ").to_string()
+}
+
+/// Validate if a string is in ISO format: YYYY-MM-DD.
+pub fn is_valid_iso_date(s: &str) -> bool {
+    NaiveDate::parse_from_str(s, "%Y-%m-%d").is_ok()
 }
 
 pub fn load_config() -> Result<Config, String> {

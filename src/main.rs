@@ -71,6 +71,10 @@ enum Commands {
         #[arg(long)]
         priority: Option<Priority>,
 
+        /// Issue meta field: due_date (YYYY-MM-DD)
+        #[arg(long)]
+        due_date: Option<String>,
+
         /// Issue meta field: labels
         #[arg(long, value_delimiter = ',', conflicts_with_all = ["labels_add", "labels_remove"])]
         labels: Option<Vec<String>>,
@@ -130,6 +134,7 @@ fn main() {
             type_,
             assignee,
             priority,
+            due_date,
             labels,
             labels_add,
             labels_remove,
@@ -141,6 +146,7 @@ fn main() {
                 type_,
                 assignee,
                 priority,
+                due_date,
                 labels,
                 labels_add,
                 labels_remove,

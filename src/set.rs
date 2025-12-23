@@ -1,7 +1,8 @@
 use std::fs;
 
 use crate::model::{
-    Priority, current_timestamp, git_commit, issue_dir, issue_meta_path, load_meta,
+    Priority, current_timestamp, git_commit, is_valid_iso_date, issue_dir, issue_meta_path,
+    load_meta,
 };
 
 #[allow(clippy::too_many_arguments)]
@@ -12,6 +13,7 @@ pub fn run(
     type_: Option<String>,
     assignee: Option<String>,
     priority: Option<Priority>,
+    due_date: Option<String>,
     labels: Option<Vec<String>>,
     labels_add: Option<Vec<String>>,
     labels_remove: Option<Vec<String>>,
@@ -66,6 +68,17 @@ pub fn run(
     {
         updated_meta.priority = value;
         fields.push("priority");
+    }
+
+    if let Some(value) = due_date
+        && updated_meta.due_date != value
+    {
+        if !is_valid_iso_date(&value) {
+            return Err("Invalid due_date format: Use YYYY-MM-DD".to_string());
+        }
+
+        updated_meta.due_date = value;
+        fields.push("due_date");
     }
 
     if let Some(value) = labels
