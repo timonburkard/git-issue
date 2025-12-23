@@ -40,6 +40,7 @@ pub fn run(title: String) -> Result<(), String> {
         labels: vec![],
         assignee: "".to_string(),
         priority: Priority::P2,
+        due_date: "".to_string(),
         created: timestamp.clone(),
         updated: timestamp,
     };

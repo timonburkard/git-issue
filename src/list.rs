@@ -60,8 +60,8 @@ pub fn run(columns: Option<Vec<String>>) -> Result<(), String> {
 fn validate_column_names(columns: &Vec<String>, context: &str) -> Result<(), String> {
     for col in columns {
         if ![
-            "id", "title", "state", "type", "labels", "assignee", "priority", "created", "updated",
-            "*",
+            "id", "title", "state", "type", "labels", "assignee", "priority", "due_date",
+            "created", "updated", "*",
         ]
         .contains(&col.as_str())
         {
@@ -150,9 +150,10 @@ fn wildcard_expansion(columns: &mut Vec<String>) {
             "state".to_string(),
             "assignee".to_string(),
             "type".to_string(),
-            "labels".to_string(),
             "title".to_string(),
             "priority".to_string(),
+            "labels".to_string(),
+            "due_date".to_string(),
             "created".to_string(),
             "updated".to_string(),
         ];
@@ -186,6 +187,13 @@ fn get_column_value(col: &str, meta: &Meta) -> String {
             }
         }
         "priority" => format!("{:?}", meta.priority),
+        "due_date" => {
+            if meta.due_date.is_empty() {
+                "-".to_string()
+            } else {
+                meta.due_date.clone()
+            }
+        }
         "created" => meta.created.clone(),
         "updated" => meta.updated.clone(),
         _ => "-".to_string(),
