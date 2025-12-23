@@ -36,7 +36,7 @@ pub fn run(title: String) -> Result<(), String> {
     fs::write(&meta_yaml_path, meta_yaml).map_err(|e| format!("Failed to write meta.yaml: {e}"))?;
 
     // Step 5: git commit
-    git_commit(issue_id, title, "new");
+    git_commit(issue_id, title, "new")?;
 
     println!("Created issue #{issue_id}");
 

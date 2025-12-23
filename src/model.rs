@@ -46,25 +46,14 @@ pub fn load_config() -> Result<Config, String> {
 }
 
 /// git commit based on template from config
-pub fn git_commit(id: u32, title: String, action: &str) {
+pub fn git_commit(id: u32, title: String, action: &str) -> Result<(), String> {
     use std::process::Command;
-    let path = Path::new(".gitissues/");
 
-    // Load configuration
-    let config_path = path.join("config.yaml");
-    let config_raw = match fs::read_to_string(&config_path) {
-        Ok(s) => s,
-        Err(_) => return,
-    };
-
-    let config: Config = match serde_yaml::from_str(&config_raw) {
-        Ok(m) => m,
-        Err(_) => return,
-    };
+    let config = load_config()?;
 
     // Check if auto-commit is enabled
     if !config.commit_auto {
-        return;
+        return Ok(());
     }
 
     // Prepare commit message
@@ -78,8 +67,7 @@ pub fn git_commit(id: u32, title: String, action: &str) {
     // Execute git add
     let add_result = Command::new("git").args(["add", ".gitissues"]).output();
     if let Err(e) = add_result {
-        eprintln!("Warning: failed to stage .gitissues: {e}");
-        return;
+        return Err(format!("Failed to stage .gitissues: {e}"));
     }
 
     // Execute git commit
@@ -87,12 +75,14 @@ pub fn git_commit(id: u32, title: String, action: &str) {
         .args(["commit", "-m", &commit_message])
         .output();
     if let Err(e) = commit_result {
-        eprintln!("Warning: failed to commit: {e}");
+        return Err(format!("Failed to commit: {e}"));
     }
+
+    Ok(())
 }
 
 /// Simple commit message not based on template or config
-pub fn git_commit_non_templated(msg: &str) {
+pub fn git_commit_non_templated(msg: &str) -> Result<(), String> {
     use std::process::Command;
 
     // Prepare commit message
@@ -101,8 +91,7 @@ pub fn git_commit_non_templated(msg: &str) {
     // Execute git add
     let add_result = Command::new("git").args(["add", ".gitissues"]).output();
     if let Err(e) = add_result {
-        eprintln!("Warning: failed to stage .gitissues: {e}");
-        return;
+        return Err(format!("Failed to stage .gitissues: {e}"));
     }
 
     // Execute git commit
@@ -110,8 +99,10 @@ pub fn git_commit_non_templated(msg: &str) {
         .args(["commit", "-m", &commit_message])
         .output();
     if let Err(e) = commit_result {
-        eprintln!("Warning: failed to commit: {e}");
+        return Err(format!("Failed to commit: {e}"));
     }
+
+    Ok(())
 }
 
 pub fn open_editor(mut editor: String, path: String) -> Result<(), String> {

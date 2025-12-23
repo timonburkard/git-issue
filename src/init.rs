@@ -36,7 +36,7 @@ pub fn run(no_commit: bool) -> Result<(), String> {
     })?;
 
     if !no_commit {
-        git_commit_non_templated("init");
+        git_commit_non_templated("init")?;
     }
 
     println!("Initialization done");

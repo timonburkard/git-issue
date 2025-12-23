@@ -30,7 +30,7 @@ pub fn run(id: u32) -> Result<(), String> {
         Err(_) => return Err("meta.yaml malformatted.".to_string()),
     };
 
-    git_commit(id, meta.title, "edit description");
+    git_commit(id, meta.title, "edit description")?;
 
     Ok(())
 }

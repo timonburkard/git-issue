@@ -15,6 +15,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+    - [git] commit does not silently fail anymore
     - [cmd/init] create a commit message by default, can be disabled by option `--no-commit` (GitHub Issue #23)
     - [cmd/set] renamed option `--labels` to `--labels-add`, which added specific labels (GitHub Issue #26)
 
