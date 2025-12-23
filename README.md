@@ -178,18 +178,18 @@ Issues live in `.gitissues/issues/{ID}/`:
 ### meta.yaml Format
 
 ```yaml
-id: 1234                      # (Integer) Identifier
-title: Login screen is broken # (String) Title
-state: new                    # (String) E.g.: new, active, resolved, junked
-type: bug                     # (String) E.g.: feature, bug, task
-labels:                       # (List of Strings) Labels / tags
+id: 1234                       # (Integer) Identifier
+title: Login screen is broken  # (String) Title
+state: new                     # (String) E.g.: new, active, resolved, junked
+type: bug                      # (String) E.g.: feature, bug, task
+labels:                        # (List of Strings) Labels / tags
   - software
   - ui
-assignee: t.burkard           # (String) To whom the issue is assigned
-priority: P2                  # (Enum) Priority: P0 = highest, P2 = default, P4 = lowest
-due_date: 2026-01-31          # (Date) Due date in ISO format: YYYY-MM-DD
-created: 2025-11-13T15:54:52Z # (Timestamp) Issue was created at
-updated: 2025-12-22T20:36:11Z # (Timestamp) Issue was last updated at
+assignee: t.burkard            # (String) To whom the issue is assigned
+priority: P2                   # (Enum) Priority: P0 = highest, P2 = default, P4 = lowest
+due_date: 2026-01-31           # (Date) Due date in ISO format: YYYY-MM-DD
+created: 2025-11-13T15:54:52Z  # (Timestamp) Issue was created at
+updated: 2025-12-22T20:36:11Z  # (Timestamp) Issue was last updated at
 ```
 
 ## Architecture
