@@ -160,6 +160,7 @@ Issues live in `.gitissues/issues/{ID}/`:
 
 ```
 .gitissues/
+├── .tmp/           # Temporary files: Put in `.gitignore`
 ├── config.yaml     # Configuration
 ├── description.md  # Description template
 └── issues/
@@ -180,11 +181,11 @@ Issues live in `.gitissues/issues/{ID}/`:
 id: 1234                      # (Integer) Identifier
 title: Login screen is broken # (String) Title
 state: new                    # (String) E.g.: new, active, resolved, junked
-type: 'bug'                   # (String) E.g.: feature, bug, task
+type: bug                     # (String) E.g.: feature, bug, task
 labels:                       # (List of Strings) Labels / tags
   - software
   - ui
-assignee: 't.burkard'         # (String) To whom the issue is assigned
+assignee: t.burkard           # (String) To whom the issue is assigned
 priority: P2                  # (Enum) Priority: P0 = highest, P2 = default, P4 = lowest
 due_date: 2026-01-31          # (Date) Due date in ISO format: YYYY-MM-DD
 created: 2025-11-13T15:54:52Z # (Timestamp) Issue was created at
