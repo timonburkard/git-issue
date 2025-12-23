@@ -1,5 +1,7 @@
 use clap::{Parser, Subcommand};
 
+use crate::model::Priority;
+
 mod edit;
 mod init;
 mod list;
@@ -65,6 +67,10 @@ enum Commands {
         #[arg(long)]
         assignee: Option<String>,
 
+        /// Issue meta field: priority
+        #[arg(long)]
+        priority: Option<Priority>,
+
         /// Issue meta field: labels
         #[arg(long, value_delimiter = ',', conflicts_with_all = ["labels_add", "labels_remove"])]
         labels: Option<Vec<String>>,
@@ -123,6 +129,7 @@ fn main() {
             title,
             type_,
             assignee,
+            priority,
             labels,
             labels_add,
             labels_remove,
@@ -133,6 +140,7 @@ fn main() {
                 title,
                 type_,
                 assignee,
+                priority,
                 labels,
                 labels_add,
                 labels_remove,
