@@ -120,6 +120,8 @@ This template can be edited by the user.
 
 ## Installation
 
+Different installation approaches are explained here.
+
 ### GitHub Release
 
 Download the latest release from GitHub and put the binary on your PATH.
@@ -143,13 +145,15 @@ Download the latest release from GitHub and put the binary on your PATH.
 
 ### Cargo
 
+Installation with cargo works as follows:
+
 ```
 cargo install --git https://github.com/timonburkard/git-issue
 ```
 
 ### Crates
 
-🚧 TODO
+Package is available on https://crates.io/crates/git-issue, so it can be installed as follows:
 
 ```
 cargo install git-issue
