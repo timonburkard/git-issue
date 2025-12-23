@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+    - [cmd/new] added option to provide initial values for other meta fields (GitHub Issue #43)
     - [meta] added field `due_date` (GitHub Issue #31)
     - [meta] added field `priority` (GitHub Issue #35)
     - [cmd/new] automatically create the `attachments/` directory (GitHub Issue #33)

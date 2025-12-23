@@ -34,7 +34,8 @@ git issue init
 git issue init --no-commit
 
 # Create a new issue
-git issue new "Fix login redirect bug"
+git issue new "Login redirection problem"
+git issue new "Login redirection problem" --type bug --labels software,ui --assignee t.burkard --priority P1 --due-date 2026-02-15
 
 # List issues
 git issue list
@@ -96,7 +97,7 @@ This config can be edited by the user.
 - `commit_message` (string): Template for git commit messages. Supports placeholders:
   - `{id}`: Issue ID
   - `{title}`: Issue title
-  - `{action}`: Command that triggered the commit (`new`, `edit`, `set X`)
+  - `{action}`: Command that triggered the commit (`new`, `edit description`, `set <field>`)
 - `editor` (string): External text editor (set `git` to use configured git core.editor)
 - `list_columns` (string list): Default columns shown in `list` command
 
@@ -203,7 +204,7 @@ updated: 2025-12-22T20:36:11Z  # (Timestamp) Issue was last updated at
   - `edit.rs`  -- Edit issue description (markdown) with external text editor
   - `init.rs`  -- Initialize `.gitissues/` directory and copy default config
   - `list.rs`  -- List all issues
-  - `new.rs`   -- Create new issues with ID allocation
+  - `new.rs`   -- Create new issues
   - `set.rs`   -- Change issue meta fields
   - `show.rs`  -- Show details of an issue
 

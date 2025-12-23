@@ -32,6 +32,26 @@ enum Commands {
     New {
         /// Issue title
         title: String,
+
+        /// Issue meta field: type
+        #[arg(long)]
+        type_: Option<String>,
+
+        /// Issue meta field: assignee
+        #[arg(long)]
+        assignee: Option<String>,
+
+        /// Issue meta field: priority
+        #[arg(long)]
+        priority: Option<Priority>,
+
+        /// Issue meta field: due_date (YYYY-MM-DD)
+        #[arg(long)]
+        due_date: Option<String>,
+
+        /// Issue meta field: labels
+        #[arg(long, value_delimiter = ',')]
+        labels: Option<Vec<String>>,
     },
 
     /// List all issues
@@ -106,8 +126,15 @@ fn main() {
             }
         }
 
-        Commands::New { title } => {
-            if let Err(e) = new::run(title) {
+        Commands::New {
+            title,
+            type_,
+            assignee,
+            priority,
+            due_date,
+            labels,
+        } => {
+            if let Err(e) = new::run(title, type_, assignee, priority, due_date, labels) {
                 eprintln!("Error: {e}");
                 std::process::exit(1);
             }
