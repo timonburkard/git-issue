@@ -165,18 +165,19 @@ Issues live in `.gitissues/issues/{ID}/`:
     └── 0000000001/
         ├── meta.yaml       # Structured metadata
         ├── description.md  # Markdown description
-        └── attachments/    # (Optional) attachments of markdown description
+        └── attachments/    # Attachments of markdown description
     ├── 0000000002/
         ├── meta.yaml       # Structured metadata
-        └── description.md  # Markdown description
+        ├── description.md  # Markdown description
+        └── attachments/    # Attachments of markdown description
     └── ...
 ```
 
 - `meta.yaml`      -- metadata: id, title, state, timestamps
 - `description.md` -- template for the human-readable markdown description
 - `XXXXXXXXXX/`    -- Directory names are the 10-digit zero-padded IDs (0000000001, 0000000002, ...)
-- `attachments/`   -- Optional subdirectory for markdown descriptions
-  - If attachments in markdown are used, the directory should be named exactly like this for the `show` command to work correctly
+- `attachments/`   -- Subdirectory for markdown descriptions
+  - If attachments in markdown description are used, they must be placed in the automatically created `attachments/` directory, for the `show` command to work correctly
 
 ### meta.yaml Format
 
