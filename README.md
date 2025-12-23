@@ -6,7 +6,7 @@ Issues live alongside your code inside `.gitissues/`, making them platform-indep
 
 ## Features
 
-- ✅ `git issue init`                       -- Initialize `.gitissues/` in your repository
+- ✅ `git issue init [--no-commit]`         -- Initialize `.gitissues/` in your repository
 - ✅ `git issue new <"title">`              -- Create a new issue with auto-incremented ID
 - ✅ `git issue list [--columns <columns>]` -- List all issues
 - ✅ `git issue show <id>`                  -- Display all issue information as markdown in external editor
@@ -23,6 +23,7 @@ git issue -h
 
 # Initialize tracking in your repo
 git issue init
+git issue init --no-commit
 
 # Create a new issue
 git issue new "Fix login redirect bug"

@@ -19,7 +19,11 @@ struct Args {
 #[derive(Subcommand)]
 enum Commands {
     /// Initialize .gitissues in the current repository
-    Init,
+    Init {
+        /// Don't create an initial git commit
+        #[arg(long, default_value_t = false)]
+        no_commit: bool,
+    },
 
     /// Create a new issue
     New {
@@ -84,8 +88,8 @@ fn main() {
     let args = Args::parse();
 
     match args.command {
-        Commands::Init => {
-            if let Err(e) = init::run() {
+        Commands::Init { no_commit } => {
+            if let Err(e) = init::run(no_commit) {
                 eprintln!("Error: {e}");
                 std::process::exit(1);
             }
