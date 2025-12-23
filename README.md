@@ -6,14 +6,16 @@ Issues live alongside your code inside `.gitissues/`, making them platform-indep
 
 ## Features
 
-- ✅ `git issue init [--no-commit]`         -- Initialize `.gitissues/` in your repository
-- ✅ `git issue new <"title">`              -- Create a new issue with auto-incremented ID
-- ✅ `git issue list [--columns <columns>]` -- List all issues
-- ✅ `git issue show <id>`                  -- Display all issue information as markdown in external editor
-- ✅ `git issue set <id> [--state <new_state> --type <new_type> --title <new_title> --assignee <new_assignee> --labels[-add|-remove] <labels>]` -- Change issue meta fields
-- ✅ `git issue edit <id>`                  -- Edit issue description in external editor
-- ✅ Git integration                        -- Auto-commit `.gitissues/` changes (configurable)
-- 🚧 Testing                                -- CI/CD automated tests
+- ✅ Git-native, file-backed issues under `.gitissues/` with per-issue `meta.yaml`, `description.md` and `attachments/`
+- ✅ Core commands: `init`, `new`, `list`, `show`, `set`, `edit`
+- ✅ Configurable: default columns for `list`, commit message template, external editor
+- ✅ External editor renders issue information as markdown
+- ✅ Git-integration: auto-commit of changes
+- 🚧 Filtering/sorting of `list` view
+- 🚧 Add `search` command across all issue titles and descriptions
+- 🚧 Relationships between issues
+- 🚧 Comments / discussions
+- 🚧 Automated tests
 
 ## Usage
 
