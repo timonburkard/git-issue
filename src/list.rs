@@ -1,7 +1,7 @@
 use std::fs;
 use std::path::Path;
 
-use crate::model::{Meta, load_meta};
+use crate::model::{Meta, load_config, load_meta};
 
 pub fn run(columns: Option<Vec<String>>) -> Result<(), String> {
     let issues_base = ".gitissues/issues";
@@ -47,7 +47,7 @@ pub fn run(columns: Option<Vec<String>>) -> Result<(), String> {
     issues.sort_by_key(|m| m.id);
 
     if columns.is_none() {
-        print_default_list(&issues);
+        print_default_list(&issues)?;
 
         return Ok(());
     }
@@ -57,9 +57,10 @@ pub fn run(columns: Option<Vec<String>>) -> Result<(), String> {
     Ok(())
 }
 
-fn print_default_list(issues: &Vec<Meta>) {
-    // Use dynamic widths like the custom printer
-    let columns = vec!["id".to_string(), "state".to_string(), "title".to_string()];
+fn print_default_list(issues: &Vec<Meta>) -> Result<(), String> {
+    let config = load_config()?;
+
+    let columns = config.list_columns;
     let column_widths = calculate_column_widths(issues, &columns);
 
     // Header
@@ -84,6 +85,8 @@ fn print_default_list(issues: &Vec<Meta>) {
         }
         println!();
     }
+
+    Ok(())
 }
 
 fn print_custom_list(issues: &Vec<Meta>, mut columns: Vec<String>) -> Result<(), String> {

@@ -23,6 +23,7 @@ pub struct Config {
     pub commit_auto: bool,
     pub commit_message: String,
     pub editor: String,
+    pub list_columns: Vec<String>,
 }
 
 /// Generate a proper ISO 8601 timestamp using chrono.
