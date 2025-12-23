@@ -37,7 +37,7 @@ git issue list
 git issue list --columns id,assignee,title
 git issue list --columns "*"
 
-# Show issue details -- launches external text editor
+# Show all issue information (markdown) -- launches external text editor
 git issue show 1234
 
 # Change issue meta fields
@@ -49,7 +49,7 @@ git issue set 1234 --state resolved --type bug --title "LCD driver has a problem
 
 # Change issue meta fields: labels
 git issue set 1234 --labels        cli,driver  # set labels (overwrite)
-git issue set 1234 --labels-add    cli-driver  # add labels
+git issue set 1234 --labels-add    cli,driver  # add labels
 git issue set 1234 --labels-remove cli,driver  # remove labels
 
 # Edit issue description (markdown) -- launches external text editor
@@ -77,6 +77,14 @@ commit_message: "[issue] {action} #{id} - {title}"
 # Editor for editing issue descriptions
 # git = use the git-configured editor
 editor: git
+
+# Default columns to display in `issue list`
+# ["*"] can be used to include all available columns
+list_columns:
+  - id
+  - state
+  - assignee
+  - title
 ```
 
 This config can be edited by the user.
@@ -87,8 +95,9 @@ This config can be edited by the user.
 - `commit_message` (string): Template for git commit messages. Supports placeholders:
   - `{id}`: Issue ID
   - `{title}`: Issue title
-  - `{action}`: Command that triggered the commit (`new`, `edit`, `set X`, `remove X`)
+  - `{action}`: Command that triggered the commit (`new`, `edit`, `set X`)
 - `editor` (string): External text editor (set `git` to use configured git core.editor)
+- `list_columns` (string list): Default columns shown in `list` command
 
 ### Description Template
 

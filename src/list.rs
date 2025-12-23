@@ -1,7 +1,7 @@
 use std::fs;
 use std::path::Path;
 
-use crate::model::{Meta, load_meta};
+use crate::model::{Meta, load_config, load_meta};
 
 pub fn run(columns: Option<Vec<String>>) -> Result<(), String> {
     let issues_base = ".gitissues/issues";
@@ -47,7 +47,7 @@ pub fn run(columns: Option<Vec<String>>) -> Result<(), String> {
     issues.sort_by_key(|m| m.id);
 
     if columns.is_none() {
-        print_default_list(&issues);
+        print_default_list(&issues)?;
 
         return Ok(());
     }
@@ -57,9 +57,29 @@ pub fn run(columns: Option<Vec<String>>) -> Result<(), String> {
     Ok(())
 }
 
-fn print_default_list(issues: &Vec<Meta>) {
-    // Use dynamic widths like the custom printer
-    let columns = vec!["id".to_string(), "state".to_string(), "title".to_string()];
+fn validate_column_names(columns: &Vec<String>, context: &str) -> Result<(), String> {
+    for col in columns {
+        if ![
+            "id", "title", "state", "type", "labels", "assignee", "created", "updated", "*",
+        ]
+        .contains(&col.as_str())
+        {
+            return Err(format!("Invalid column name in {}: {}", context, col));
+        }
+    }
+
+    Ok(())
+}
+
+fn print_default_list(issues: &Vec<Meta>) -> Result<(), String> {
+    let config = load_config()?;
+
+    let mut columns = config.list_columns;
+
+    validate_column_names(&columns, "config.yaml:list_columns")?;
+
+    wildcard_expansion(&mut columns);
+
     let column_widths = calculate_column_widths(issues, &columns);
 
     // Header
@@ -83,6 +103,57 @@ fn print_default_list(issues: &Vec<Meta>) {
             );
         }
         println!();
+    }
+
+    Ok(())
+}
+
+fn print_custom_list(issues: &Vec<Meta>, mut columns: Vec<String>) -> Result<(), String> {
+    validate_column_names(&columns, "--columns")?;
+
+    wildcard_expansion(&mut columns);
+
+    let column_widths = calculate_column_widths(issues, &columns);
+
+    // Print header
+    for col in &columns {
+        print!(
+            "{:<width$}",
+            col,
+            width = column_widths.get(col).copied().unwrap_or(22)
+        );
+    }
+
+    println!();
+
+    // Print rows
+    for meta in issues {
+        for col in &columns {
+            let value = get_column_value(col, meta);
+            print!(
+                "{:<width$}",
+                value,
+                width = column_widths.get(col).copied().unwrap_or(22)
+            );
+        }
+        println!();
+    }
+
+    Ok(())
+}
+
+fn wildcard_expansion(columns: &mut Vec<String>) {
+    if columns.contains(&"*".to_string()) {
+        *columns = vec![
+            "id".to_string(),
+            "state".to_string(),
+            "assignee".to_string(),
+            "type".to_string(),
+            "labels".to_string(),
+            "title".to_string(),
+            "created".to_string(),
+            "updated".to_string(),
+        ];
     }
 }
 
@@ -145,59 +216,4 @@ fn calculate_column_widths(
     }
 
     widths
-}
-
-fn print_custom_list(issues: &Vec<Meta>, mut columns: Vec<String>) -> Result<(), String> {
-    // Validate column names
-    for col in &columns {
-        if !&[
-            "id", "title", "state", "type", "labels", "assignee", "created", "updated", "*",
-        ]
-        .contains(&col.as_str())
-        {
-            return Err(format!("Invalid column name: {}", col));
-        }
-    }
-
-    // Wildcard
-    if columns.contains(&"*".to_string()) {
-        columns = vec![
-            "id".to_string(),
-            "state".to_string(),
-            "assignee".to_string(),
-            "type".to_string(),
-            "labels".to_string(),
-            "title".to_string(),
-            "created".to_string(),
-            "updated".to_string(),
-        ];
-    }
-
-    let column_widths = calculate_column_widths(issues, &columns);
-
-    // Print header
-    for col in &columns {
-        print!(
-            "{:<width$}",
-            col,
-            width = column_widths.get(col).copied().unwrap_or(22)
-        );
-    }
-
-    println!();
-
-    // Print rows
-    for meta in issues {
-        for col in &columns {
-            let value = get_column_value(col, meta);
-            print!(
-                "{:<width$}",
-                value,
-                width = column_widths.get(col).copied().unwrap_or(22)
-            );
-        }
-        println!();
-    }
-
-    Ok(())
 }
