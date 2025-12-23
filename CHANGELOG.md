@@ -5,7 +5,7 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [unreleased]
+## [v0.3.0] - 2025-12-23
 
 ### Added
 
@@ -20,7 +20,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-    - [list] included 'assignee' in default columns
+    - [cmd/list] included 'assignee' in default columns
     - [git] commit does not silently fail anymore
     - [cmd/init] create a commit message by default, can be disabled by option `--no-commit` (GitHub Issue #23)
     - [cmd/set] renamed option `--labels` to `--labels-add`, which added specific labels (GitHub Issue #26)
