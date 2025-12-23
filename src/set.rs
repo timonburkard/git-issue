@@ -71,7 +71,12 @@ pub fn run(
     if let Some(value) = labels
         && updated_meta.labels != value
     {
-        updated_meta.labels = value;
+        if value == vec![""] {
+            updated_meta.labels = Vec::new();
+        } else {
+            updated_meta.labels = value;
+        }
+
         fields.push("labels");
     }
 
