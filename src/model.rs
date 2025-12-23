@@ -59,6 +59,12 @@ pub fn load_meta(path: &Path) -> Result<Meta, String> {
     Ok(meta)
 }
 
+pub fn load_description(path: &Path) -> Result<String, String> {
+    let raw = fs::read_to_string(path)
+        .map_err(|_| format!("description.md not found: {}", path.display()))?;
+    Ok(raw)
+}
+
 fn padded_id(id: u32) -> String {
     format!("{id:010}")
 }

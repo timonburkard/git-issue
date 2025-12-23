@@ -5,7 +5,7 @@ use regex::Regex;
 
 use crate::model::{
     Meta, issue_attachments_dir, issue_dir, issue_meta_path, issue_tmp_show_dir, load_config,
-    load_meta, open_editor,
+    load_description, load_meta, open_editor,
 };
 
 pub fn run(id: u32) -> Result<(), String> {
@@ -97,10 +97,7 @@ fn generate_content_metadata(id: u32, meta: &Meta) -> String {
 fn add_content_description(path: &Path, content: &mut String) -> Result<(), String> {
     // Load description.md
     let desc_path = path.join("description.md");
-    let desc_raw = match fs::read_to_string(&desc_path) {
-        Ok(s) => s,
-        Err(_) => return Err("description.md not found.".to_string()),
-    };
+    let desc_raw = load_description(&desc_path)?;
 
     let re = Regex::new(r"(?m)^#").unwrap(); // (?m) enables multi-line mode
 
