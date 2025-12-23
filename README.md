@@ -120,6 +120,8 @@ This template can be edited by the user.
 
 ## Installation
 
+### GitHub Release
+
 Download the latest release from GitHub and put the binary on your PATH.
 
 1) Go to the Releases page and download the binary for your platform:
@@ -138,6 +140,20 @@ Download the latest release from GitHub and put the binary on your PATH.
    ```bash
    git issue -h
    ```
+
+### Cargo
+
+```
+cargo install --git https://github.com/timonburkard/git-issue
+```
+
+### Crates
+
+🚧 TODO
+
+```
+cargo install git-issue
+```
 
 ## Building & Development
 
