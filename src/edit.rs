@@ -1,7 +1,7 @@
 use std::fs;
 use std::path::Path;
 
-use crate::model::{Config, Meta, git_commit, open_editor};
+use crate::model::{Meta, git_commit, load_config, open_editor};
 
 pub fn run(id: u32) -> Result<(), String> {
     let id_str = format!("{id:010}");
@@ -13,17 +13,7 @@ pub fn run(id: u32) -> Result<(), String> {
         return Err("Not available: ID/description.md does not exist.".to_string());
     }
 
-    // Load configuration
-    let config_path = Path::new(".gitissues/config.yaml");
-    let config_raw = match fs::read_to_string(config_path) {
-        Ok(s) => s,
-        Err(_) => return Err("config.yaml not found.".to_string()),
-    };
-
-    let config: Config = match serde_yaml::from_str(&config_raw) {
-        Ok(m) => m,
-        Err(_) => return Err("config.yaml malformatted.".to_string()),
-    };
+    let config = load_config()?;
 
     open_editor(config.editor, desc_path)?;
 

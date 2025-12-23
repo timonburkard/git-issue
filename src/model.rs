@@ -30,6 +30,21 @@ pub fn current_timestamp() -> String {
     Utc::now().format("%Y-%m-%dT%H:%M:%SZ").to_string()
 }
 
+pub fn load_config() -> Result<Config, String> {
+    let config_path = Path::new(".gitissues/config.yaml");
+    let config_raw = match fs::read_to_string(config_path) {
+        Ok(s) => s,
+        Err(_) => return Err("config.yaml not found.".to_string()),
+    };
+
+    let config: Config = match serde_yaml::from_str(&config_raw) {
+        Ok(m) => m,
+        Err(_) => return Err("config.yaml malformatted.".to_string()),
+    };
+
+    Ok(config)
+}
+
 /// git commit based on template from config
 pub fn git_commit(id: u32, title: String, action: &str) {
     use std::process::Command;
