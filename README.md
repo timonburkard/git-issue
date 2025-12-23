@@ -10,8 +10,7 @@ Issues live alongside your code inside `.gitissues/`, making them platform-indep
 - ✅ `git issue new <"title">`              -- Create a new issue with auto-incremented ID
 - ✅ `git issue list [--columns <columns>]` -- List all issues
 - ✅ `git issue show <id>`                  -- Display all issue information as markdown in external editor
-- ✅ `git issue set <id> [--state <new_state> --type <new_type> --title <new_title> --assignee <new_assignee> --labels <add_labels>]` -- Change issue meta fields
-- ✅ `git issue remove <id> [--labels <remove_labels>]` -- Remove elements from issue meta fields (currently only for labels)
+- ✅ `git issue set <id> [--state <new_state> --type <new_type> --title <new_title> --assignee <new_assignee> --labels[-add|-remove] <labels>]` -- Change issue meta fields
 - ✅ `git issue edit <id>`                  -- Edit issue description in external editor
 - ✅ Git integration                        -- Auto-commit `.gitissues/` changes (configurable)
 - 🚧 Testing                                -- CI/CD automated tests
@@ -41,12 +40,12 @@ git issue set 1234 --state resolved
 git issue set 1234 --type bug
 git issue set 1234 --title "LCD driver has a problem"
 git issue set 1234 --assignee "t.burkard"
-git issue set 1234 --labels cli,driver
-git issue set 1234 --state resolved --type bug --title "LCD driver has a problem" --assignee "t.burkard" --labels cli,driver
+git issue set 1234 --state resolved --type bug --title "LCD driver has a problem" --assignee "t.burkard"
 
-# Remove elements from issue meta fields (currently only labels)
-git issue remove 1234 --labels cli
-git issue remove 1234 --labels cli,driver
+# Change issue meta fields: labels
+git issue set 1234 --labels        cli,driver  # set labels (overwrite)
+git issue set 1234 --labels-add    cli-driver  # add labels
+git issue set 1234 --labels-remove cli,driver  # remove labels
 
 # Edit issue description (markdown) -- launches external text editor
 git issue edit 1234
@@ -184,15 +183,14 @@ updated: 2025-12-21T15:54:52Z
   - `config-default.yaml`    -- Default configuration, applied at `git issue init`
   - `description-default.md` -- Default description template, applied at `git issue init`
 - `src/`
-  - `main.rs`   -- CLI parsing with clap
-  - `model.rs`  -- Shared data types, functions and utilities
-  - `edit.rs`   -- Edit issue description (markdown) with external text editor
-  - `init.rs`   -- Initialize `.gitissues/` directory and copy default config
-  - `list.rs`   -- List all issues
-  - `new.rs`    -- Create new issues with ID allocation
-  - `remove.rs` -- Remove elements from issue meta fields (currently only labels)
-  - `set.rs`    -- Change issue meta fields
-  - `show.rs`   -- Show details of an issue
+  - `main.rs`  -- CLI parsing with clap
+  - `model.rs` -- Shared data types, functions and utilities
+  - `edit.rs`  -- Edit issue description (markdown) with external text editor
+  - `init.rs`  -- Initialize `.gitissues/` directory and copy default config
+  - `list.rs`  -- List all issues
+  - `new.rs`   -- Create new issues with ID allocation
+  - `set.rs`   -- Change issue meta fields
+  - `show.rs`  -- Show details of an issue
 
 ## Dependencies
 
