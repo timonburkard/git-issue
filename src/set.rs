@@ -1,6 +1,8 @@
 use std::fs;
 
-use crate::model::{current_timestamp, git_commit, issue_dir, issue_meta_path, load_meta};
+use crate::model::{
+    Priority, current_timestamp, git_commit, issue_dir, issue_meta_path, load_meta,
+};
 
 #[allow(clippy::too_many_arguments)]
 pub fn run(
@@ -9,6 +11,7 @@ pub fn run(
     title: Option<String>,
     type_: Option<String>,
     assignee: Option<String>,
+    priority: Option<Priority>,
     labels: Option<Vec<String>>,
     labels_add: Option<Vec<String>>,
     labels_remove: Option<Vec<String>>,
@@ -56,6 +59,13 @@ pub fn run(
     {
         updated_meta.assignee = value;
         fields.push("assignee");
+    }
+
+    if let Some(value) = priority
+        && updated_meta.priority != value
+    {
+        updated_meta.priority = value;
+        fields.push("priority");
     }
 
     if let Some(value) = labels

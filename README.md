@@ -41,11 +41,8 @@ git issue list --columns "*"
 git issue show 1234
 
 # Change issue meta fields
-git issue set 1234 --state resolved
-git issue set 1234 --type bug
 git issue set 1234 --title "LCD driver has a problem"
-git issue set 1234 --assignee "t.burkard"
-git issue set 1234 --state resolved --type bug --title "LCD driver has a problem" --assignee "t.burkard"
+git issue set 1234 --state resolved --type bug --assignee "t.burkard" --priority P1
 
 # Change issue meta fields: labels
 git issue set 1234 --labels        cli,driver  # set labels (overwrite)
@@ -173,23 +170,20 @@ Issues live in `.gitissues/issues/{ID}/`:
     └── ...
 ```
 
-- `meta.yaml`      -- metadata: id, title, state, timestamps
-- `description.md` -- template for the human-readable markdown description
-- `XXXXXXXXXX/`    -- Directory names are the 10-digit zero-padded IDs (0000000001, 0000000002, ...)
-- `attachments/`   -- Subdirectory for markdown descriptions
-  - If attachments in markdown description are used, they must be placed in the automatically created `attachments/` directory, for the `show` command to work correctly
-
 ### meta.yaml Format
 
 ```yaml
-id: 1234
-title: Fix login bug
-state: new
-type: ''
-labels: []
-assignee: ''
-created: 2025-12-21T15:54:52Z
-updated: 2025-12-21T15:54:52Z
+id: 1234                      # (Integer) Identifier
+title: Login screen is broken # (String) Title
+state: new                    # (String) E.g.: new, active, resolved, junked
+type: 'bug'                   # (String) E.g.: feature, bug, task
+labels:                       # (List of Strings) Labels / tags
+  - software
+  - ui
+assignee: 't.burkard'         # (String) To whom the issue is assigned
+priority: P2                  # (Enum) Priority: P0 = highest, P2 = default, P4 = lowest
+created: 2025-11-13T15:54:52Z # (Timestamp) Issue was created at
+updated: 2025-12-22T20:36:11Z # (Timestamp) Issue was last updated at
 ```
 
 ## Architecture

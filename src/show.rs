@@ -88,6 +88,7 @@ fn generate_content_metadata(id: u32, meta: &Meta) -> String {
             meta.assignee.clone()
         }
     ));
+    content.push_str(&format!("| **priority** | {:?} |\n", meta.priority));
     content.push_str(&format!("| **created**  | {} |\n", meta.created));
     content.push_str(&format!("| **updated**  | {} |\n", meta.updated));
 

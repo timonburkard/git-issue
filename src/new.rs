@@ -2,8 +2,8 @@ use std::fs;
 use std::path::Path;
 
 use crate::model::{
-    Meta, current_timestamp, git_commit, issue_attachments_dir, issue_desc_path, issue_dir,
-    issue_meta_path,
+    Meta, Priority, current_timestamp, git_commit, issue_attachments_dir, issue_desc_path,
+    issue_dir, issue_meta_path,
 };
 
 pub fn run(title: String) -> Result<(), String> {
@@ -39,6 +39,7 @@ pub fn run(title: String) -> Result<(), String> {
         type_: "".to_string(),
         labels: vec![],
         assignee: "".to_string(),
+        priority: Priority::P2,
         created: timestamp.clone(),
         updated: timestamp,
     };
