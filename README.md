@@ -6,8 +6,10 @@ Issues live alongside your code inside `.gitissues/`, making them platform-indep
 
 ## Features
 
-- ✅ Git-native, file-backed issues under `.gitissues/` with per-issue `meta.yaml`, `description.md` and `attachments/`
+- ✅ Git-native, file-backed issues under `.gitissues/`
 - ✅ Core commands: `init`, `new`, `list`, `show`, `set`, `edit`
+- ✅ Each issue has a markdown description incl. attachments
+- ✅ Each issue has metadata: `id`, `title`, `state`, `type`, `labels`, `assignee`, `priority`, `due_date`, `created`, `updated`
 - ✅ Configurable: default columns for `list`, commit message template, external editor
 - ✅ External editor renders issue information as markdown
 - ✅ Git-integration: auto-commit of changes
@@ -44,7 +46,7 @@ git issue show 1234
 
 # Change issue meta fields
 git issue set 1234 --title "LCD driver has a problem"
-git issue set 1234 --state resolved --type bug --assignee "t.burkard" --priority P1
+git issue set 1234 --state resolved --type bug --assignee "t.burkard" --priority P1 --due-date 2026-01-31
 
 # Change issue meta fields: labels
 git issue set 1234 --labels        cli,driver  # set labels (overwrite)
@@ -184,6 +186,7 @@ labels:                       # (List of Strings) Labels / tags
   - ui
 assignee: 't.burkard'         # (String) To whom the issue is assigned
 priority: P2                  # (Enum) Priority: P0 = highest, P2 = default, P4 = lowest
+due_date: 2026-01-31          # (Date) Due date in ISO format: YYYY-MM-DD
 created: 2025-11-13T15:54:52Z # (Timestamp) Issue was created at
 updated: 2025-12-22T20:36:11Z # (Timestamp) Issue was last updated at
 ```
