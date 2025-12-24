@@ -42,6 +42,7 @@ pub struct Config {
     pub commit_message: String,
     pub editor: String,
     pub list_columns: Vec<String>,
+    pub states: Vec<String>,
 }
 
 /// Generate a proper ISO 8601 timestamp using chrono.
@@ -52,6 +53,12 @@ pub fn current_timestamp() -> String {
 /// Validate if a string is in ISO format: YYYY-MM-DD.
 pub fn is_valid_iso_date(s: &str) -> bool {
     NaiveDate::parse_from_str(s, "%Y-%m-%d").is_ok()
+}
+
+/// Validate if a state is in the list of valid states from config.
+pub fn is_valid_state(s: &str) -> Result<bool, String> {
+    let config = load_config()?;
+    Ok(config.states.contains(&s.to_string()))
 }
 
 pub fn load_config() -> Result<Config, String> {

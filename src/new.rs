@@ -3,7 +3,7 @@ use std::path::Path;
 
 use crate::model::{
     Meta, Priority, current_timestamp, git_commit, is_valid_iso_date, issue_attachments_dir,
-    issue_desc_path, issue_dir, issue_meta_path,
+    issue_desc_path, issue_dir, issue_meta_path, load_config,
 };
 
 pub fn run(
@@ -17,12 +17,23 @@ pub fn run(
     // Step 1: Allocate the next issue ID
     let issue_id = allocate_id()?;
 
-    // Step 2: Create meta fields and validate
+    // Step 2: Read config
+    let config = load_config()?;
+
+    if config.states.is_empty() {
+        return Err("No states defined in config.yaml.".to_string());
+    }
+
+    // Step 3: Create meta fields and validate
     let timestamp = current_timestamp();
     let meta = Meta {
         id: issue_id,
         title: title.clone(),
-        state: "new".to_string(),
+        state: config
+            .states
+            .first()
+            .cloned()
+            .unwrap_or_else(|| "new".to_string()),
         type_: type_.unwrap_or_default(),
         labels: labels.unwrap_or_default(),
         assignee: assignee.unwrap_or_default(),
@@ -36,33 +47,33 @@ pub fn run(
         return Err("Invalid due_date format: Use YYYY-MM-DD".to_string());
     }
 
-    // Step 3: Create the issue directory
+    // Step 4: Create the issue directory
     let dir = issue_dir(issue_id);
     fs::create_dir_all(&dir).map_err(|e| format!("Failed to create issue directory: {e}"))?;
 
-    // Step 4: Write description.md
+    // Step 5: Write description.md
     let desc_path = issue_desc_path(issue_id);
 
     fs::copy(".gitissues/description.md", &desc_path)
         .map_err(|e| format!("Failed to write description.md: {e}"))?;
 
-    // Step 5: Create attachments directory
+    // Step 6: Create attachments directory
     let attachment_dir = issue_attachments_dir(issue_id);
     fs::create_dir_all(&attachment_dir)
         .map_err(|e| format!("Failed to create issue directory: {e}"))?;
 
-    // Step 5.1: Add .gitkeep
+    // Step 6.1: Add .gitkeep
     fs::write(attachment_dir.join(".gitkeep"), "")
         .map_err(|e| format!("Failed to write .gitkeep: {e}"))?;
 
-    // Step 6: Write meta.yaml
+    // Step 7: Write meta.yaml
     let meta_yaml_path = issue_meta_path(issue_id);
 
     let meta_yaml =
         serde_yaml::to_string(&meta).map_err(|_| "Failed to serialize meta.yaml".to_string())?;
     fs::write(&meta_yaml_path, meta_yaml).map_err(|e| format!("Failed to write meta.yaml: {e}"))?;
 
-    // Step 7: git commit
+    // Step 8: git commit
     git_commit(issue_id, title, "new")?;
 
     println!("Created issue #{issue_id}");

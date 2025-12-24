@@ -1,8 +1,8 @@
 use std::fs;
 
 use crate::model::{
-    Priority, current_timestamp, git_commit, is_valid_iso_date, issue_dir, issue_meta_path,
-    load_meta,
+    Priority, current_timestamp, git_commit, is_valid_iso_date, is_valid_state, issue_dir,
+    issue_meta_path, load_meta,
 };
 
 #[allow(clippy::too_many_arguments)]
@@ -38,6 +38,12 @@ pub fn run(
     if let Some(value) = state
         && updated_meta.state != value
     {
+        match is_valid_state(&value) {
+            Ok(true) => { /* valid, continue */ }
+            Ok(false) => return Err("Invalid state: Check config.yaml:states".to_string()),
+            Err(e) => return Err(format!("Config error: {e}")),
+        }
+
         updated_meta.state = value;
         fields.push("state");
     }

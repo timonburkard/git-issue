@@ -72,7 +72,7 @@ enum Commands {
         /// Issue ID
         id: u32,
 
-        /// Issue meta field: state
+        /// Issue meta field: state [possible values: see config.yaml:states]
         #[arg(long)]
         state: Option<String>,
 
