@@ -24,3 +24,10 @@ states:
   - active
   - closed
   - deleted
+
+# Available issue types
+# Per default the type is empty for new issues
+types:
+  - bug
+  - feature
+  - task

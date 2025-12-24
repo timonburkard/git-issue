@@ -80,7 +80,7 @@ enum Commands {
         #[arg(long)]
         title: Option<String>,
 
-        /// Issue meta field: type
+        /// Issue meta field: type [possible values: see config.yaml:types]
         #[arg(long)]
         type_: Option<String>,
 

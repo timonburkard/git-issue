@@ -43,6 +43,7 @@ pub struct Config {
     pub editor: String,
     pub list_columns: Vec<String>,
     pub states: Vec<String>,
+    pub types: Vec<String>,
 }
 
 /// Generate a proper ISO 8601 timestamp using chrono.
@@ -59,6 +60,12 @@ pub fn is_valid_iso_date(s: &str) -> bool {
 pub fn is_valid_state(s: &str) -> Result<bool, String> {
     let config = load_config()?;
     Ok(config.states.contains(&s.to_string()))
+}
+
+/// Validate if a type is in the list of valid types from config.
+pub fn is_valid_type(s: &str) -> Result<bool, String> {
+    let config = load_config()?;
+    Ok(s.is_empty() || config.types.contains(&s.to_string()))
 }
 
 pub fn load_config() -> Result<Config, String> {
