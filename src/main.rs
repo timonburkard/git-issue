@@ -1,3 +1,4 @@
+#![deny(warnings, clippy::unwrap_used, clippy::expect_used)]
 use clap::{Parser, Subcommand};
 
 use crate::model::Priority;
