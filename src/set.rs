@@ -35,6 +35,13 @@ pub fn run(
 
     let mut fields = Vec::new();
 
+    if let Some(value) = title
+        && updated_meta.title != value
+    {
+        updated_meta.title = value;
+        fields.push("title");
+    }
+
     if let Some(value) = state
         && updated_meta.state != value
     {
@@ -46,13 +53,6 @@ pub fn run(
 
         updated_meta.state = value;
         fields.push("state");
-    }
-
-    if let Some(value) = title
-        && updated_meta.title != value
-    {
-        updated_meta.title = value;
-        fields.push("title");
     }
 
     if let Some(value) = type_
