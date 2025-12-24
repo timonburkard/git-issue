@@ -66,7 +66,11 @@ Dummy example project to see how `git-issue` is used in a repo: https://github.c
 
 ### Config
 
-After running `git issue init`, a default config file is created at `.gitissues/config.yaml`:
+After running `git issue init`, default config file and users are created at `.gitissues/config.yaml` resp. `.gitissues/users.yaml`.
+
+These files can be edited by the user.
+
+#### config.yaml
 
 ```yaml
 # Automatically create a git commit after mutating commands
@@ -74,7 +78,7 @@ commit_auto: true
 
 # Commit message template
 # Available placeholders: {action}, {id}, {title}
-commit_message: "[issue] {action} #{id} - {title}"
+commit_message: "[issue] {action} #{id} -- {title}"
 
 # Editor for editing issue descriptions
 # git = use the git-configured editor
@@ -87,11 +91,24 @@ list_columns:
   - state
   - assignee
   - title
+
+# Available issue states
+# First state in the list is the initial state for new issues
+states:
+  - new
+  - active
+  - closed
+  - deleted
+
+# Available issue types
+# Per default the type is empty for new issues
+types:
+  - bug
+  - feature
+  - task
 ```
 
-This config can be edited by the user.
-
-#### Config Options
+#### Options
 
 - `commit_auto` (boolean): If `true`, automatically commit changes to `.gitissues/`. Default: `true`
 - `commit_message` (string): Template for git commit messages. Supports placeholders:
@@ -99,7 +116,18 @@ This config can be edited by the user.
   - `{title}`: Issue title
   - `{action}`: Command that triggered the commit (`new`, `edit description`, `set <field>`)
 - `editor` (string): External text editor (set `git` to use configured git core.editor)
-- `list_columns` (string list): Default columns shown in `list` command
+- `list_columns` (list of strings): Default columns shown in `list` command
+- `states` (list of strings): Available issue states. Default is the first element.
+- `types` (list of strings): Available issue types. Default is empty.
+
+#### users.yaml
+
+```yaml
+users:
+  - id: alice
+  - id: bob
+  - id: carol
+```
 
 ### Description Template
 

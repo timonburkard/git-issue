@@ -16,3 +16,18 @@ list_columns:
   - state
   - assignee
   - title
+
+# Available issue states
+# First state in the list is the initial state for new issues
+states:
+  - new
+  - active
+  - closed
+  - deleted
+
+# Available issue types
+# Per default the type is empty for new issues
+types:
+  - bug
+  - feature
+  - task

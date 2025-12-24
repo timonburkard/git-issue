@@ -141,7 +141,7 @@ fn test_basic_workflow() {
         "--type",
         "bug",
         "--assignee",
-        "john.doe",
+        "alice",
         "--priority",
         "P1",
         "--due-date",
@@ -154,7 +154,7 @@ fn test_basic_workflow() {
     let meta2_updated = load_meta_value(".gitissues/issues/0000000002/meta.yaml");
     assert_eq!(meta2_updated["state"].as_str().unwrap(), "active");
     assert_eq!(meta2_updated["type"].as_str().unwrap(), "bug");
-    assert_eq!(meta2_updated["assignee"].as_str().unwrap(), "john.doe");
+    assert_eq!(meta2_updated["assignee"].as_str().unwrap(), "alice");
     assert_eq!(meta2_updated["priority"].as_str().unwrap(), "P1");
     assert_eq!(meta2_updated["due_date"].as_str().unwrap(), "2026-06-15");
     assert!(meta2_updated["updated"].as_str().unwrap() >= prev_updated.as_str());

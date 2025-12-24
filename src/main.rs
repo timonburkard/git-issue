@@ -34,11 +34,11 @@ enum Commands {
         /// Issue title
         title: String,
 
-        /// Issue meta field: type
+        /// Issue meta field: type [possible values: see config.yaml:types or '']
         #[arg(long)]
         type_: Option<String>,
 
-        /// Issue meta field: assignee
+        /// Issue meta field: assignee [possible values: see users.yaml:users:id or '']
         #[arg(long)]
         assignee: Option<String>,
 
@@ -46,7 +46,7 @@ enum Commands {
         #[arg(long)]
         priority: Option<Priority>,
 
-        /// Issue meta field: due_date (YYYY-MM-DD)
+        /// Issue meta field: due_date [possible values: YYYY-MM-DD or '']
         #[arg(long)]
         due_date: Option<String>,
 
@@ -72,19 +72,19 @@ enum Commands {
         /// Issue ID
         id: u32,
 
-        /// Issue meta field: state
-        #[arg(long)]
-        state: Option<String>,
-
         /// Issue meta field: title
         #[arg(long)]
         title: Option<String>,
 
-        /// Issue meta field: type
+        /// Issue meta field: state [possible values: see config.yaml:states]
+        #[arg(long)]
+        state: Option<String>,
+
+        /// Issue meta field: type [possible values: see config.yaml:types or '']
         #[arg(long)]
         type_: Option<String>,
 
-        /// Issue meta field: assignee
+        /// Issue meta field: assignee [possible values: see users.yaml:users:id or '']
         #[arg(long)]
         assignee: Option<String>,
 
@@ -92,7 +92,7 @@ enum Commands {
         #[arg(long)]
         priority: Option<Priority>,
 
-        /// Issue meta field: due_date (YYYY-MM-DD)
+        /// Issue meta field: due_date [possible values: YYYY-MM-DD or '']
         #[arg(long)]
         due_date: Option<String>,
 

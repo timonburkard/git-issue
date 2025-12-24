@@ -42,6 +42,34 @@ pub struct Config {
     pub commit_message: String,
     pub editor: String,
     pub list_columns: Vec<String>,
+    pub states: Vec<String>,
+    pub types: Vec<String>,
+}
+
+#[derive(Debug, Deserialize)]
+pub struct User {
+    pub id: String,
+}
+
+#[derive(Debug, Deserialize)]
+pub struct Users {
+    pub users: Vec<User>,
+}
+
+/// Load users.yaml
+pub fn load_users() -> Result<Users, String> {
+    let users_path = Path::new(".gitissues/users.yaml");
+    let users_raw = match fs::read_to_string(users_path) {
+        Ok(s) => s,
+        Err(_) => return Err("users.yaml not found.".to_string()),
+    };
+
+    let users: Users = match serde_yaml::from_str(&users_raw) {
+        Ok(m) => m,
+        Err(_) => return Err("users.yaml malformatted.".to_string()),
+    };
+
+    Ok(users)
 }
 
 /// Generate a proper ISO 8601 timestamp using chrono.
@@ -49,9 +77,27 @@ pub fn current_timestamp() -> String {
     Utc::now().format("%Y-%m-%dT%H:%M:%SZ").to_string()
 }
 
-/// Validate if a string is in ISO format: YYYY-MM-DD.
-pub fn is_valid_iso_date(s: &str) -> bool {
-    NaiveDate::parse_from_str(s, "%Y-%m-%d").is_ok()
+/// Validate if a string is in ISO format: YYYY-MM-DD or empty.
+pub fn is_valid_iso_date(s: &str) -> Result<bool, String> {
+    Ok(s.is_empty() || NaiveDate::parse_from_str(s, "%Y-%m-%d").is_ok())
+}
+
+/// Validate if a state is in the list of valid states from config.
+pub fn is_valid_state(s: &str) -> Result<bool, String> {
+    let config = load_config()?;
+    Ok(config.states.contains(&s.to_string()))
+}
+
+/// Validate if a type is in the list of valid types from config or empty.
+pub fn is_valid_type(s: &str) -> Result<bool, String> {
+    let config = load_config()?;
+    Ok(s.is_empty() || config.types.contains(&s.to_string()))
+}
+
+/// Validate if an assignee is in the list of valid users:id from users.yaml.
+pub fn is_valid_assignee(s: &str) -> Result<bool, String> {
+    let users = load_users()?;
+    Ok(s.is_empty() || users.users.iter().any(|u| u.id == s))
 }
 
 pub fn load_config() -> Result<Config, String> {

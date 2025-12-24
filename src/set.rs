@@ -1,8 +1,8 @@
 use std::fs;
 
 use crate::model::{
-    Priority, current_timestamp, git_commit, is_valid_iso_date, issue_dir, issue_meta_path,
-    load_meta,
+    Priority, current_timestamp, git_commit, is_valid_iso_date, is_valid_state, is_valid_type,
+    issue_dir, issue_meta_path, load_meta,
 };
 
 #[allow(clippy::too_many_arguments)]
@@ -35,13 +35,6 @@ pub fn run(
 
     let mut fields = Vec::new();
 
-    if let Some(value) = state
-        && updated_meta.state != value
-    {
-        updated_meta.state = value;
-        fields.push("state");
-    }
-
     if let Some(value) = title
         && updated_meta.title != value
     {
@@ -49,9 +42,28 @@ pub fn run(
         fields.push("title");
     }
 
+    if let Some(value) = state
+        && updated_meta.state != value
+    {
+        match is_valid_state(&value) {
+            Ok(true) => { /* valid, continue */ }
+            Ok(false) => return Err("Invalid state: Check config.yaml:states".to_string()),
+            Err(e) => return Err(format!("Config error: {e}")),
+        }
+
+        updated_meta.state = value;
+        fields.push("state");
+    }
+
     if let Some(value) = type_
         && updated_meta.type_ != value
     {
+        match is_valid_type(&value) {
+            Ok(true) => { /* valid, continue */ }
+            Ok(false) => return Err("Invalid type: Check config.yaml:types".to_string()),
+            Err(e) => return Err(format!("Config error: {e}")),
+        }
+
         updated_meta.type_ = value;
         fields.push("type");
     }
@@ -59,6 +71,12 @@ pub fn run(
     if let Some(value) = assignee
         && updated_meta.assignee != value
     {
+        match crate::model::is_valid_assignee(&value) {
+            Ok(true) => { /* valid, continue */ }
+            Ok(false) => return Err("Invalid assignee: Check users.yaml:users:id".to_string()),
+            Err(e) => return Err(format!("Config error: {e}")),
+        }
+
         updated_meta.assignee = value;
         fields.push("assignee");
     }
@@ -73,8 +91,10 @@ pub fn run(
     if let Some(value) = due_date
         && updated_meta.due_date != value
     {
-        if !is_valid_iso_date(&value) {
-            return Err("Invalid due_date format: Use YYYY-MM-DD".to_string());
+        match is_valid_iso_date(&value) {
+            Ok(true) => { /* valid, continue */ }
+            Ok(false) => return Err("Invalid due_date format: Use 'YYYY-MM-DD' or ''".to_string()),
+            Err(e) => return Err(format!("Error: {e}")),
         }
 
         updated_meta.due_date = value;
