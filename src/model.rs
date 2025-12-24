@@ -77,9 +77,9 @@ pub fn current_timestamp() -> String {
     Utc::now().format("%Y-%m-%dT%H:%M:%SZ").to_string()
 }
 
-/// Validate if a string is in ISO format: YYYY-MM-DD.
-pub fn is_valid_iso_date(s: &str) -> bool {
-    NaiveDate::parse_from_str(s, "%Y-%m-%d").is_ok()
+/// Validate if a string is in ISO format: YYYY-MM-DD or empty.
+pub fn is_valid_iso_date(s: &str) -> Result<bool, String> {
+    Ok(s.is_empty() || NaiveDate::parse_from_str(s, "%Y-%m-%d").is_ok())
 }
 
 /// Validate if a state is in the list of valid states from config.
@@ -88,7 +88,7 @@ pub fn is_valid_state(s: &str) -> Result<bool, String> {
     Ok(config.states.contains(&s.to_string()))
 }
 
-/// Validate if a type is in the list of valid types from config.
+/// Validate if a type is in the list of valid types from config or empty.
 pub fn is_valid_type(s: &str) -> Result<bool, String> {
     let config = load_config()?;
     Ok(s.is_empty() || config.types.contains(&s.to_string()))

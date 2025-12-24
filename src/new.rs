@@ -2,8 +2,8 @@ use std::fs;
 use std::path::Path;
 
 use crate::model::{
-    Meta, Priority, current_timestamp, git_commit, is_valid_iso_date, issue_attachments_dir,
-    issue_desc_path, issue_dir, issue_meta_path, load_config,
+    Meta, Priority, current_timestamp, git_commit, is_valid_assignee, is_valid_iso_date,
+    is_valid_type, issue_attachments_dir, issue_desc_path, issue_dir, issue_meta_path, load_config,
 };
 
 pub fn run(
@@ -26,17 +26,24 @@ pub fn run(
 
     // Step 3: Validate user inputs
     let type_val = type_.unwrap_or_default();
-    match crate::model::is_valid_type(&type_val) {
+    match is_valid_type(&type_val) {
         Ok(true) => { /* valid, continue */ }
         Ok(false) => return Err("Invalid type: Check config.yaml:types".to_string()),
         Err(e) => return Err(format!("Config error: {e}")),
     }
 
     let assignee_val = assignee.unwrap_or_default();
-    match crate::model::is_valid_assignee(&assignee_val) {
+    match is_valid_assignee(&assignee_val) {
         Ok(true) => { /* valid, continue */ }
         Ok(false) => return Err("Invalid assignee: Check users.yaml:users:id".to_string()),
         Err(e) => return Err(format!("Config error: {e}")),
+    }
+
+    let due_date_val = due_date.clone().unwrap_or_default();
+    match is_valid_iso_date(&due_date_val) {
+        Ok(true) => { /* valid, continue */ }
+        Ok(false) => return Err(" Invalid due_date format: Use 'YYYY-MM-DD' or ''".to_string()),
+        Err(e) => return Err(format!("Error: {e}")),
     }
 
     // Step 4: Create meta fields and validate
@@ -58,10 +65,6 @@ pub fn run(
         created: timestamp.clone(),
         updated: timestamp,
     };
-
-    if !meta.due_date.is_empty() && !is_valid_iso_date(&meta.due_date) {
-        return Err("Invalid due_date format: Use YYYY-MM-DD".to_string());
-    }
 
     // Step 5: Create the issue directory
     let dir = issue_dir(issue_id);
