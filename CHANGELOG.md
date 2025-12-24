@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+    - [meta] added configurable list of available options for `state`, `type` and `assignee` (users) (GitHub Issue 36)
     - [ci] added automated integration tests
 
 ## [v0.3.0] - 2025-12-23
