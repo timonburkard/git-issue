@@ -108,7 +108,8 @@ fn add_content_description(path: &Path, content: &mut String) -> Result<(), Stri
     let desc_path = path.join("description.md");
     let desc_raw = load_description(&desc_path)?;
 
-    let re = Regex::new(r"(?m)^#").unwrap(); // (?m) enables multi-line mode
+    let re =
+        Regex::new(r"(?m)^#").map_err(|e| format!("Invalid regex for description headers: {e}"))?; // (?m) enables multi-line mode
 
     // Replace # with ###
     let desc_nested = re.replace_all(&desc_raw, "###");
