@@ -46,6 +46,32 @@ pub struct Config {
     pub types: Vec<String>,
 }
 
+#[derive(Debug, Deserialize)]
+pub struct User {
+    pub id: String,
+}
+
+#[derive(Debug, Deserialize)]
+pub struct Users {
+    pub users: Vec<User>,
+}
+
+/// Load users.yaml
+pub fn load_users() -> Result<Users, String> {
+    let users_path = Path::new(".gitissues/users.yaml");
+    let users_raw = match fs::read_to_string(users_path) {
+        Ok(s) => s,
+        Err(_) => return Err("users.yaml not found.".to_string()),
+    };
+
+    let users: Users = match serde_yaml::from_str(&users_raw) {
+        Ok(m) => m,
+        Err(_) => return Err("users.yaml malformatted.".to_string()),
+    };
+
+    Ok(users)
+}
+
 /// Generate a proper ISO 8601 timestamp using chrono.
 pub fn current_timestamp() -> String {
     Utc::now().format("%Y-%m-%dT%H:%M:%SZ").to_string()
@@ -66,6 +92,12 @@ pub fn is_valid_state(s: &str) -> Result<bool, String> {
 pub fn is_valid_type(s: &str) -> Result<bool, String> {
     let config = load_config()?;
     Ok(s.is_empty() || config.types.contains(&s.to_string()))
+}
+
+/// Validate if an assignee is in the list of valid users:id from users.yaml.
+pub fn is_valid_assignee(s: &str) -> Result<bool, String> {
+    let users = load_users()?;
+    Ok(s.is_empty() || users.users.iter().any(|u| u.id == s))
 }
 
 pub fn load_config() -> Result<Config, String> {

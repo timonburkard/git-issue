@@ -25,6 +25,16 @@ pub fn run(no_commit: bool) -> Result<(), String> {
         )
     })?;
 
+    // Copy default users file
+    const DEFAULT_USERS: &str = include_str!("../config/users-default.yaml");
+    let users_dst = Path::new(".gitissues").join("users.yaml");
+    fs::write(&users_dst, DEFAULT_USERS).map_err(|e| {
+        format!(
+            "Failed to write default users to {}: {e}",
+            users_dst.display()
+        )
+    })?;
+
     // Copy default description file
     const DEFAULT_DESC: &str = include_str!("../config/description-default.md");
     let desc_dst = Path::new(".gitissues").join("description.md");

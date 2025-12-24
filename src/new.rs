@@ -32,8 +32,16 @@ pub fn run(
         Err(e) => return Err(format!("Config error: {e}")),
     }
 
+    let assignee_val = assignee.unwrap_or_default();
+    match crate::model::is_valid_assignee(&assignee_val) {
+        Ok(true) => { /* valid, continue */ }
+        Ok(false) => return Err("Invalid assignee: Check users.yaml:users:id".to_string()),
+        Err(e) => return Err(format!("Config error: {e}")),
+    }
+
     // Step 4: Create meta fields and validate
     let timestamp = current_timestamp();
+
     let meta = Meta {
         id: issue_id,
         title: title.clone(),
@@ -44,7 +52,7 @@ pub fn run(
             .unwrap_or_else(|| "new".to_string()),
         type_: type_val,
         labels: labels.unwrap_or_default(),
-        assignee: assignee.unwrap_or_default(),
+        assignee: assignee_val,
         priority: priority.unwrap_or(Priority::P2),
         due_date: due_date.unwrap_or_default(),
         created: timestamp.clone(),

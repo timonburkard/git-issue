@@ -71,6 +71,12 @@ pub fn run(
     if let Some(value) = assignee
         && updated_meta.assignee != value
     {
+        match crate::model::is_valid_assignee(&value) {
+            Ok(true) => { /* valid, continue */ }
+            Ok(false) => return Err("Invalid assignee: Check users.yaml:users:id".to_string()),
+            Err(e) => return Err(format!("Config error: {e}")),
+        }
+
         updated_meta.assignee = value;
         fields.push("assignee");
     }

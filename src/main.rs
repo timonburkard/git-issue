@@ -38,7 +38,7 @@ enum Commands {
         #[arg(long)]
         type_: Option<String>,
 
-        /// Issue meta field: assignee
+        /// Issue meta field: assignee [possible values: see users.yaml:users:id]
         #[arg(long)]
         assignee: Option<String>,
 

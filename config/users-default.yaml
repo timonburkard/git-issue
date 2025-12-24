@@ -1,0 +1,6 @@
+# List of valid users
+# Per default the assignee is empty for new issues
+users:
+  - id: alice
+  - id: bob
+  - id: carol
