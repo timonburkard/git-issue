@@ -46,13 +46,14 @@ pub fn run(columns: Option<Vec<String>>) -> Result<(), String> {
     // Sort by numeric ID
     issues.sort_by_key(|m| m.id);
 
-    if columns.is_none() {
-        print_default_list(&issues)?;
-
-        return Ok(());
+    match columns {
+        None => {
+            print_default_list(&issues)?;
+        }
+        Some(cols) => {
+            print_custom_list(&issues, cols)?;
+        }
     }
-
-    print_custom_list(&issues, columns.unwrap())?;
 
     Ok(())
 }
@@ -85,11 +86,8 @@ fn print_default_list(issues: &Vec<Meta>) -> Result<(), String> {
 
     // Header
     for col in &columns {
-        print!(
-            "{:<width$}",
-            col,
-            width = column_widths.get(col).copied().unwrap_or(22)
-        );
+        let width = *column_widths.get(col).unwrap_or(&22);
+        print!("{:<width$}", col, width = width);
     }
     println!();
 
@@ -97,11 +95,8 @@ fn print_default_list(issues: &Vec<Meta>) -> Result<(), String> {
     for meta in issues {
         for col in &columns {
             let value = get_column_value(col, meta);
-            print!(
-                "{:<width$}",
-                value,
-                width = column_widths.get(col).copied().unwrap_or(22)
-            );
+            let width = *column_widths.get(col).unwrap_or(&22);
+            print!("{:<width$}", value, width = width);
         }
         println!();
     }
@@ -118,11 +113,8 @@ fn print_custom_list(issues: &Vec<Meta>, mut columns: Vec<String>) -> Result<(),
 
     // Print header
     for col in &columns {
-        print!(
-            "{:<width$}",
-            col,
-            width = column_widths.get(col).copied().unwrap_or(22)
-        );
+        let width = *column_widths.get(col).unwrap_or(&22);
+        print!("{:<width$}", col, width = width);
     }
 
     println!();
@@ -131,11 +123,8 @@ fn print_custom_list(issues: &Vec<Meta>, mut columns: Vec<String>) -> Result<(),
     for meta in issues {
         for col in &columns {
             let value = get_column_value(col, meta);
-            print!(
-                "{:<width$}",
-                value,
-                width = column_widths.get(col).copied().unwrap_or(22)
-            );
+            let width = *column_widths.get(col).unwrap_or(&22);
+            print!("{:<width$}", value, width = width);
         }
         println!();
     }
