@@ -118,13 +118,8 @@ enum Commands {
 fn main() {
     let args = Args::parse();
 
-    match args.command {
-        Commands::Init { no_commit } => {
-            if let Err(e) = init::run(no_commit) {
-                eprintln!("Error: {e}");
-                std::process::exit(1);
-            }
-        }
+    let result = match args.command {
+        Commands::Init { no_commit } => init::run(no_commit),
 
         Commands::New {
             title,
@@ -133,26 +128,11 @@ fn main() {
             priority,
             due_date,
             labels,
-        } => {
-            if let Err(e) = new::run(title, type_, assignee, priority, due_date, labels) {
-                eprintln!("Error: {e}");
-                std::process::exit(1);
-            }
-        }
+        } => new::run(title, type_, assignee, priority, due_date, labels),
 
-        Commands::List { columns } => {
-            if let Err(e) = list::run(columns) {
-                eprintln!("Error: {e}");
-                std::process::exit(1);
-            }
-        }
+        Commands::List { columns } => list::run(columns),
 
-        Commands::Show { id } => {
-            if let Err(e) = show::run(id) {
-                eprintln!("Error: {e}");
-                std::process::exit(1);
-            }
-        }
+        Commands::Show { id } => show::run(id),
 
         Commands::Set {
             id,
@@ -165,29 +145,24 @@ fn main() {
             labels,
             labels_add,
             labels_remove,
-        } => {
-            if let Err(e) = set::run(
-                id,
-                state,
-                title,
-                type_,
-                assignee,
-                priority,
-                due_date,
-                labels,
-                labels_add,
-                labels_remove,
-            ) {
-                eprintln!("Error: {e}");
-                std::process::exit(1);
-            }
-        }
+        } => set::run(
+            id,
+            state,
+            title,
+            type_,
+            assignee,
+            priority,
+            due_date,
+            labels,
+            labels_add,
+            labels_remove,
+        ),
 
-        Commands::Edit { id } => {
-            if let Err(e) = edit::run(id) {
-                eprintln!("Error: {e}");
-                std::process::exit(1);
-            }
-        }
+        Commands::Edit { id } => edit::run(id),
+    };
+
+    if let Err(e) = result {
+        eprintln!("Error: {e}");
+        std::process::exit(1);
     }
 }
