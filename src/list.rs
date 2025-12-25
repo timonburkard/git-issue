@@ -1,11 +1,10 @@
 use std::fs;
 use std::path::Path;
 
-use crate::model::{Meta, load_config, load_meta};
+use crate::model::{Meta, gitissues_base, load_config, load_meta};
 
 pub fn run(columns: Option<Vec<String>>) -> Result<(), String> {
-    let issues_base = ".gitissues/issues";
-    let path = Path::new(issues_base);
+    let path = Path::new(gitissues_base()).join("issues");
 
     // Precondition: .gitissues/issues must exist (user must run init first)
     if !path.exists() {
