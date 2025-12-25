@@ -2,8 +2,9 @@ use std::fs;
 use std::path::Path;
 
 use crate::model::{
-    Meta, Priority, current_timestamp, git_commit, is_valid_assignee, is_valid_iso_date,
-    is_valid_type, issue_attachments_dir, issue_desc_path, issue_dir, issue_meta_path, load_config,
+    Meta, Priority, current_timestamp, git_commit, gitissues_base, is_valid_assignee,
+    is_valid_iso_date, is_valid_type, issue_attachments_dir, issue_desc_path, issue_dir,
+    issue_meta_path, load_config,
 };
 
 pub fn run(
@@ -73,7 +74,8 @@ pub fn run(
     // Step 6: Write description.md
     let desc_path = issue_desc_path(issue_id);
 
-    fs::copy(".gitissues/description.md", &desc_path)
+    let template_path = Path::new(gitissues_base()).join("description.md");
+    fs::copy(&template_path, &desc_path)
         .map_err(|e| format!("Failed to write description.md: {e}"))?;
 
     // Step 7: Create attachments directory

@@ -58,8 +58,8 @@ pub struct Users {
 
 /// Load users.yaml
 pub fn load_users() -> Result<Users, String> {
-    let users_path = Path::new(".gitissues/users.yaml");
-    let users_raw = match fs::read_to_string(users_path) {
+    let users_path = users_path();
+    let users_raw = match fs::read_to_string(&users_path) {
         Ok(s) => s,
         Err(_) => return Err("users.yaml not found.".to_string()),
     };
@@ -101,8 +101,8 @@ pub fn is_valid_assignee(s: &str) -> Result<bool, String> {
 }
 
 pub fn load_config() -> Result<Config, String> {
-    let config_path = Path::new(".gitissues/config.yaml");
-    let config_raw = match fs::read_to_string(config_path) {
+    let config_path = config_path();
+    let config_raw = match fs::read_to_string(&config_path) {
         Ok(s) => s,
         Err(_) => return Err("config.yaml not found.".to_string()),
     };
@@ -139,8 +139,25 @@ fn padded_id(id: u32) -> String {
     format!("{id:010}")
 }
 
+/// Returns the path to the .gitissues base directory.
+pub fn gitissues_base() -> &'static str {
+    ".gitissues"
+}
+
+/// Returns the path to the config.yaml file.
+pub fn config_path() -> std::path::PathBuf {
+    Path::new(gitissues_base()).join("config.yaml")
+}
+
+/// Returns the path to the users.yaml file.
+pub fn users_path() -> std::path::PathBuf {
+    Path::new(gitissues_base()).join("users.yaml")
+}
+
 pub fn issue_dir(id: u32) -> std::path::PathBuf {
-    Path::new(".gitissues").join("issues").join(padded_id(id))
+    Path::new(gitissues_base())
+        .join("issues")
+        .join(padded_id(id))
 }
 
 pub fn issue_meta_path(id: u32) -> std::path::PathBuf {
@@ -156,7 +173,7 @@ pub fn issue_attachments_dir(id: u32) -> std::path::PathBuf {
 }
 
 pub fn issue_tmp_show_dir(id: u32) -> std::path::PathBuf {
-    Path::new(".gitissues")
+    Path::new(gitissues_base())
         .join(".tmp")
         .join(format!("show-{id}"))
 }
@@ -181,7 +198,7 @@ pub fn git_commit(id: u32, title: String, action: &str) -> Result<(), String> {
         .replace("{title}", &title);
 
     // Execute git add
-    let add_result = Command::new("git").args(["add", ".gitissues"]).output();
+    let add_result = Command::new("git").args(["add", gitissues_base()]).output();
     if let Err(e) = add_result {
         return Err(format!("Failed to stage .gitissues: {e}"));
     }
@@ -205,7 +222,7 @@ pub fn git_commit_non_templated(msg: &str) -> Result<(), String> {
     let commit_message = format!("[issue] {msg}");
 
     // Execute git add
-    let add_result = Command::new("git").args(["add", ".gitissues"]).output();
+    let add_result = Command::new("git").args(["add", gitissues_base()]).output();
     if let Err(e) = add_result {
         return Err(format!("Failed to stage .gitissues: {e}"));
     }
