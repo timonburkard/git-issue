@@ -15,10 +15,10 @@ pub fn run(columns: Option<Vec<String>>, filter: Option<Vec<Filter>>, sort: Opti
     // Print
     match columns {
         None => {
-            print_default_list(&issues, print_csv)?;
+            print_list(&issues, None, print_csv)?;
         }
         Some(cols) => {
-            print_custom_list(&issues, cols, print_csv)?;
+            print_list(&issues, Some(cols), print_csv)?;
         }
     }
 
@@ -89,75 +89,35 @@ fn to_csv_field(value: &str, separator: char) -> String {
     format!("\"{value}\"{separator}")
 }
 
-fn print_default_list(issues: &Vec<Meta>, print_csv: bool) -> Result<(), String> {
+/// print list
+/// - issues: list of issue metadata
+/// - columns: list of columns to print (None means default from config)
+/// - print_csv: whether to print as CSV
+fn print_list(issues: &Vec<Meta>, columns: Option<Vec<String>>, print_csv: bool) -> Result<(), String> {
     let config = load_config()?;
 
-    let mut columns = config.list_columns;
+    let mut cols = match &columns {
+        Some(value) => value.clone(),
+        None => config.list_columns,
+    };
 
-    validate_column_names(&mut columns, "config.yaml:list_columns")?;
+    let context = if columns.is_some() {
+        "--columns"
+    } else {
+        "config.yaml:list_columns"
+    };
 
-    wildcard_expansion(&mut columns);
+    validate_column_names(&mut cols, context)?;
 
-    let column_widths = calculate_column_widths(issues, &columns)?;
+    wildcard_expansion(&mut cols);
 
-    let mut csv_content = String::new();
-    let csv_separator = config.export_csv_separator;
-
-    // Header
-    for col in &columns {
-        if print_csv {
-            csv_content.push_str(&to_csv_field(col, csv_separator));
-        } else {
-            let width = *column_widths.get(col).unwrap_or(&22);
-            print!("{:<width$}", col, width = width);
-        }
-    }
-
-    print_ln(print_csv, &mut csv_content);
-
-    // Rows
-    for meta in issues {
-        for col in &columns {
-            let value = get_column_value(col, meta)?;
-
-            if print_csv {
-                csv_content.push_str(&to_csv_field(&value.to_string(), csv_separator));
-            } else {
-                let width = *column_widths.get(col).unwrap_or(&22);
-                print!("{:<width$}", value, width = width);
-            }
-        }
-
-        print_ln(print_csv, &mut csv_content);
-    }
-
-    if print_csv {
-        // Create export directory
-        let export_dir = issue_export_dir();
-        fs::create_dir_all(&export_dir).map_err(|e| format!("Failed to create {}: {e}", export_dir.display()))?;
-
-        // Write CSV file
-        let export_file = export_dir.join(format!("{}.csv", current_timestamp().replace(":", "-")));
-        fs::write(&export_file, csv_content).map_err(|e| format!("Failed to write {}: {e}", export_file.display()))?;
-    }
-
-    Ok(())
-}
-
-fn print_custom_list(issues: &Vec<Meta>, mut columns: Vec<String>, print_csv: bool) -> Result<(), String> {
-    let config = load_config()?;
-
-    validate_column_names(&mut columns, "--columns")?;
-
-    wildcard_expansion(&mut columns);
-
-    let column_widths = calculate_column_widths(issues, &columns)?;
+    let column_widths = calculate_column_widths(issues, &cols)?;
 
     let mut csv_content = String::new();
     let csv_separator = config.export_csv_separator;
 
     // Print header
-    for col in &columns {
+    for col in &cols {
         if print_csv {
             csv_content.push_str(&to_csv_field(col, csv_separator));
         } else {
@@ -170,7 +130,7 @@ fn print_custom_list(issues: &Vec<Meta>, mut columns: Vec<String>, print_csv: bo
 
     // Print rows
     for meta in issues {
-        for col in &columns {
+        for col in &cols {
             let value = get_column_value(col, meta)?;
 
             if print_csv {
