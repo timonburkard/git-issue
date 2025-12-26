@@ -31,3 +31,16 @@ types:
   - bug
   - feature
   - task
+
+# Available relationships between issues
+# link: specifies the name of the reciprocal relationship
+#  - same name:      bidirectional, symmetric
+#  - different name: bidirectional, asymmetric
+#  - null:           unidirectional
+relationships:
+  related:
+    link: related
+  parent:
+    link: child
+  child:
+    link: parent

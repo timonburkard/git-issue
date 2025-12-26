@@ -7,10 +7,11 @@ Issues live alongside your code inside `.gitissues/`, making them platform-indep
 ## Features
 
 - ✅ Git-native, file-backed issues under `.gitissues/`
-- ✅ Core commands: `init`, `new`, `list`, `show`, `set`, `edit`
+- ✅ Core commands: `init`, `new`, `list`, `show`, `set`, `edit`, `link`
 - ✅ Each issue has a markdown description incl. attachments
 - ✅ Each issue has metadata: `id`, `title`, `state`, `type`, `labels`, `assignee`, `priority`, `due_date`, `created`, `updated`
-- ✅ Configurable: default columns for `list`, commit message template, external editor
+- ✅ Each issue has `relationships`: Desired relationship categories (e.g, related, child/parent, ...) are configurable and bidirectional links can be managed automatically
+- ✅ Highly configurable: default columns for `list`, available options for `state` and `type`, relation ship categories, commit message template, external editor
 - ✅ External editor renders issue information as markdown
 - ✅ Git-integration: auto-commit of changes
 - ✅ Automated integration tests
@@ -50,9 +51,14 @@ git issue set 1234 --title "LCD driver has a problem"
 git issue set 1234 --state resolved --type bug --assignee "t.burkard" --priority P1 --due-date 2026-01-31
 
 # Change issue meta fields: labels
-git issue set 1234 --labels        cli,driver  # set labels (overwrite)
-git issue set 1234 --labels-add    cli,driver  # add labels
+git issue set 1234 --labels cli,driver         # set labels (overwrite)
+git issue set 1234 --labels-add cli,driver     # add labels
 git issue set 1234 --labels-remove cli,driver  # remove labels
+
+# Change issue relationships
+git issue link 1234 --add related=5678                                       # add relationship link
+git issue link 1234 --remove related=5678                                    # remove relationship links
+git issue link 1234 --add related=5678,3333 parent=9999 --remove child=7777  # batch update relationship links
 
 # Edit issue description (markdown) -- launches external text editor
 git issue edit 1234
@@ -106,6 +112,19 @@ types:
   - bug
   - feature
   - task
+
+# Available relationships between issues
+# link: specifies the name of the reciprocal relationship
+#  - same name:      bidirectional, symmetric
+#  - different name: bidirectional, asymmetric
+#  - null:           unidirectional
+relationships:
+  related:
+    link: related
+  parent:
+    link: child
+  child:
+    link: parent
 ```
 
 #### Options
@@ -119,6 +138,7 @@ types:
 - `list_columns` (list of strings): Default columns shown in `list` command
 - `states` (list of strings): Available issue states. Default is the first element.
 - `types` (list of strings): Available issue types. Default is empty.
+- `relationships` (object): Available relationships between issues
 
 #### users.yaml
 
@@ -193,14 +213,14 @@ cargo install git-issue
 # Build
 cargo build
 
-# Run tests
-cargo test
-
 # Format code
 cargo fmt
 
 # Lint
 cargo clippy
+
+# Run tests
+cargo test
 ```
 
 ## Storage Layout
@@ -237,6 +257,15 @@ labels:                        # (List of Strings) Labels / tags
 assignee: t.burkard            # (String) To whom the issue is assigned
 priority: P2                   # (Enum) Priority: P0 = highest, P2 = default, P4 = lowest
 due_date: 2026-01-31           # (Date) Due date in ISO format: YYYY-MM-DD
+relationships:                 # (Object) Relationships with other issues
+  related:
+  - 5678
+  - 7777
+  parent:
+  - 5555
+  child:
+  - 3333
+  - 4444
 created: 2025-11-13T15:54:52Z  # (Timestamp) Issue was created at
 updated: 2025-12-22T20:36:11Z  # (Timestamp) Issue was last updated at
 ```
@@ -251,10 +280,11 @@ updated: 2025-12-22T20:36:11Z  # (Timestamp) Issue was last updated at
   - `model.rs` -- Shared data types, functions and utilities
   - `edit.rs`  -- Edit issue description (markdown) with external text editor
   - `init.rs`  -- Initialize `.gitissues/` directory and copy default config
+  - `link.rs`  -- Change relationships between issues
   - `list.rs`  -- List all issues
   - `new.rs`   -- Create new issues
   - `set.rs`   -- Change issue meta fields
-  - `show.rs`  -- Show details of an issue
+  - `show.rs`  -- Show all issue information
 
 ## Dependencies
 
@@ -264,3 +294,4 @@ updated: 2025-12-22T20:36:11Z  # (Timestamp) Issue was last updated at
 - `serde_yaml`  -- YAML parsing for meta.yaml files
 - `shell-words` -- Process command line according to parsing rules of Unix shell
 - `regex`       -- Regular expressions
+- `indexmap`    -- Provides IndexMap datatype

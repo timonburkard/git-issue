@@ -1,10 +1,11 @@
 use std::fs;
 use std::path::Path;
 
+use indexmap::IndexMap;
+
 use crate::model::{
-    Meta, Priority, current_timestamp, git_commit, gitissues_base, is_valid_assignee,
-    is_valid_iso_date, is_valid_type, issue_attachments_dir, issue_desc_path, issue_dir,
-    issue_meta_path, load_config,
+    Meta, Priority, current_timestamp, git_commit, gitissues_base, is_valid_assignee, is_valid_iso_date, is_valid_type,
+    issue_attachments_dir, issue_desc_path, issue_dir, issue_meta_path, load_config,
 };
 
 pub fn run(
@@ -53,16 +54,13 @@ pub fn run(
     let meta = Meta {
         id: issue_id,
         title: title.clone(),
-        state: config
-            .states
-            .first()
-            .cloned()
-            .unwrap_or_else(|| "new".to_string()),
+        state: config.states.first().cloned().unwrap_or_else(|| "new".to_string()),
         type_: type_val,
         labels: labels.unwrap_or_default(),
         assignee: assignee_val,
         priority: priority.unwrap_or(Priority::P2),
         due_date: due_date.unwrap_or_default(),
+        relationships: IndexMap::new(),
         created: timestamp.clone(),
         updated: timestamp,
     };
@@ -75,23 +73,19 @@ pub fn run(
     let desc_path = issue_desc_path(issue_id);
 
     let template_path = Path::new(gitissues_base()).join("description.md");
-    fs::copy(&template_path, &desc_path)
-        .map_err(|e| format!("Failed to write description.md: {e}"))?;
+    fs::copy(&template_path, &desc_path).map_err(|e| format!("Failed to write description.md: {e}"))?;
 
     // Step 7: Create attachments directory
     let attachment_dir = issue_attachments_dir(issue_id);
-    fs::create_dir_all(&attachment_dir)
-        .map_err(|e| format!("Failed to create issue directory: {e}"))?;
+    fs::create_dir_all(&attachment_dir).map_err(|e| format!("Failed to create issue directory: {e}"))?;
 
     // Step 7.1: Add .gitkeep
-    fs::write(attachment_dir.join(".gitkeep"), "")
-        .map_err(|e| format!("Failed to write .gitkeep: {e}"))?;
+    fs::write(attachment_dir.join(".gitkeep"), "").map_err(|e| format!("Failed to write .gitkeep: {e}"))?;
 
     // Step 8: Write meta.yaml
     let meta_yaml_path = issue_meta_path(issue_id);
 
-    let meta_yaml =
-        serde_yaml::to_string(&meta).map_err(|_| "Failed to serialize meta.yaml".to_string())?;
+    let meta_yaml = serde_yaml::to_string(&meta).map_err(|_| "Failed to serialize meta.yaml".to_string())?;
     fs::write(&meta_yaml_path, meta_yaml).map_err(|e| format!("Failed to write meta.yaml: {e}"))?;
 
     // Step 9: git commit
@@ -111,10 +105,7 @@ fn allocate_id() -> Result<u32, String> {
 
     // Precondition: .gitissues/issues must exist (user must run init first)
     if !path.exists() {
-        return Err(
-            "Not initialized: .gitissues/issues does not exist. Run `git issue init` first."
-                .to_string(),
-        );
+        return Err("Not initialized: .gitissues/issues does not exist. Run `git issue init` first.".to_string());
     }
 
     let mut max_id = 0u32;

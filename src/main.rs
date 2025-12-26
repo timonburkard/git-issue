@@ -1,10 +1,11 @@
 #![deny(warnings, clippy::unwrap_used, clippy::expect_used)]
 use clap::{Parser, Subcommand};
 
-use crate::model::Priority;
+use crate::model::{Priority, RelationshipLink};
 
 mod edit;
 mod init;
+mod link;
 mod list;
 mod model;
 mod new;
@@ -114,6 +115,20 @@ enum Commands {
         /// Issue ID
         id: u32,
     },
+
+    /// Link issue to other issues via relationships
+    Link {
+        /// Issue ID
+        id: u32,
+
+        /// Relationship link
+        #[arg(long, num_args = 1.., required_unless_present = "remove")]
+        add: Option<Vec<RelationshipLink>>,
+
+        /// Relationship link
+        #[arg(long, num_args = 1.., required_unless_present = "add")]
+        remove: Option<Vec<RelationshipLink>>,
+    },
 }
 
 fn main() {
@@ -160,6 +175,8 @@ fn main() {
         ),
 
         Commands::Edit { id } => edit::run(id),
+
+        Commands::Link { id, add, remove } => link::run(id, add, remove),
     };
 
     if let Err(e) = result {

@@ -1,17 +1,14 @@
 use std::fs;
 use std::path::Path;
 
-use crate::model::{Meta, gitissues_base, load_config, load_meta};
+use crate::model::{Meta, dash_if_empty, gitissues_base, load_config, load_meta};
 
 pub fn run(columns: Option<Vec<String>>) -> Result<(), String> {
     let path = Path::new(gitissues_base()).join("issues");
 
     // Precondition: .gitissues/issues must exist (user must run init first)
     if !path.exists() {
-        return Err(
-            "Not initialized: .gitissues/issues does not exist. Run `git issue init` first."
-                .to_string(),
-        );
+        return Err("Not initialized: .gitissues/issues does not exist. Run `git issue init` first.".to_string());
     }
 
     // Collect issue metadata
@@ -19,11 +16,7 @@ pub fn run(columns: Option<Vec<String>>) -> Result<(), String> {
 
     for entry in fs::read_dir(path).map_err(|e| format!("Failed to read issues directory: {e}"))? {
         let entry = entry.map_err(|e| format!("Failed to read entry: {e}"))?;
-        if !entry
-            .file_type()
-            .map_err(|e| format!("Failed to read file type: {e}"))?
-            .is_dir()
-        {
+        if !entry.file_type().map_err(|e| format!("Failed to read file type: {e}"))?.is_dir() {
             continue;
         }
 
@@ -65,8 +58,7 @@ fn validate_column_names(columns: &mut [String], context: &str) -> Result<(), St
         }
 
         if ![
-            "id", "title", "state", "type", "labels", "assignee", "priority", "due_date",
-            "created", "updated", "*",
+            "id", "title", "state", "type", "labels", "assignee", "priority", "due_date", "created", "updated", "*",
         ]
         .contains(&col.as_str())
         {
@@ -153,14 +145,6 @@ fn wildcard_expansion(columns: &mut Vec<String>) {
     }
 }
 
-fn dash_if_empty(value: &str) -> String {
-    if value.is_empty() {
-        "-".to_string()
-    } else {
-        value.to_string()
-    }
-}
-
 fn get_column_value(col: &str, meta: &Meta) -> Result<String, String> {
     match col {
         "id" => Ok(meta.id.to_string()),
@@ -177,10 +161,7 @@ fn get_column_value(col: &str, meta: &Meta) -> Result<String, String> {
     }
 }
 
-fn calculate_column_widths(
-    issues: &[Meta],
-    columns: &[String],
-) -> Result<std::collections::HashMap<String, usize>, String> {
+fn calculate_column_widths(issues: &[Meta], columns: &[String]) -> Result<std::collections::HashMap<String, usize>, String> {
     use std::collections::HashMap;
     let mut widths: HashMap<String, usize> = HashMap::new();
 
