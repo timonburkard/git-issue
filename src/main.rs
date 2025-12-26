@@ -69,6 +69,10 @@ enum Commands {
         /// Sort issues by meta fields  [<field>=asc|desc]
         #[arg(long, num_args = 1..)]
         sort: Option<Vec<Sorting>>,
+
+        /// Print output to CSV file
+        #[arg(long, default_value_t = false)]
+        csv: bool,
     },
 
     /// Show issue details
@@ -155,7 +159,12 @@ fn main() {
             labels,
         } => new::run(title, type_, assignee, priority, due_date, labels),
 
-        Commands::List { columns, filter, sort } => list::run(columns, filter, sort),
+        Commands::List {
+            columns,
+            filter,
+            sort,
+            csv,
+        } => list::run(columns, filter, sort, csv),
 
         Commands::Show { id } => show::run(id),
 
