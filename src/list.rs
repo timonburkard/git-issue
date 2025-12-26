@@ -57,8 +57,13 @@ pub fn run(columns: Option<Vec<String>>) -> Result<(), String> {
     Ok(())
 }
 
-fn validate_column_names(columns: &Vec<String>, context: &str) -> Result<(), String> {
-    for col in columns {
+fn validate_column_names(columns: &mut [String], context: &str) -> Result<(), String> {
+    for col in columns.iter_mut() {
+        // normalize aliases
+        if col == "due-date" {
+            *col = "due_date".to_string();
+        }
+
         if ![
             "id", "title", "state", "type", "labels", "assignee", "priority", "due_date",
             "created", "updated", "*",
@@ -77,7 +82,7 @@ fn print_default_list(issues: &Vec<Meta>) -> Result<(), String> {
 
     let mut columns = config.list_columns;
 
-    validate_column_names(&columns, "config.yaml:list_columns")?;
+    validate_column_names(&mut columns, "config.yaml:list_columns")?;
 
     wildcard_expansion(&mut columns);
 
@@ -104,7 +109,7 @@ fn print_default_list(issues: &Vec<Meta>) -> Result<(), String> {
 }
 
 fn print_custom_list(issues: &Vec<Meta>, mut columns: Vec<String>) -> Result<(), String> {
-    validate_column_names(&columns, "--columns")?;
+    validate_column_names(&mut columns, "--columns")?;
 
     wildcard_expansion(&mut columns);
 
