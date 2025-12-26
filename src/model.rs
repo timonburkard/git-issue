@@ -143,6 +143,7 @@ pub struct Config {
     pub states: Vec<String>,
     pub types: Vec<String>,
     pub relationships: IndexMap<String, Relationship>,
+    pub export_csv_separator: char,
 }
 
 #[derive(Debug, Deserialize)]
@@ -276,6 +277,10 @@ pub fn issue_attachments_dir(id: u32) -> std::path::PathBuf {
 
 pub fn issue_tmp_show_dir(id: u32) -> std::path::PathBuf {
     Path::new(gitissues_base()).join(".tmp").join(format!("show-{id}"))
+}
+
+pub fn issue_exports_dir() -> std::path::PathBuf {
+    Path::new(gitissues_base()).join("exports")
 }
 
 /// git commit based on template from config

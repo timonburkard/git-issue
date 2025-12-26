@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+    - [cmd/list] added `--csv` option (GitHub Issue #57)
     - [cmd/list] added `--sort` option (GitHub Issue #7)
     - [cmd/list] added `--filter` option (GitHub Issue #6)
     - [cmd] added `link` command to change relationships between issues (GitHub Issue #29)
