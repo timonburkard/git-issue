@@ -23,6 +23,18 @@ pub enum Priority {
     P4,
 }
 
+impl Priority {
+    pub fn as_int(&self) -> u8 {
+        match self {
+            Priority::P0 => 0,
+            Priority::P1 => 1,
+            Priority::P2 => 2,
+            Priority::P3 => 3,
+            Priority::P4 => 4,
+        }
+    }
+}
+
 #[derive(Clone)]
 pub struct RelationshipLink {
     pub relationship: String,
@@ -66,6 +78,37 @@ impl FromStr for Filter {
         Ok(Filter {
             field: field.to_string(),
             value: value.to_string(),
+        })
+    }
+}
+
+#[derive(Clone, Debug)]
+pub enum Order {
+    Asc,
+    Desc,
+}
+
+#[derive(Clone)]
+pub struct Sorting {
+    pub field: String,
+    pub order: Order,
+}
+
+impl FromStr for Sorting {
+    type Err = String;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        let (field, order) = s.split_once('=').ok_or("expected format: <field>=asc|desc")?;
+
+        let order_enum = match order.to_lowercase().as_str() {
+            "asc" => Order::Asc,
+            "desc" => Order::Desc,
+            _ => return Err("Unknown order, expected 'asc' or 'desc'".to_string()),
+        };
+
+        Ok(Sorting {
+            field: field.to_string(),
+            order: order_enum,
         })
     }
 }

@@ -11,6 +11,7 @@ Issues live alongside your code inside `.gitissues/`, making them platform-indep
 - ✅ Each issue has a markdown description incl. attachments
 - ✅ Each issue has metadata: `id`, `title`, `state`, `type`, `labels`, `assignee`, `priority`, `due_date`, `created`, `updated`
 - ✅ Each issue has `relationships`: Desired relationship categories (e.g, related, child/parent, ...) are configurable and bidirectional links can be managed automatically
+- ✅ Issues can be filtered and sorted
 - ✅ Highly configurable: default columns for `list`, available options for `state` and `type`, relation ship categories, commit message template, external editor
 - ✅ External editor renders issue information as markdown
 - ✅ Git-integration: auto-commit of changes
@@ -41,6 +42,7 @@ git issue list
 git issue list --columns id,assignee,title
 git issue list --columns "*"
 git issue list --filter priority=p2 title=*driver*
+git issue list --sort assignee=asc priority=desc
 
 # Show all issue information (markdown) -- launches external text editor
 git issue show 1234
