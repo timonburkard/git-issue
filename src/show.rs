@@ -6,7 +6,8 @@ use indexmap::IndexMap;
 use regex::Regex;
 
 use crate::model::{
-    Meta, issue_attachments_dir, issue_dir, issue_meta_path, issue_tmp_show_dir, load_config, load_description, load_meta, open_editor,
+    Meta, dash_if_empty, issue_attachments_dir, issue_dir, issue_meta_path, issue_tmp_show_dir, load_config, load_description, load_meta,
+    open_editor,
 };
 
 pub fn run(id: u32) -> Result<(), String> {
@@ -63,39 +64,11 @@ fn generate_content_metadata(id: u32, meta: &Meta) -> String {
     content.push_str(&format!("| **id**            | {} |\n", meta.id));
     content.push_str(&format!("| **title**         | {} |\n", meta.title));
     content.push_str(&format!("| **state**         | {} |\n", meta.state));
-    content.push_str(&format!(
-        "| **type**          | {} |\n",
-        if meta.type_.is_empty() {
-            "-".to_string()
-        } else {
-            meta.type_.clone()
-        },
-    ));
-    content.push_str(&format!(
-        "| **labels**        | {} |\n",
-        if meta.labels.is_empty() {
-            "-".to_string()
-        } else {
-            meta.labels.join(",")
-        }
-    ));
-    content.push_str(&format!(
-        "| **assignee**      | {} |\n",
-        if meta.assignee.is_empty() {
-            "-".to_string()
-        } else {
-            meta.assignee.clone()
-        }
-    ));
+    content.push_str(&format!("| **type**          | {} |\n", dash_if_empty(&meta.type_),));
+    content.push_str(&format!("| **labels**        | {} |\n", dash_if_empty(&meta.labels.join(","))));
+    content.push_str(&format!("| **assignee**      | {} |\n", dash_if_empty(&meta.assignee)));
     content.push_str(&format!("| **priority**      | {:?} |\n", meta.priority));
-    content.push_str(&format!(
-        "| **due_date**      | {} |\n",
-        if meta.due_date.is_empty() {
-            "-".to_string()
-        } else {
-            meta.due_date.clone()
-        }
-    ));
+    content.push_str(&format!("| **due_date**      | {} |\n", dash_if_empty(&meta.due_date)));
     content.push_str(content_relationships(&meta.relationships).as_str());
     content.push_str(&format!("| **created**       | {} |\n", meta.created));
     content.push_str(&format!("| **updated**       | {} |\n", meta.updated));
