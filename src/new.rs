@@ -1,6 +1,8 @@
 use std::fs;
 use std::path::Path;
 
+use indexmap::IndexMap;
+
 use crate::model::{
     Meta, Priority, current_timestamp, git_commit, gitissues_base, is_valid_assignee,
     is_valid_iso_date, is_valid_type, issue_attachments_dir, issue_desc_path, issue_dir,
@@ -63,6 +65,7 @@ pub fn run(
         assignee: assignee_val,
         priority: priority.unwrap_or(Priority::P2),
         due_date: due_date.unwrap_or_default(),
+        relationships: IndexMap::new(),
         created: timestamp.clone(),
         updated: timestamp,
     };

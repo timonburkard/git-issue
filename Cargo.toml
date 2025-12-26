@@ -12,9 +12,11 @@ categories = ["development-tools"]
 [dependencies]
 chrono = "0.4.42"
 clap = { version = "4.5.53", features = ["derive"] }
+indexmap = { version = "2.12.1", features = ["serde"] }
 regex = "1.12.2"
 serde = { version = "1.0.228", features = ["derive"] }
 serde_yaml = "0.9.34"
 shell-words = "1.1"
+
 [dev-dependencies]
 tempfile = "3"

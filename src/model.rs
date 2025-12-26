@@ -1,9 +1,11 @@
 use std::fs;
 use std::path::Path;
 use std::process::Command;
+use std::str::FromStr;
 
 use chrono::{NaiveDate, Utc};
 use clap::ValueEnum;
+use indexmap::IndexMap;
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Serialize, Deserialize, Clone, PartialEq, Eq, ValueEnum)]
@@ -21,7 +23,41 @@ pub enum Priority {
     P4,
 }
 
-#[derive(Debug, Serialize, Deserialize, Clone)]
+#[derive(Clone)]
+pub struct RelationshipLink {
+    pub relationship: String,
+    pub target_ids: Vec<u32>,
+}
+
+impl FromStr for RelationshipLink {
+    type Err = String;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        let (relationship, target_ids) = s
+            .split_once('=')
+            .ok_or("expected format: <relationship>=<target_ids>")?;
+
+        let target_ids = target_ids
+            .split(',')
+            .map(|id| {
+                id.trim()
+                    .parse::<u32>()
+                    .map_err(|_| format!("invalid target id: {id}"))
+            })
+            .collect::<Result<Vec<_>, _>>()?;
+
+        if target_ids.is_empty() {
+            return Err("at least one target id is required".into());
+        }
+
+        Ok(RelationshipLink {
+            relationship: relationship.to_string(),
+            target_ids,
+        })
+    }
+}
+
+#[derive(Debug, Serialize, Deserialize, Clone, PartialEq, Eq)]
 pub struct Meta {
     pub id: u32,
     pub title: String,
@@ -32,8 +68,14 @@ pub struct Meta {
     pub assignee: String,
     pub priority: Priority,
     pub due_date: String,
+    pub relationships: IndexMap<String, Vec<u32>>,
     pub created: String,
     pub updated: String,
+}
+
+#[derive(Debug, Deserialize)]
+pub struct Relationship {
+    pub link: Option<String>,
 }
 
 #[derive(Debug, Deserialize)]
@@ -44,6 +86,7 @@ pub struct Config {
     pub list_columns: Vec<String>,
     pub states: Vec<String>,
     pub types: Vec<String>,
+    pub relationships: IndexMap<String, Relationship>,
 }
 
 #[derive(Debug, Deserialize)]
