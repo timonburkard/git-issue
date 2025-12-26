@@ -3,7 +3,7 @@ use std::path::Path;
 
 use regex::Regex;
 
-use crate::model::{Filter, Meta, Sorting, current_timestamp, dash_if_empty, gitissues_base, issue_export_dir, load_config, load_meta};
+use crate::model::{Filter, Meta, Sorting, current_timestamp, dash_if_empty, gitissues_base, issue_exports_dir, load_config, load_meta};
 
 pub fn run(columns: Option<Vec<String>>, filter: Option<Vec<Filter>>, sort: Option<Vec<Sorting>>, print_csv: bool) -> Result<(), String> {
     let mut issues = get_issues_metadata()?;
@@ -145,8 +145,8 @@ fn print_list(issues: &Vec<Meta>, columns: Option<Vec<String>>, print_csv: bool)
     }
 
     if print_csv {
-        // Create export directory
-        let export_dir = issue_export_dir();
+        // Create exports directory
+        let export_dir = issue_exports_dir();
         fs::create_dir_all(&export_dir).map_err(|e| format!("Failed to create {}: {e}", export_dir.display()))?;
 
         // Write CSV file

@@ -279,8 +279,8 @@ pub fn issue_tmp_show_dir(id: u32) -> std::path::PathBuf {
     Path::new(gitissues_base()).join(".tmp").join(format!("show-{id}"))
 }
 
-pub fn issue_export_dir() -> std::path::PathBuf {
-    Path::new(gitissues_base()).join("export")
+pub fn issue_exports_dir() -> std::path::PathBuf {
+    Path::new(gitissues_base()).join("exports")
 }
 
 /// git commit based on template from config
