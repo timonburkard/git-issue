@@ -33,17 +33,11 @@ impl FromStr for RelationshipLink {
     type Err = String;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
-        let (relationship, target_ids) = s
-            .split_once('=')
-            .ok_or("expected format: <relationship>=<target_ids>")?;
+        let (relationship, target_ids) = s.split_once('=').ok_or("expected format: <relationship>=<target_ids>")?;
 
         let target_ids = target_ids
             .split(',')
-            .map(|id| {
-                id.trim()
-                    .parse::<u32>()
-                    .map_err(|_| format!("invalid target id: {id}"))
-            })
+            .map(|id| id.trim().parse::<u32>().map_err(|_| format!("invalid target id: {id}")))
             .collect::<Result<Vec<_>, _>>()?;
 
         if target_ids.is_empty() {
@@ -173,8 +167,7 @@ pub fn load_meta(path: &Path) -> Result<Meta, String> {
 }
 
 pub fn load_description(path: &Path) -> Result<String, String> {
-    let raw = fs::read_to_string(path)
-        .map_err(|_| format!("description.md not found: {}", path.display()))?;
+    let raw = fs::read_to_string(path).map_err(|_| format!("description.md not found: {}", path.display()))?;
     Ok(raw)
 }
 
@@ -204,9 +197,7 @@ pub fn users_path() -> std::path::PathBuf {
 }
 
 pub fn issue_dir(id: u32) -> std::path::PathBuf {
-    Path::new(gitissues_base())
-        .join("issues")
-        .join(padded_id(id))
+    Path::new(gitissues_base()).join("issues").join(padded_id(id))
 }
 
 pub fn issue_meta_path(id: u32) -> std::path::PathBuf {
@@ -222,9 +213,7 @@ pub fn issue_attachments_dir(id: u32) -> std::path::PathBuf {
 }
 
 pub fn issue_tmp_show_dir(id: u32) -> std::path::PathBuf {
-    Path::new(gitissues_base())
-        .join(".tmp")
-        .join(format!("show-{id}"))
+    Path::new(gitissues_base()).join(".tmp").join(format!("show-{id}"))
 }
 
 /// git commit based on template from config
@@ -253,9 +242,7 @@ pub fn git_commit(id: u32, title: String, action: &str) -> Result<(), String> {
     }
 
     // Execute git commit
-    let commit_result = Command::new("git")
-        .args(["commit", "-m", &commit_message])
-        .output();
+    let commit_result = Command::new("git").args(["commit", "-m", &commit_message]).output();
     if let Err(e) = commit_result {
         return Err(format!("Failed to commit: {e}"));
     }
@@ -277,9 +264,7 @@ pub fn git_commit_non_templated(msg: &str) -> Result<(), String> {
     }
 
     // Execute git commit
-    let commit_result = Command::new("git")
-        .args(["commit", "-m", &commit_message])
-        .output();
+    let commit_result = Command::new("git").args(["commit", "-m", &commit_message]).output();
     if let Err(e) = commit_result {
         return Err(format!("Failed to commit: {e}"));
     }
@@ -306,8 +291,7 @@ pub fn open_editor(mut editor: String, path: String) -> Result<(), String> {
     }
 
     // Parse editor command (handles quoted paths with arguments)
-    let editor_parts =
-        shell_words::split(&editor).map_err(|e| format!("Failed to parse editor command: {e}"))?;
+    let editor_parts = shell_words::split(&editor).map_err(|e| format!("Failed to parse editor command: {e}"))?;
 
     if editor_parts.is_empty() {
         return Err("No editor command specified".to_string());
@@ -346,19 +330,12 @@ pub fn open_editor(mut editor: String, path: String) -> Result<(), String> {
 
     let status = status.map_err(|e| format!("Failed to open editor: {e}"))?;
     if !status.success() {
-        return Err(format!(
-            "Editor exited with error code: {:?}",
-            status.code()
-        ));
+        return Err(format!("Editor exited with error code: {:?}", status.code()));
     }
 
     Ok(())
 }
 
 pub fn dash_if_empty(value: &str) -> String {
-    if value.is_empty() {
-        "-".to_string()
-    } else {
-        value.to_string()
-    }
+    if value.is_empty() { "-".to_string() } else { value.to_string() }
 }

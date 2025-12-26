@@ -1,8 +1,7 @@
 use std::fs;
 
 use crate::model::{
-    Config, RelationshipLink, current_timestamp, git_commit, issue_dir, issue_meta_path,
-    issue_title, load_config, load_meta,
+    Config, RelationshipLink, current_timestamp, git_commit, issue_dir, issue_meta_path, issue_title, load_config, load_meta,
 };
 
 enum Action {
@@ -10,11 +9,7 @@ enum Action {
     Remove,
 }
 
-pub fn run(
-    id: u32,
-    add: Option<Vec<RelationshipLink>>,
-    remove: Option<Vec<RelationshipLink>>,
-) -> Result<(), String> {
+pub fn run(id: u32, add: Option<Vec<RelationshipLink>>, remove: Option<Vec<RelationshipLink>>) -> Result<(), String> {
     let dir = issue_dir(id);
     let path = dir.as_path();
 
@@ -58,11 +53,7 @@ pub fn run(
     Ok(())
 }
 
-fn validate_relationships(
-    id: u32,
-    relationships: &[RelationshipLink],
-    config: &Config,
-) -> Result<(), String> {
+fn validate_relationships(id: u32, relationships: &[RelationshipLink], config: &Config) -> Result<(), String> {
     for relationship in relationships {
         check_relationship(&relationship.relationship, config)?;
         check_target_ids(id, &relationship.target_ids)?;
@@ -99,12 +90,7 @@ fn check_target_ids(id: u32, target_ids: &Vec<u32>) -> Result<(), String> {
     Ok(())
 }
 
-fn update_relationship(
-    action: Action,
-    id: u32,
-    relationship: &RelationshipLink,
-    config: &Config,
-) -> Result<(), String> {
+fn update_relationship(action: Action, id: u32, relationship: &RelationshipLink, config: &Config) -> Result<(), String> {
     let current_timestamp = current_timestamp();
 
     let meta_path = issue_meta_path(id);
@@ -158,10 +144,7 @@ fn update_relationship(
 
             let mut target_meta_updated = target_meta.clone();
 
-            let relationship_category = target_meta_updated
-                .relationships
-                .entry(link.clone())
-                .or_insert_with(Vec::new);
+            let relationship_category = target_meta_updated.relationships.entry(link.clone()).or_insert_with(Vec::new);
 
             match action {
                 Action::Add => {
@@ -188,28 +171,23 @@ fn update_relationship(
     // Save updated meta files
 
     if meta_updated != meta {
-        let updated_yaml = serde_yaml::to_string(&meta_updated)
-            .map_err(|_| "Failed to serialize meta.yaml".to_string())?;
+        let updated_yaml = serde_yaml::to_string(&meta_updated).map_err(|_| "Failed to serialize meta.yaml".to_string())?;
 
         fs::write(&meta_path, updated_yaml).map_err(|_| "Failed to write meta.yaml".to_string())?;
     } else {
         return Err("No changes made to relationships".to_string());
     }
 
-    for ((target_meta, target_meta_updated), target_meta_path) in target_metas
-        .into_iter()
-        .zip(target_metas_updated)
-        .zip(target_metas_paths)
+    for ((target_meta, target_meta_updated), target_meta_path) in target_metas.into_iter().zip(target_metas_updated).zip(target_metas_paths)
     {
         if target_meta_updated == target_meta {
             continue;
         }
 
-        let updated_target_yaml = serde_yaml::to_string(&target_meta_updated)
-            .map_err(|_| "Failed to serialize target meta.yaml".to_string())?;
+        let updated_target_yaml =
+            serde_yaml::to_string(&target_meta_updated).map_err(|_| "Failed to serialize target meta.yaml".to_string())?;
 
-        fs::write(&target_meta_path, updated_target_yaml)
-            .map_err(|_| "Failed to write target meta.yaml".to_string())?;
+        fs::write(&target_meta_path, updated_target_yaml).map_err(|_| "Failed to write target meta.yaml".to_string())?;
     }
 
     Ok(())

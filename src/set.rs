@@ -1,8 +1,7 @@
 use std::fs;
 
 use crate::model::{
-    Priority, current_timestamp, git_commit, is_valid_iso_date, is_valid_state, is_valid_type,
-    issue_dir, issue_meta_path, load_meta,
+    Priority, current_timestamp, git_commit, is_valid_iso_date, is_valid_state, is_valid_type, issue_dir, issue_meta_path, load_meta,
 };
 
 #[allow(clippy::too_many_arguments)]
@@ -143,8 +142,7 @@ pub fn run(
 
     updated_meta.updated = current_timestamp();
 
-    let updated_yaml = serde_yaml::to_string(&updated_meta)
-        .map_err(|_| "Failed to serialize meta.yaml".to_string())?;
+    let updated_yaml = serde_yaml::to_string(&updated_meta).map_err(|_| "Failed to serialize meta.yaml".to_string())?;
 
     fs::write(&meta_path, updated_yaml).map_err(|_| "Failed to write meta.yaml".to_string())?;
 
