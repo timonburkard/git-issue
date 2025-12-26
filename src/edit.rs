@@ -1,6 +1,4 @@
-use crate::model::{
-    git_commit, issue_desc_path, issue_meta_path, load_config, load_meta, open_editor,
-};
+use crate::model::{git_commit, issue_desc_path, issue_title, load_config, open_editor};
 
 pub fn run(id: u32) -> Result<(), String> {
     let desc = issue_desc_path(id);
@@ -15,11 +13,9 @@ pub fn run(id: u32) -> Result<(), String> {
 
     open_editor(config.editor, desc.to_string_lossy().to_string())?;
 
-    // Load meta.yaml to get title for commit message
-    let meta_path = issue_meta_path(id);
-    let meta = load_meta(&meta_path)?;
+    let title = issue_title(id)?;
 
-    git_commit(id, meta.title, "edit description")?;
+    git_commit(id, title, "edit description")?;
 
     Ok(())
 }

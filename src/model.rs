@@ -135,6 +135,12 @@ pub fn load_description(path: &Path) -> Result<String, String> {
     Ok(raw)
 }
 
+pub fn issue_title(id: u32) -> Result<String, String> {
+    let meta_path = issue_meta_path(id);
+    let meta = load_meta(&meta_path)?;
+    Ok(meta.title)
+}
+
 fn padded_id(id: u32) -> String {
     format!("{id:010}")
 }
