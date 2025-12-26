@@ -1,9 +1,11 @@
 use std::fs;
 use std::path::Path;
 
-use crate::model::{Meta, dash_if_empty, gitissues_base, load_config, load_meta};
+use regex::Regex;
 
-pub fn run(columns: Option<Vec<String>>) -> Result<(), String> {
+use crate::model::{Filter, Meta, dash_if_empty, gitissues_base, load_config, load_meta};
+
+pub fn run(columns: Option<Vec<String>>, filter: Option<Vec<Filter>>) -> Result<(), String> {
     let path = Path::new(gitissues_base()).join("issues");
 
     // Precondition: .gitissues/issues must exist (user must run init first)
@@ -38,6 +40,10 @@ pub fn run(columns: Option<Vec<String>>) -> Result<(), String> {
     // Sort by numeric ID
     issues.sort_by_key(|m| m.id);
 
+    // Apply filters
+    filter_issues(&mut issues, filter)?;
+
+    // Print
     match columns {
         None => {
             print_default_list(&issues)?;
@@ -185,4 +191,54 @@ fn calculate_column_widths(issues: &[Meta], columns: &[String]) -> Result<std::c
     }
 
     Ok(widths)
+}
+
+fn filter_issues(issues: &mut Vec<Meta>, filters: Option<Vec<Filter>>) -> Result<(), String> {
+    if let Some(mut filters) = filters {
+        // Validate all filter fields
+        let mut filter_fields: Vec<String> = filters.iter().map(|f| f.field.clone()).collect();
+        validate_column_names(&mut filter_fields, "--filter")?;
+
+        // Update the actual filter struct with normalized field names
+        for (filter, normalized) in filters.iter_mut().zip(filter_fields) {
+            filter.field = normalized;
+        }
+
+        // Apply filters
+        issues.retain(|meta| {
+            filters.iter().all(|filter| match filter.field.as_str() {
+                "id" => do_strings_match(&meta.id.to_string(), &filter.value),
+                "title" => do_strings_match(&meta.title, &filter.value),
+                "state" => do_strings_match(&meta.state, &filter.value),
+                "type" => do_strings_match(&meta.type_, &filter.value),
+                "labels" => meta.labels.iter().any(|l| do_strings_match(l, &filter.value)),
+                "assignee" => do_strings_match(&meta.assignee, &filter.value),
+                "priority" => do_strings_match(&format!("{:?}", meta.priority), &filter.value),
+                "due_date" => do_strings_match(&meta.due_date, &filter.value),
+                "created" => do_strings_match(&meta.created, &filter.value),
+                "updated" => do_strings_match(&meta.updated, &filter.value),
+                _ => unreachable!("All filter fields should have been validated above"),
+            })
+        });
+    }
+    Ok(())
+}
+
+fn do_strings_match(value: &str, pattern: &str) -> bool {
+    let value = value.trim().to_lowercase();
+    let pattern = pattern.trim().to_lowercase();
+
+    // Escape regex special characters except '*'
+    let regex_pattern = regex::escape(&pattern).replace(r"\*", ".*");
+
+    // Add anchors to match the whole string
+    let regex_pattern = format!("^{}$", regex_pattern);
+
+    // Compile the regex
+    let re = match Regex::new(&regex_pattern) {
+        Ok(re) => re,
+        Err(_) => return false, // invalid regex
+    };
+
+    re.is_match(&value)
 }

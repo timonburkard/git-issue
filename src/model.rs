@@ -51,6 +51,25 @@ impl FromStr for RelationshipLink {
     }
 }
 
+#[derive(Clone)]
+pub struct Filter {
+    pub field: String,
+    pub value: String,
+}
+
+impl FromStr for Filter {
+    type Err = String;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        let (field, value) = s.split_once('=').ok_or("expected format: <field>=<value>")?;
+
+        Ok(Filter {
+            field: field.to_string(),
+            value: value.to_string(),
+        })
+    }
+}
+
 #[derive(Debug, Serialize, Deserialize, Clone, PartialEq, Eq)]
 pub struct Meta {
     pub id: u32,
