@@ -57,8 +57,13 @@ pub fn run(columns: Option<Vec<String>>) -> Result<(), String> {
     Ok(())
 }
 
-fn validate_column_names(columns: &Vec<String>, context: &str) -> Result<(), String> {
-    for col in columns {
+fn validate_column_names(columns: &mut [String], context: &str) -> Result<(), String> {
+    for col in columns.iter_mut() {
+        // normalize aliases
+        if col == "due-date" {
+            *col = "due_date".to_string();
+        }
+
         if ![
             "id", "title", "state", "type", "labels", "assignee", "priority", "due_date",
             "created", "updated", "*",
@@ -77,11 +82,11 @@ fn print_default_list(issues: &Vec<Meta>) -> Result<(), String> {
 
     let mut columns = config.list_columns;
 
-    validate_column_names(&columns, "config.yaml:list_columns")?;
+    validate_column_names(&mut columns, "config.yaml:list_columns")?;
 
     wildcard_expansion(&mut columns);
 
-    let column_widths = calculate_column_widths(issues, &columns);
+    let column_widths = calculate_column_widths(issues, &columns)?;
 
     // Header
     for col in &columns {
@@ -93,7 +98,7 @@ fn print_default_list(issues: &Vec<Meta>) -> Result<(), String> {
     // Rows
     for meta in issues {
         for col in &columns {
-            let value = get_column_value(col, meta);
+            let value = get_column_value(col, meta)?;
             let width = *column_widths.get(col).unwrap_or(&22);
             print!("{:<width$}", value, width = width);
         }
@@ -104,11 +109,11 @@ fn print_default_list(issues: &Vec<Meta>) -> Result<(), String> {
 }
 
 fn print_custom_list(issues: &Vec<Meta>, mut columns: Vec<String>) -> Result<(), String> {
-    validate_column_names(&columns, "--columns")?;
+    validate_column_names(&mut columns, "--columns")?;
 
     wildcard_expansion(&mut columns);
 
-    let column_widths = calculate_column_widths(issues, &columns);
+    let column_widths = calculate_column_widths(issues, &columns)?;
 
     // Print header
     for col in &columns {
@@ -121,7 +126,7 @@ fn print_custom_list(issues: &Vec<Meta>, mut columns: Vec<String>) -> Result<(),
     // Print rows
     for meta in issues {
         for col in &columns {
-            let value = get_column_value(col, meta);
+            let value = get_column_value(col, meta)?;
             let width = *column_widths.get(col).unwrap_or(&22);
             print!("{:<width$}", value, width = width);
         }
@@ -148,50 +153,34 @@ fn wildcard_expansion(columns: &mut Vec<String>) {
     }
 }
 
-fn get_column_value(col: &str, meta: &Meta) -> String {
+fn dash_if_empty(value: &str) -> String {
+    if value.is_empty() {
+        "-".to_string()
+    } else {
+        value.to_string()
+    }
+}
+
+fn get_column_value(col: &str, meta: &Meta) -> Result<String, String> {
     match col {
-        "id" => meta.id.to_string(),
-        "title" => meta.title.clone(),
-        "state" => meta.state.clone(),
-        "type" => {
-            if meta.type_.is_empty() {
-                "-".to_string()
-            } else {
-                meta.type_.clone()
-            }
-        }
-        "labels" => {
-            if meta.labels.is_empty() {
-                "-".to_string()
-            } else {
-                meta.labels.join(",")
-            }
-        }
-        "assignee" => {
-            if meta.assignee.is_empty() {
-                "-".to_string()
-            } else {
-                meta.assignee.clone()
-            }
-        }
-        "priority" => format!("{:?}", meta.priority),
-        "due_date" => {
-            if meta.due_date.is_empty() {
-                "-".to_string()
-            } else {
-                meta.due_date.clone()
-            }
-        }
-        "created" => meta.created.clone(),
-        "updated" => meta.updated.clone(),
-        _ => "-".to_string(),
+        "id" => Ok(meta.id.to_string()),
+        "title" => Ok(meta.title.clone()),
+        "state" => Ok(meta.state.clone()),
+        "type" => Ok(dash_if_empty(&meta.type_)),
+        "labels" => Ok(dash_if_empty(&meta.labels.join(","))),
+        "assignee" => Ok(dash_if_empty(&meta.assignee)),
+        "priority" => Ok(format!("{:?}", meta.priority)),
+        "due_date" => Ok(dash_if_empty(&meta.due_date)),
+        "created" => Ok(meta.created.clone()),
+        "updated" => Ok(meta.updated.clone()),
+        _ => Err(format!("Unknown column: {}", col)),
     }
 }
 
 fn calculate_column_widths(
     issues: &[Meta],
     columns: &[String],
-) -> std::collections::HashMap<String, usize> {
+) -> Result<std::collections::HashMap<String, usize>, String> {
     use std::collections::HashMap;
     let mut widths: HashMap<String, usize> = HashMap::new();
 
@@ -203,7 +192,7 @@ fn calculate_column_widths(
     // Update with max content widths
     for meta in issues {
         for col in columns {
-            let value = get_column_value(col, meta);
+            let value = get_column_value(col, meta)?;
             let width = widths.get(col).copied().unwrap_or(0);
             widths.insert(col.clone(), width.max(value.len()));
         }
@@ -214,5 +203,5 @@ fn calculate_column_widths(
         *width += 2;
     }
 
-    widths
+    Ok(widths)
 }
