@@ -15,9 +15,7 @@ Issues live alongside your code inside `.gitissues/`, making them platform-indep
 - ✅ External editor renders issue information as markdown
 - ✅ Git-integration: auto-commit of changes
 - ✅ Automated integration tests
-- 🚧 Filtering/sorting of `list` view
 - 🚧 Add `search` command across all issue titles and descriptions
-- 🚧 Relationships between issues
 - 🚧 Comments / discussions
 
 ## Usage
@@ -42,6 +40,7 @@ git issue new "Login redirection problem" --type bug --labels software,ui --assi
 git issue list
 git issue list --columns id,assignee,title
 git issue list --columns "*"
+git issue list --filter priority=p2 title=*driver*
 
 # Show all issue information (markdown) -- launches external text editor
 git issue show 1234
