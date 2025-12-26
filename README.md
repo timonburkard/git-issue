@@ -284,7 +284,7 @@ updated: 2025-12-22T20:36:11Z  # (Timestamp) Issue was last updated at
   - `list.rs`  -- List all issues
   - `new.rs`   -- Create new issues
   - `set.rs`   -- Change issue meta fields
-  - `show.rs`  -- Show details of an issue
+  - `show.rs`  -- Show all issue information
 
 ## Dependencies
 
