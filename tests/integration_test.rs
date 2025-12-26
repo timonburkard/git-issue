@@ -1,3 +1,4 @@
+use chrono::Utc;
 use serde_yaml::Value;
 use std::env;
 use std::fs;
@@ -95,6 +96,7 @@ fn test_basic_workflow() {
     assert!(PathBuf::from(".gitissues/issues").exists());
 
     // Step 2: Create 3 issues
+    let now = Utc::now().format("%Y-%m-%dT%H:%M:%SZ").to_string();
     run_command(&["new", "First issue"]).expect("new 1 failed");
     run_command(&["new", "Second issue"]).expect("new 2 failed");
     run_command(&["new", "Third issue"]).expect("new 3 failed");
@@ -118,8 +120,16 @@ fn test_basic_workflow() {
     let meta1 = load_meta_value(".gitissues/issues/0000000001/meta.yaml");
     assert_eq!(meta1["id"].as_i64().unwrap(), 1);
     assert_eq!(meta1["title"].as_str().unwrap(), "First issue");
-    assert_eq!(meta1["state"].as_str().unwrap(), "new");
+    assert_eq!(meta1["state"].as_str().unwrap(), "new"); // default
+    assert_eq!(meta1["type"].as_str().unwrap(), "");
+    assert_eq!(meta1["assignee"].as_str().unwrap(), "");
     assert_eq!(meta1["priority"].as_str().unwrap(), "P2"); // default
+    assert_eq!(meta1["due_date"].as_str().unwrap(), "");
+
+    let created = meta1["created"].as_str().unwrap();
+    let updated = meta1["created"].as_str().unwrap();
+    assert_eq!(created, now);
+    assert_eq!(created, updated);
 
     let meta2 = load_meta_value(".gitissues/issues/0000000002/meta.yaml");
     assert_eq!(meta2["id"].as_i64().unwrap(), 2);
@@ -140,6 +150,8 @@ fn test_basic_workflow() {
         "active",
         "--type",
         "bug",
+        "--labels",
+        "cli,fw",
         "--assignee",
         "alice",
         "--priority",
@@ -154,6 +166,13 @@ fn test_basic_workflow() {
     let meta2_updated = load_meta_value(".gitissues/issues/0000000002/meta.yaml");
     assert_eq!(meta2_updated["state"].as_str().unwrap(), "active");
     assert_eq!(meta2_updated["type"].as_str().unwrap(), "bug");
+    let labels: Vec<String> = meta2_updated["labels"]
+        .as_sequence()
+        .unwrap()
+        .iter()
+        .map(|v| v.as_str().unwrap().to_string())
+        .collect();
+    assert_eq!(labels, vec!["cli", "fw"]);
     assert_eq!(meta2_updated["assignee"].as_str().unwrap(), "alice");
     assert_eq!(meta2_updated["priority"].as_str().unwrap(), "P1");
     assert_eq!(meta2_updated["due_date"].as_str().unwrap(), "2026-06-15");
