@@ -15,7 +15,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     - [cmd] added `link` command to change relationships between issues (GitHub Issue #29)
     - [cli] accept `due-date` and `due_date` for `list` columns, `new` and `set` commands
     - [test] added more checks for `basic_workflow` and more tests for `set` command
-    - [meta] added configurable list of available options for `state`, `type` and `assignee` (users) (GitHub Issue 36)
+    - [meta] added configurable list of available options for `state`, `type` and `assignee` (users) (GitHub Issue #36)
     - [ci] added automated integration tests
 
 ## [v0.3.0] - 2025-12-23
