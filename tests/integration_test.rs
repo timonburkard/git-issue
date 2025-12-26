@@ -95,8 +95,14 @@ fn test_basic_workflow() {
     assert!(PathBuf::from(".gitissues/description.md").exists());
     assert!(PathBuf::from(".gitissues/issues").exists());
 
+    // Current time
+    let t = Utc::now();
+    let now = t.format("%Y-%m-%dT%H:%M:%SZ").to_string();
+    let now_plus_1s = (t + Duration::from_secs(1))
+        .format("%Y-%m-%dT%H:%M:%SZ")
+        .to_string();
+
     // Step 2: Create 3 issues
-    let now = Utc::now().format("%Y-%m-%dT%H:%M:%SZ").to_string();
     run_command(&["new", "First issue"]).expect("new 1 failed");
     run_command(&["new", "Second issue"]).expect("new 2 failed");
     run_command(&["new", "Third issue"]).expect("new 3 failed");
@@ -128,8 +134,16 @@ fn test_basic_workflow() {
 
     let created = meta1["created"].as_str().unwrap();
     let updated = meta1["created"].as_str().unwrap();
-    assert_eq!(created, now);
+
     assert_eq!(created, updated);
+
+    assert!(
+        created == now || created == now_plus_1s,
+        "expected {} or {}, got {}",
+        now,
+        now_plus_1s,
+        created
+    );
 
     let meta2 = load_meta_value(".gitissues/issues/0000000002/meta.yaml");
     assert_eq!(meta2["id"].as_i64().unwrap(), 2);
