@@ -15,6 +15,7 @@ Issues live alongside your code inside `.gitissues/`, making them platform-indep
 - ✅ Highly configurable: default columns for `list`, available options for `state` and `type`, relation ship categories, commit message template, external editor
 - ✅ External editor renders issue information as markdown
 - ✅ Git-integration: auto-commit of changes
+- ✅ Possibility to export issue list into CSV file
 - ✅ Automated integration tests
 - 🚧 Add `search` command across all issue titles and descriptions
 - 🚧 Comments / discussions
@@ -43,6 +44,7 @@ git issue list --columns id,assignee,title
 git issue list --columns "*"
 git issue list --filter priority=p2 title=*driver*
 git issue list --sort assignee=asc priority=desc
+git issue list --csv
 
 # Show all issue information (markdown) -- launches external text editor
 git issue show 1234
@@ -126,6 +128,9 @@ relationships:
     link: child
   child:
     link: parent
+
+# Separator used when exporting to CSV
+export_csv_separator: ','
 ```
 
 #### Options
@@ -140,6 +145,7 @@ relationships:
 - `states` (list of strings): Available issue states. Default is the first element.
 - `types` (list of strings): Available issue types. Default is empty.
 - `relationships` (object): Available relationships between issues
+- `export_csv_separator` (char): Separator for CSV file exports
 
 #### users.yaml
 
@@ -233,6 +239,7 @@ Issues live in `.gitissues/issues/{ID}/`:
 ├── .tmp/           # Temporary files: Put in `.gitignore`
 ├── config.yaml     # Configuration
 ├── description.md  # Description template
+├── exports/        # Location of CSV exports: Put in `.gitignore`
 └── issues/
     └── 0000000001/
         ├── meta.yaml       # Structured metadata
