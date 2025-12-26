@@ -3,12 +3,12 @@ use std::path::Path;
 
 use regex::Regex;
 
-use crate::model::{Filter, Meta, dash_if_empty, gitissues_base, load_config, load_meta};
+use crate::model::{Filter, Meta, Sorting, dash_if_empty, gitissues_base, load_config, load_meta};
 
-pub fn run(columns: Option<Vec<String>>, filter: Option<Vec<Filter>>) -> Result<(), String> {
+pub fn run(columns: Option<Vec<String>>, filter: Option<Vec<Filter>>, sort: Option<Vec<Sorting>>) -> Result<(), String> {
     let mut issues = get_issues_metadata()?;
 
-    sort_issues(&mut issues);
+    sort_issues(&mut issues, sort)?;
 
     filter_issues(&mut issues, filter)?;
 
@@ -245,6 +245,45 @@ fn do_strings_match(value: &str, pattern: &str) -> bool {
     re.is_match(&value)
 }
 
-fn sort_issues(issues: &mut [Meta]) {
-    issues.sort_by_key(|m| m.id);
+fn sort_issues(issues: &mut [Meta], sorts: Option<Vec<Sorting>>) -> Result<(), String> {
+    if let Some(mut sorts) = sorts {
+        // Validate all sort fields
+        let mut sort_fields: Vec<String> = sorts.iter().map(|s| s.field.clone()).collect();
+        validate_column_names(&mut sort_fields, "--sort")?;
+
+        // Update the actual sort struct with normalized field names
+        for (sort, normalized) in sorts.iter_mut().zip(sort_fields) {
+            sort.field = normalized;
+        }
+
+        issues.sort_by(|a, b| {
+            for sort in &sorts {
+                let ordering = match sort.field.as_str() {
+                    "id" => a.id.cmp(&b.id),
+                    "title" => a.title.cmp(&b.title),
+                    "state" => a.state.cmp(&b.state),
+                    "type" => a.type_.cmp(&b.type_),
+                    "labels" => a.labels.cmp(&b.labels),
+                    "assignee" => a.assignee.cmp(&b.assignee),
+                    "priority" => a.priority.as_int().cmp(&b.priority.as_int()),
+                    "due_date" => a.due_date.cmp(&b.due_date),
+                    "created" => a.created.cmp(&b.created),
+                    "updated" => a.updated.cmp(&b.updated),
+                    _ => std::cmp::Ordering::Equal, // Unknown field: treat as equal
+                };
+                let ordering = match sort.order {
+                    crate::model::Order::Asc => ordering,
+                    crate::model::Order::Desc => ordering.reverse(),
+                };
+                if ordering != std::cmp::Ordering::Equal {
+                    return ordering;
+                }
+            }
+            std::cmp::Ordering::Equal
+        });
+    } else {
+        issues.sort_by_key(|m| m.id);
+    }
+
+    Ok(())
 }

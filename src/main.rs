@@ -1,7 +1,7 @@
 #![deny(warnings, clippy::unwrap_used, clippy::expect_used)]
 use clap::{Parser, Subcommand};
 
-use crate::model::{Filter, Priority, RelationshipLink};
+use crate::model::{Filter, Priority, RelationshipLink, Sorting};
 
 mod edit;
 mod init;
@@ -62,9 +62,13 @@ enum Commands {
         #[arg(long, value_delimiter = ',')]
         columns: Option<Vec<String>>,
 
-        /// Filter issues by meta fields
+        /// Filter issues by meta fields [<field>=<value>]
         #[arg(long, num_args = 1..)]
         filter: Option<Vec<Filter>>,
+
+        /// Sort issues by meta fields  [<field>=asc|desc]
+        #[arg(long, num_args = 1..)]
+        sort: Option<Vec<Sorting>>,
     },
 
     /// Show issue details
@@ -151,7 +155,7 @@ fn main() {
             labels,
         } => new::run(title, type_, assignee, priority, due_date, labels),
 
-        Commands::List { columns, filter } => list::run(columns, filter),
+        Commands::List { columns, filter, sort } => list::run(columns, filter, sort),
 
         Commands::Show { id } => show::run(id),
 
