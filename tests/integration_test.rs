@@ -1,3 +1,4 @@
+use chrono::Utc;
 use serde_yaml::Value;
 use std::env;
 use std::fs;
@@ -94,6 +95,13 @@ fn test_basic_workflow() {
     assert!(PathBuf::from(".gitissues/description.md").exists());
     assert!(PathBuf::from(".gitissues/issues").exists());
 
+    // Current time
+    let t = Utc::now();
+    let now = t.format("%Y-%m-%dT%H:%M:%SZ").to_string();
+    let now_plus_1s = (t + Duration::from_secs(1))
+        .format("%Y-%m-%dT%H:%M:%SZ")
+        .to_string();
+
     // Step 2: Create 3 issues
     run_command(&["new", "First issue"]).expect("new 1 failed");
     run_command(&["new", "Second issue"]).expect("new 2 failed");
@@ -118,8 +126,24 @@ fn test_basic_workflow() {
     let meta1 = load_meta_value(".gitissues/issues/0000000001/meta.yaml");
     assert_eq!(meta1["id"].as_i64().unwrap(), 1);
     assert_eq!(meta1["title"].as_str().unwrap(), "First issue");
-    assert_eq!(meta1["state"].as_str().unwrap(), "new");
+    assert_eq!(meta1["state"].as_str().unwrap(), "new"); // default
+    assert_eq!(meta1["type"].as_str().unwrap(), "");
+    assert_eq!(meta1["assignee"].as_str().unwrap(), "");
     assert_eq!(meta1["priority"].as_str().unwrap(), "P2"); // default
+    assert_eq!(meta1["due_date"].as_str().unwrap(), "");
+
+    let created = meta1["created"].as_str().unwrap();
+    let updated = meta1["created"].as_str().unwrap();
+
+    assert_eq!(created, updated);
+
+    assert!(
+        created == now || created == now_plus_1s,
+        "expected {} or {}, got {}",
+        now,
+        now_plus_1s,
+        created
+    );
 
     let meta2 = load_meta_value(".gitissues/issues/0000000002/meta.yaml");
     assert_eq!(meta2["id"].as_i64().unwrap(), 2);
@@ -140,6 +164,8 @@ fn test_basic_workflow() {
         "active",
         "--type",
         "bug",
+        "--labels",
+        "cli,fw",
         "--assignee",
         "alice",
         "--priority",
@@ -154,6 +180,13 @@ fn test_basic_workflow() {
     let meta2_updated = load_meta_value(".gitissues/issues/0000000002/meta.yaml");
     assert_eq!(meta2_updated["state"].as_str().unwrap(), "active");
     assert_eq!(meta2_updated["type"].as_str().unwrap(), "bug");
+    let labels: Vec<String> = meta2_updated["labels"]
+        .as_sequence()
+        .unwrap()
+        .iter()
+        .map(|v| v.as_str().unwrap().to_string())
+        .collect();
+    assert_eq!(labels, vec!["cli", "fw"]);
     assert_eq!(meta2_updated["assignee"].as_str().unwrap(), "alice");
     assert_eq!(meta2_updated["priority"].as_str().unwrap(), "P1");
     assert_eq!(meta2_updated["due_date"].as_str().unwrap(), "2026-06-15");
@@ -350,4 +383,255 @@ fn test_list_basic() {
     assert!(stdout.contains("Issue 1"));
     assert!(stdout.contains("Issue 2"));
     assert!(stdout.contains("Issue 3"));
+}
+
+#[test]
+fn test_set_assignee() {
+    let _env = TestEnv::new();
+
+    run_command(&["init", "--no-commit"]).expect("init failed");
+
+    // Create an issue
+    run_command(&["new", "Issue 1"]).expect("new 1 failed");
+
+    // List to check that assignee is empty
+    let output =
+        run_command(&["list", "--columns", "title,assignee"]).expect("list with assignee failed");
+    let stdout = String::from_utf8_lossy(&output.stdout);
+    assert!(stdout.contains("title"));
+    assert!(stdout.contains("Issue 1"));
+    assert!(stdout.contains("assignee"));
+    assert!(stdout.contains("-"));
+
+    // Set valid assignee
+    run_command(&["set", "1", "--assignee", "bob"]).expect("set assignee failed");
+
+    // List to check that assignee was set
+    let output =
+        run_command(&["list", "--columns", "title,assignee"]).expect("list with assignee failed");
+    let stdout = String::from_utf8_lossy(&output.stdout);
+    assert!(stdout.contains("title"));
+    assert!(stdout.contains("Issue 1"));
+    assert!(stdout.contains("assignee"));
+    assert!(stdout.contains("bob"));
+
+    // Set invalid assignee
+    run_command(&["set", "1", "--assignee", "duck"])
+        .expect_err("set assignee successful but should fail");
+
+    // List to check that invalid assignee was not set
+    let output =
+        run_command(&["list", "--columns", "title,assignee"]).expect("list with assignee failed");
+    let stdout = String::from_utf8_lossy(&output.stdout);
+    assert!(stdout.contains("title"));
+    assert!(stdout.contains("Issue 1"));
+    assert!(stdout.contains("assignee"));
+    assert!(stdout.contains("bob"));
+    assert!(!stdout.contains("duck"));
+
+    // Remove assignee
+    run_command(&["set", "1", "--assignee", ""]).expect("remove assignee failed");
+
+    // List to check that assignee was removed
+    let output =
+        run_command(&["list", "--columns", "title,assignee"]).expect("list with assignee failed");
+    let stdout = String::from_utf8_lossy(&output.stdout);
+    assert!(stdout.contains("title"));
+    assert!(stdout.contains("Issue 1"));
+    assert!(stdout.contains("assignee"));
+    assert!(!stdout.contains("bob"));
+    assert!(stdout.contains("-"));
+}
+
+#[test]
+fn test_set_state() {
+    let _env = TestEnv::new();
+
+    run_command(&["init", "--no-commit"]).expect("init failed");
+
+    // Create an issue
+    run_command(&["new", "Issue 1"]).expect("new 1 failed");
+
+    // List to check that state is new
+    let output =
+        run_command(&["list", "--columns", "title,state"]).expect("list with state failed");
+    let stdout = String::from_utf8_lossy(&output.stdout);
+    assert!(stdout.contains("title"));
+    assert!(stdout.contains("Issue 1"));
+    assert!(stdout.contains("state"));
+    assert!(stdout.contains("new"));
+
+    // Set valid state
+    run_command(&["set", "1", "--state", "active"]).expect("set state failed");
+
+    // List to check that state was set
+    let output =
+        run_command(&["list", "--columns", "title,state"]).expect("list with state failed");
+    let stdout = String::from_utf8_lossy(&output.stdout);
+    assert!(stdout.contains("title"));
+    assert!(stdout.contains("Issue 1"));
+    assert!(stdout.contains("state"));
+    assert!(stdout.contains("active"));
+
+    // Set invalid state
+    run_command(&["set", "1", "--state", "perfect"])
+        .expect_err("set state successful but should fail");
+
+    // List to check that invalid state was not set
+    let output =
+        run_command(&["list", "--columns", "title,state"]).expect("list with state failed");
+    let stdout = String::from_utf8_lossy(&output.stdout);
+    assert!(stdout.contains("title"));
+    assert!(stdout.contains("Issue 1"));
+    assert!(stdout.contains("state"));
+    assert!(stdout.contains("active"));
+    assert!(!stdout.contains("perfect"));
+
+    // Try to remove state
+    run_command(&["set", "1", "--state", ""]).expect_err("remove state successful but should fail");
+
+    // List to check that state was not removed
+    let output =
+        run_command(&["list", "--columns", "title,state"]).expect("list with state failed");
+    let stdout = String::from_utf8_lossy(&output.stdout);
+    assert!(stdout.contains("title"));
+    assert!(stdout.contains("Issue 1"));
+    assert!(stdout.contains("state"));
+    assert!(stdout.contains("active"));
+}
+
+#[test]
+fn test_set_type() {
+    let _env = TestEnv::new();
+
+    run_command(&["init", "--no-commit"]).expect("init failed");
+
+    // Create an issue
+    run_command(&["new", "Issue 1"]).expect("new 1 failed");
+
+    // List to check that type is empty
+    let output = run_command(&["list", "--columns", "title,type"]).expect("list with type failed");
+    let stdout = String::from_utf8_lossy(&output.stdout);
+    assert!(stdout.contains("title"));
+    assert!(stdout.contains("Issue 1"));
+    assert!(stdout.contains("type"));
+    assert!(stdout.contains("-"));
+
+    // Set valid type
+    run_command(&["set", "1", "--type", "feature"]).expect("set type failed");
+
+    // List to check that state was set
+    let output = run_command(&["list", "--columns", "title,type"]).expect("list with type failed");
+    let stdout = String::from_utf8_lossy(&output.stdout);
+    assert!(stdout.contains("title"));
+    assert!(stdout.contains("Issue 1"));
+    assert!(stdout.contains("type"));
+    assert!(stdout.contains("feature"));
+
+    // Set invalid type
+    run_command(&["set", "1", "--type", "experiment"])
+        .expect_err("set type successful but should fail");
+    // List to check that invalid type was not set
+    let output = run_command(&["list", "--columns", "title,type"]).expect("list with type failed");
+    let stdout = String::from_utf8_lossy(&output.stdout);
+    assert!(stdout.contains("title"));
+    assert!(stdout.contains("Issue 1"));
+    assert!(stdout.contains("type"));
+    assert!(stdout.contains("feature"));
+    assert!(!stdout.contains("experiment"));
+
+    // Remove type
+    run_command(&["set", "1", "--type", ""]).expect("remove type failed");
+
+    // List to check that type was removed
+    let output = run_command(&["list", "--columns", "title,type"]).expect("list with state failed");
+    let stdout = String::from_utf8_lossy(&output.stdout);
+    assert!(stdout.contains("title"));
+    assert!(stdout.contains("Issue 1"));
+    assert!(stdout.contains("type"));
+    assert!(stdout.contains("-"));
+}
+
+#[test]
+fn test_set_priority() {
+    let _env = TestEnv::new();
+
+    run_command(&["init", "--no-commit"]).expect("init failed");
+
+    // Create an issue
+    run_command(&["new", "Issue 1"]).expect("new 1 failed");
+
+    // List to check that priority is P2
+    let output =
+        run_command(&["list", "--columns", "title,priority"]).expect("list with priority failed");
+    let stdout = String::from_utf8_lossy(&output.stdout);
+    assert!(stdout.contains("title"));
+    assert!(stdout.contains("Issue 1"));
+    assert!(stdout.contains("priority"));
+    assert!(stdout.contains("P2"));
+
+    // Set valid priority
+    run_command(&["set", "1", "--priority", "P1"]).expect("set priority failed");
+
+    // List to check that priority was set
+    let output =
+        run_command(&["list", "--columns", "title,priority"]).expect("list with priority failed");
+    let stdout = String::from_utf8_lossy(&output.stdout);
+    assert!(stdout.contains("title"));
+    assert!(stdout.contains("Issue 1"));
+    assert!(stdout.contains("priority"));
+    assert!(stdout.contains("P1"));
+
+    // Set valid priority in lowercase
+    run_command(&["set", "1", "--priority", "p0"]).expect("set priority failed");
+
+    // List to check that priority was set
+    let output =
+        run_command(&["list", "--columns", "title,priority"]).expect("list with priority failed");
+    let stdout = String::from_utf8_lossy(&output.stdout);
+    assert!(stdout.contains("title"));
+    assert!(stdout.contains("Issue 1"));
+    assert!(stdout.contains("priority"));
+    assert!(stdout.contains("P0"));
+
+    // Set non-existing priority
+    run_command(&["set", "1", "--priority", "P5"])
+        .expect_err("set priority successful but should fail");
+
+    // List to check that non-existing priority was not set
+    let output =
+        run_command(&["list", "--columns", "title,priority"]).expect("list with priority failed");
+    let stdout = String::from_utf8_lossy(&output.stdout);
+    assert!(stdout.contains("title"));
+    assert!(stdout.contains("Issue 1"));
+    assert!(stdout.contains("priority"));
+    assert!(stdout.contains("P0"));
+    assert!(!stdout.contains("P5"));
+
+    // Set invalid priority
+    run_command(&["set", "1", "--priority", "3"])
+        .expect_err("set priority successful but should fail");
+
+    // List to check that non-existing priority was not set
+    let output =
+        run_command(&["list", "--columns", "title,priority"]).expect("list with priority failed");
+    let stdout = String::from_utf8_lossy(&output.stdout);
+    assert!(stdout.contains("title"));
+    assert!(stdout.contains("Issue 1"));
+    assert!(stdout.contains("priority"));
+    assert!(stdout.contains("P0"));
+    assert!(!stdout.contains("3"));
+
+    // Try to remove priority
+    run_command(&["set", "1", "--priority", ""])
+        .expect_err("remove priority successful but should fail");
+
+    // List to check that priority was not removed
+    let output =
+        run_command(&["list", "--columns", "title,priority"]).expect("list with priority failed");
+    let stdout = String::from_utf8_lossy(&output.stdout);
+    assert!(stdout.contains("title"));
+    assert!(stdout.contains("Issue 1"));
+    assert!(stdout.contains("priority"));
+    assert!(stdout.contains("P0"));
 }
