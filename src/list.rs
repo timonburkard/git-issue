@@ -148,40 +148,24 @@ fn wildcard_expansion(columns: &mut Vec<String>) {
     }
 }
 
+fn dash_if_empty(value: &str) -> String {
+    if value.is_empty() {
+        "-".to_string()
+    } else {
+        value.to_string()
+    }
+}
+
 fn get_column_value(col: &str, meta: &Meta) -> Result<String, String> {
     match col {
         "id" => Ok(meta.id.to_string()),
         "title" => Ok(meta.title.clone()),
         "state" => Ok(meta.state.clone()),
-        "type" => {
-            if meta.type_.is_empty() {
-                Ok("-".to_string())
-            } else {
-                Ok(meta.type_.clone())
-            }
-        }
-        "labels" => {
-            if meta.labels.is_empty() {
-                Ok("-".to_string())
-            } else {
-                Ok(meta.labels.join(","))
-            }
-        }
-        "assignee" => {
-            if meta.assignee.is_empty() {
-                Ok("-".to_string())
-            } else {
-                Ok(meta.assignee.clone())
-            }
-        }
+        "type" => Ok(dash_if_empty(&meta.type_)),
+        "labels" => Ok(dash_if_empty(&meta.labels.join(","))),
+        "assignee" => Ok(dash_if_empty(&meta.assignee)),
         "priority" => Ok(format!("{:?}", meta.priority)),
-        "due_date" => {
-            if meta.due_date.is_empty() {
-                Ok("-".to_string())
-            } else {
-                Ok(meta.due_date.clone())
-            }
-        }
+        "due_date" => Ok(dash_if_empty(&meta.due_date)),
         "created" => Ok(meta.created.clone()),
         "updated" => Ok(meta.updated.clone()),
         _ => Err(format!("Unknown column: {}", col)),
