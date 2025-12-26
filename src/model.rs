@@ -354,3 +354,11 @@ pub fn open_editor(mut editor: String, path: String) -> Result<(), String> {
 
     Ok(())
 }
+
+pub fn dash_if_empty(value: &str) -> String {
+    if value.is_empty() {
+        "-".to_string()
+    } else {
+        value.to_string()
+    }
+}

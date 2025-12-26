@@ -1,7 +1,7 @@
 use std::fs;
 use std::path::Path;
 
-use crate::model::{Meta, gitissues_base, load_config, load_meta};
+use crate::model::{Meta, dash_if_empty, gitissues_base, load_config, load_meta};
 
 pub fn run(columns: Option<Vec<String>>) -> Result<(), String> {
     let path = Path::new(gitissues_base()).join("issues");
@@ -150,14 +150,6 @@ fn wildcard_expansion(columns: &mut Vec<String>) {
             "created".to_string(),
             "updated".to_string(),
         ];
-    }
-}
-
-fn dash_if_empty(value: &str) -> String {
-    if value.is_empty() {
-        "-".to_string()
-    } else {
-        value.to_string()
     }
 }
 
