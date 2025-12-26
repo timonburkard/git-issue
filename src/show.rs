@@ -1,6 +1,8 @@
 use std::fs;
 use std::path::Path;
 
+use indexmap::IndexMap;
+
 use regex::Regex;
 
 use crate::model::{
@@ -59,13 +61,13 @@ fn generate_content_metadata(id: u32, meta: &Meta) -> String {
     content.push('\n');
     content.push_str("## Meta Data\n");
     content.push('\n');
-    content.push_str("| **field**    | **value** |\n");
-    content.push_str("| ------------ | --------- |\n");
-    content.push_str(&format!("| **id**       | {} |\n", meta.id));
-    content.push_str(&format!("| **title**    | {} |\n", meta.title));
-    content.push_str(&format!("| **state**    | {} |\n", meta.state));
+    content.push_str("| **field**         | **value** |\n");
+    content.push_str("| ----------------- | --------- |\n");
+    content.push_str(&format!("| **id**            | {} |\n", meta.id));
+    content.push_str(&format!("| **title**         | {} |\n", meta.title));
+    content.push_str(&format!("| **state**         | {} |\n", meta.state));
     content.push_str(&format!(
-        "| **type**     | {} |\n",
+        "| **type**          | {} |\n",
         if meta.type_.is_empty() {
             "-".to_string()
         } else {
@@ -73,7 +75,7 @@ fn generate_content_metadata(id: u32, meta: &Meta) -> String {
         },
     ));
     content.push_str(&format!(
-        "| **labels**   | {} |\n",
+        "| **labels**        | {} |\n",
         if meta.labels.is_empty() {
             "-".to_string()
         } else {
@@ -81,24 +83,57 @@ fn generate_content_metadata(id: u32, meta: &Meta) -> String {
         }
     ));
     content.push_str(&format!(
-        "| **assignee** | {} |\n",
+        "| **assignee**      | {} |\n",
         if meta.assignee.is_empty() {
             "-".to_string()
         } else {
             meta.assignee.clone()
         }
     ));
-    content.push_str(&format!("| **priority** | {:?} |\n", meta.priority));
+    content.push_str(&format!("| **priority**      | {:?} |\n", meta.priority));
     content.push_str(&format!(
-        "| **due_date** | {} |\n",
+        "| **due_date**      | {} |\n",
         if meta.due_date.is_empty() {
             "-".to_string()
         } else {
             meta.due_date.clone()
         }
     ));
-    content.push_str(&format!("| **created**  | {} |\n", meta.created));
-    content.push_str(&format!("| **updated**  | {} |\n", meta.updated));
+    content.push_str(content_relationships(&meta.relationships).as_str());
+    content.push_str(&format!("| **created**       | {} |\n", meta.created));
+    content.push_str(&format!("| **updated**       | {} |\n", meta.updated));
+
+    content
+}
+
+fn content_relationships(relationships: &IndexMap<String, Vec<u32>>) -> String {
+    let mut content = String::new();
+
+    if relationships.is_empty() {
+        content.push_str("| **relationships** | - |\n");
+        return content;
+    }
+
+    let mut first = true;
+    for (rel_type, ids) in relationships {
+        let ids_str = ids
+            .iter()
+            .map(|id| id.to_string())
+            .collect::<Vec<String>>()
+            .join(", ");
+        if first {
+            content.push_str(&format!(
+                "| **relationships** | {}: {} |\n",
+                rel_type, ids_str
+            ));
+            first = false;
+        } else {
+            content.push_str(&format!(
+                "|                   | {}: {} |\n",
+                rel_type, ids_str
+            ));
+        }
+    }
 
     content
 }
