@@ -81,7 +81,7 @@ fn print_default_list(issues: &Vec<Meta>) -> Result<(), String> {
 
     wildcard_expansion(&mut columns);
 
-    let column_widths = calculate_column_widths(issues, &columns);
+    let column_widths = calculate_column_widths(issues, &columns)?;
 
     // Header
     for col in &columns {
@@ -93,7 +93,7 @@ fn print_default_list(issues: &Vec<Meta>) -> Result<(), String> {
     // Rows
     for meta in issues {
         for col in &columns {
-            let value = get_column_value(col, meta);
+            let value = get_column_value(col, meta)?;
             let width = *column_widths.get(col).unwrap_or(&22);
             print!("{:<width$}", value, width = width);
         }
@@ -108,7 +108,7 @@ fn print_custom_list(issues: &Vec<Meta>, mut columns: Vec<String>) -> Result<(),
 
     wildcard_expansion(&mut columns);
 
-    let column_widths = calculate_column_widths(issues, &columns);
+    let column_widths = calculate_column_widths(issues, &columns)?;
 
     // Print header
     for col in &columns {
@@ -121,7 +121,7 @@ fn print_custom_list(issues: &Vec<Meta>, mut columns: Vec<String>) -> Result<(),
     // Print rows
     for meta in issues {
         for col in &columns {
-            let value = get_column_value(col, meta);
+            let value = get_column_value(col, meta)?;
             let width = *column_widths.get(col).unwrap_or(&22);
             print!("{:<width$}", value, width = width);
         }
@@ -148,50 +148,50 @@ fn wildcard_expansion(columns: &mut Vec<String>) {
     }
 }
 
-fn get_column_value(col: &str, meta: &Meta) -> String {
+fn get_column_value(col: &str, meta: &Meta) -> Result<String, String> {
     match col {
-        "id" => meta.id.to_string(),
-        "title" => meta.title.clone(),
-        "state" => meta.state.clone(),
+        "id" => Ok(meta.id.to_string()),
+        "title" => Ok(meta.title.clone()),
+        "state" => Ok(meta.state.clone()),
         "type" => {
             if meta.type_.is_empty() {
-                "-".to_string()
+                Ok("-".to_string())
             } else {
-                meta.type_.clone()
+                Ok(meta.type_.clone())
             }
         }
         "labels" => {
             if meta.labels.is_empty() {
-                "-".to_string()
+                Ok("-".to_string())
             } else {
-                meta.labels.join(",")
+                Ok(meta.labels.join(","))
             }
         }
         "assignee" => {
             if meta.assignee.is_empty() {
-                "-".to_string()
+                Ok("-".to_string())
             } else {
-                meta.assignee.clone()
+                Ok(meta.assignee.clone())
             }
         }
-        "priority" => format!("{:?}", meta.priority),
+        "priority" => Ok(format!("{:?}", meta.priority)),
         "due_date" => {
             if meta.due_date.is_empty() {
-                "-".to_string()
+                Ok("-".to_string())
             } else {
-                meta.due_date.clone()
+                Ok(meta.due_date.clone())
             }
         }
-        "created" => meta.created.clone(),
-        "updated" => meta.updated.clone(),
-        _ => "-".to_string(),
+        "created" => Ok(meta.created.clone()),
+        "updated" => Ok(meta.updated.clone()),
+        _ => Err(format!("Unknown column: {}", col)),
     }
 }
 
 fn calculate_column_widths(
     issues: &[Meta],
     columns: &[String],
-) -> std::collections::HashMap<String, usize> {
+) -> Result<std::collections::HashMap<String, usize>, String> {
     use std::collections::HashMap;
     let mut widths: HashMap<String, usize> = HashMap::new();
 
@@ -203,7 +203,7 @@ fn calculate_column_widths(
     // Update with max content widths
     for meta in issues {
         for col in columns {
-            let value = get_column_value(col, meta);
+            let value = get_column_value(col, meta)?;
             let width = widths.get(col).copied().unwrap_or(0);
             widths.insert(col.clone(), width.max(value.len()));
         }
@@ -214,5 +214,5 @@ fn calculate_column_widths(
         *width += 2;
     }
 
-    widths
+    Ok(widths)
 }
