@@ -6,15 +6,33 @@ use regex::Regex;
 use crate::model::{Filter, Meta, dash_if_empty, gitissues_base, load_config, load_meta};
 
 pub fn run(columns: Option<Vec<String>>, filter: Option<Vec<Filter>>) -> Result<(), String> {
+    let mut issues = get_issues_metadata()?;
+
+    sort_issues(&mut issues);
+
+    filter_issues(&mut issues, filter)?;
+
+    // Print
+    match columns {
+        None => {
+            print_default_list(&issues)?;
+        }
+        Some(cols) => {
+            print_custom_list(&issues, cols)?;
+        }
+    }
+
+    Ok(())
+}
+
+fn get_issues_metadata() -> Result<Vec<Meta>, String> {
     let path = Path::new(gitissues_base()).join("issues");
+    let mut issues: Vec<Meta> = Vec::new();
 
     // Precondition: .gitissues/issues must exist (user must run init first)
     if !path.exists() {
         return Err("Not initialized: .gitissues/issues does not exist. Run `git issue init` first.".to_string());
     }
-
-    // Collect issue metadata
-    let mut issues: Vec<Meta> = Vec::new();
 
     for entry in fs::read_dir(path).map_err(|e| format!("Failed to read issues directory: {e}"))? {
         let entry = entry.map_err(|e| format!("Failed to read entry: {e}"))?;
@@ -37,23 +55,7 @@ pub fn run(columns: Option<Vec<String>>, filter: Option<Vec<Filter>>) -> Result<
         issues.push(meta);
     }
 
-    // Sort by numeric ID
-    issues.sort_by_key(|m| m.id);
-
-    // Apply filters
-    filter_issues(&mut issues, filter)?;
-
-    // Print
-    match columns {
-        None => {
-            print_default_list(&issues)?;
-        }
-        Some(cols) => {
-            print_custom_list(&issues, cols)?;
-        }
-    }
-
-    Ok(())
+    Ok(issues)
 }
 
 fn validate_column_names(columns: &mut [String], context: &str) -> Result<(), String> {
@@ -241,4 +243,8 @@ fn do_strings_match(value: &str, pattern: &str) -> bool {
     };
 
     re.is_match(&value)
+}
+
+fn sort_issues(issues: &mut [Meta]) {
+    issues.sort_by_key(|m| m.id);
 }
