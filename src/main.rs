@@ -47,7 +47,7 @@ enum Commands {
         priority: Option<Priority>,
 
         /// Issue meta field: due_date [possible values: YYYY-MM-DD or '']
-        #[arg(long)]
+        #[arg(long, alias = "due_date")]
         due_date: Option<String>,
 
         /// Issue meta field: labels
