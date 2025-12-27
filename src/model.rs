@@ -138,12 +138,16 @@ pub struct Relationship {
 pub struct Config {
     pub commit_auto: bool,
     pub commit_message: String,
-    pub editor: String,
     pub list_columns: Vec<String>,
     pub states: Vec<String>,
     pub types: Vec<String>,
     pub relationships: IndexMap<String, Relationship>,
     pub export_csv_separator: char,
+}
+
+#[derive(Debug, Deserialize)]
+pub struct Settings {
+    pub editor: String,
 }
 
 #[derive(Debug, Deserialize)]
@@ -215,6 +219,21 @@ pub fn load_config() -> Result<Config, String> {
     Ok(config)
 }
 
+pub fn load_settings() -> Result<Settings, String> {
+    let settings_path = settings_path();
+    let settings_raw = match fs::read_to_string(&settings_path) {
+        Ok(s) => s,
+        Err(_) => return Err("settings.yaml not found.".to_string()),
+    };
+
+    let settings: Settings = match serde_yaml::from_str(&settings_raw) {
+        Ok(m) => m,
+        Err(_) => return Err("settings.yaml malformatted.".to_string()),
+    };
+
+    Ok(settings)
+}
+
 pub fn load_meta(path: &Path) -> Result<Meta, String> {
     let meta_raw = match fs::read_to_string(path) {
         Ok(s) => s,
@@ -252,6 +271,11 @@ pub fn gitissues_base() -> &'static str {
 /// Returns the path to the config.yaml file.
 pub fn config_path() -> std::path::PathBuf {
     Path::new(gitissues_base()).join("config.yaml")
+}
+
+/// Returns the path to the settings.yaml file.
+pub fn settings_path() -> std::path::PathBuf {
+    Path::new(gitissues_base()).join("settings.yaml")
 }
 
 /// Returns the path to the users.yaml file.

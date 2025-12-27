@@ -1,0 +1,3 @@
+# Editor to edit/show issue descriptions
+# git = use the git-configured editor
+editor: git

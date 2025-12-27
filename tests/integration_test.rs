@@ -93,6 +93,8 @@ fn test_basic_workflow() {
     assert!(PathBuf::from(".gitissues").exists());
     assert!(PathBuf::from(".gitissues/config.yaml").exists());
     assert!(PathBuf::from(".gitissues/description.md").exists());
+    assert!(PathBuf::from(".gitissues/settings.yaml").exists());
+    assert!(PathBuf::from(".gitissues/users.yaml").exists());
     assert!(PathBuf::from(".gitissues/issues").exists());
 
     // Current time

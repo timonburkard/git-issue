@@ -5,10 +5,6 @@ commit_auto: true
 # Available placeholders: {action}, {id}, {title}
 commit_message: "[issue] {action} #{id} -- {title}"
 
-# Editor for editing issue descriptions
-# git = use the git-configured editor
-editor: git
-
 # Default columns to display in `issue list`
 # ["*"] can be used to include all available columns
 list_columns:

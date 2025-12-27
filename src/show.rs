@@ -6,7 +6,7 @@ use indexmap::IndexMap;
 use regex::Regex;
 
 use crate::model::{
-    Meta, dash_if_empty, issue_attachments_dir, issue_dir, issue_meta_path, issue_tmp_show_dir, load_config, load_description, load_meta,
+    Meta, dash_if_empty, issue_attachments_dir, issue_dir, issue_meta_path, issue_tmp_show_dir, load_description, load_meta, load_settings,
     open_editor,
 };
 
@@ -40,9 +40,9 @@ pub fn run(id: u32) -> Result<(), String> {
         copy_dir_recursive(&attachments_src, &tmp_attachments)?;
     }
 
-    let config = load_config()?;
+    let settings = load_settings()?;
 
-    open_editor(config.editor, tmp_file.to_string_lossy().to_string())?;
+    open_editor(settings.editor, tmp_file.to_string_lossy().to_string())?;
 
     // Clean up entire per-issue tmp directory
     let _ = fs::remove_dir_all(tmp_issue_path);

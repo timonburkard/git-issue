@@ -1,4 +1,4 @@
-use crate::model::{git_commit, issue_desc_path, issue_title, load_config, open_editor};
+use crate::model::{git_commit, issue_desc_path, issue_title, load_settings, open_editor};
 
 pub fn run(id: u32) -> Result<(), String> {
     let desc = issue_desc_path(id);
@@ -9,9 +9,9 @@ pub fn run(id: u32) -> Result<(), String> {
         return Err("Not available: ID/description.md does not exist.".to_string());
     }
 
-    let config = load_config()?;
+    let settings = load_settings()?;
 
-    open_editor(config.editor, desc.to_string_lossy().to_string())?;
+    open_editor(settings.editor, desc.to_string_lossy().to_string())?;
 
     let title = issue_title(id)?;
 
