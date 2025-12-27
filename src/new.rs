@@ -5,7 +5,7 @@ use indexmap::IndexMap;
 
 use crate::model::{
     Meta, Priority, current_timestamp, git_commit, gitissues_base, is_valid_iso_date, is_valid_type, is_valid_user, issue_attachments_dir,
-    issue_desc_path, issue_dir, issue_meta_path, load_config, load_settings,
+    issue_desc_path, issue_dir, issue_meta_path, load_config, load_settings, user_handle_me,
 };
 
 pub fn run(
@@ -35,7 +35,7 @@ pub fn run(
         Err(e) => return Err(format!("Config error: {e}")),
     }
 
-    let reporter_val = match reporter {
+    let mut reporter_val = match reporter {
         Some(value) => match is_valid_user(&value) {
             Ok(true) => value,
             Ok(false) => return Err("Invalid reporter: Check users.yaml:users:id or ''".to_string()),
@@ -51,12 +51,16 @@ pub fn run(
         }
     };
 
-    let assignee_val = assignee.unwrap_or_default();
+    user_handle_me(&mut reporter_val)?;
+
+    let mut assignee_val = assignee.unwrap_or_default();
     match is_valid_user(&assignee_val) {
         Ok(true) => { /* valid, continue */ }
         Ok(false) => return Err("Invalid assignee: Check users.yaml:users:id or ''".to_string()),
         Err(e) => return Err(format!("Config error: {e}")),
     }
+
+    user_handle_me(&mut assignee_val)?;
 
     let due_date_val = due_date.clone().unwrap_or_default();
     match is_valid_iso_date(&due_date_val) {
