@@ -66,6 +66,7 @@ fn generate_content_metadata(id: u32, meta: &Meta) -> String {
     content.push_str(&format!("| **state**         | {} |\n", meta.state));
     content.push_str(&format!("| **type**          | {} |\n", dash_if_empty(&meta.type_),));
     content.push_str(&format!("| **labels**        | {} |\n", dash_if_empty(&meta.labels.join(","))));
+    content.push_str(&format!("| **reporter**      | {} |\n", dash_if_empty(&meta.reporter)));
     content.push_str(&format!("| **assignee**      | {} |\n", dash_if_empty(&meta.assignee)));
     content.push_str(&format!("| **priority**      | {:?} |\n", meta.priority));
     content.push_str(&format!("| **due_date**      | {} |\n", dash_if_empty(&meta.due_date)));

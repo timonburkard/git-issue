@@ -121,6 +121,7 @@ pub struct Meta {
     #[serde(rename = "type")]
     pub type_: String,
     pub labels: Vec<String>,
+    pub reporter: String,
     pub assignee: String,
     pub priority: Priority,
     pub due_date: String,
@@ -148,6 +149,7 @@ pub struct Config {
 #[derive(Debug, Deserialize)]
 pub struct Settings {
     pub editor: String,
+    pub user: String,
 }
 
 #[derive(Debug, Deserialize)]
@@ -198,8 +200,8 @@ pub fn is_valid_type(s: &str) -> Result<bool, String> {
     Ok(s.is_empty() || config.types.contains(&s.to_string()))
 }
 
-/// Validate if an assignee is in the list of valid users:id from users.yaml.
-pub fn is_valid_assignee(s: &str) -> Result<bool, String> {
+/// Validate if an user is in the list of valid users:id from users.yaml.
+pub fn is_valid_user(s: &str) -> Result<bool, String> {
     let users = load_users()?;
     Ok(s.is_empty() || users.users.iter().any(|u| u.id == s))
 }

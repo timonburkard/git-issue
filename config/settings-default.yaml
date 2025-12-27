@@ -1,3 +1,7 @@
 # Editor to edit/show issue descriptions
 # git = use the git-configured editor
 editor: git
+
+# User name
+# Used as default reporter for new issues
+user: alice
