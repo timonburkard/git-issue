@@ -119,6 +119,7 @@ git issue init --no-commit
 # Create a new issue
 git issue new "Login redirection problem"
 git issue new "Login redirection problem" --type bug --labels software,ui --reporter alice --assignee bob --priority P1 --due-date 2026-02-15
+git issue new "Login redirection problem" --reporter me --assignee me  # 'me' is automatically replaced with `settings.yaml:user`
 
 # List issues
 git issue list
@@ -134,6 +135,7 @@ git issue show 1234
 # Change issue meta fields
 git issue set 1234 --title "LCD driver has a problem"
 git issue set 1234 --state resolved --type bug --reporter alice --assignee bob --priority P1 --due-date 2026-01-31
+git issue set 1234 --reporter me --assignee me  # 'me' is automatically replaced with `settings.yaml:user`
 
 # Change issue meta fields: labels
 git issue set 1234 --labels cli,driver         # set labels (overwrite)
