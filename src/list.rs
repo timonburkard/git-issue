@@ -303,7 +303,7 @@ fn sort_issues(issues: &mut [Meta], sorts: Option<Vec<Sorting>>) -> Result<(), S
             std::cmp::Ordering::Equal
         });
     } else {
-        issues.sort_by_key(|m| m.id);
+        issues.sort_by_key(|m| std::cmp::Reverse(m.id));
     }
 
     Ok(())
