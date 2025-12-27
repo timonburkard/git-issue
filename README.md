@@ -9,7 +9,7 @@ Issues live alongside your code inside `.gitissues/`, making them platform-indep
 - ✅ Git-native, file-backed issues under `.gitissues/`
 - ✅ Core commands: `init`, `new`, `list`, `show`, `set`, `edit`, `link`
 - ✅ Each issue has a markdown description incl. attachments
-- ✅ Each issue has metadata: `id`, `title`, `state`, `type`, `labels`, `assignee`, `priority`, `due_date`, `created`, `updated`
+- ✅ Each issue has metadata: `id`, `title`, `state`, `type`, `labels`, `reporter`, `assignee`, `priority`, `due_date`, `created`, `updated`
 - ✅ Each issue has `relationships`: Desired relationship categories (e.g, related, child/parent, ...) are configurable and bidirectional links can be managed automatically
 - ✅ Issues can be filtered and sorted
 - ✅ Highly configurable: default columns for `list`, available options for `state` and `type`, relation ship categories, commit message template, external editor
@@ -118,7 +118,7 @@ git issue init --no-commit
 
 # Create a new issue
 git issue new "Login redirection problem"
-git issue new "Login redirection problem" --type bug --labels software,ui --assignee t.burkard --priority P1 --due-date 2026-02-15
+git issue new "Login redirection problem" --type bug --labels software,ui --reporter alice --assignee bob --priority P1 --due-date 2026-02-15
 
 # List issues
 git issue list
@@ -133,7 +133,7 @@ git issue show 1234
 
 # Change issue meta fields
 git issue set 1234 --title "LCD driver has a problem"
-git issue set 1234 --state resolved --type bug --assignee "t.burkard" --priority P1 --due-date 2026-01-31
+git issue set 1234 --state resolved --type bug --reporter alice --assignee bob --priority P1 --due-date 2026-01-31
 
 # Change issue meta fields: labels
 git issue set 1234 --labels cli,driver         # set labels (overwrite)
@@ -248,11 +248,16 @@ This file holds the local user settings. It should **not** be version-controlled
 # Editor to edit/show issue descriptions
 # git = use the git-configured editor
 editor: git
+
+# User name
+# Used as default reporter for new issues
+user: alice
 ```
 
 #### 3.3.1) Options
 
 - `editor` (string): External text editor (set `git` to use configured git core.editor)
+- `user` (string): User name, used per default as reporter for new issues (can be '')
 
 ### 3.4) description.md
 
@@ -303,7 +308,8 @@ type: bug                      # (String) E.g.: feature, bug, task
 labels:                        # (List of Strings) Labels / tags
   - software
   - ui
-assignee: t.burkard            # (String) To whom the issue is assigned
+reporter: t.burkard            # (String) Who reported the issue
+assignee: j.doe                # (String) To whom the issue is assigned
 priority: P2                   # (Enum) Priority: P0 = highest, P2 = default, P4 = lowest
 due_date: 2026-01-31           # (Date) Due date in ISO format: YYYY-MM-DD
 relationships:                 # (Object) Relationships with other issues

@@ -10,6 +10,7 @@ pub fn run(
     state: Option<String>,
     title: Option<String>,
     type_: Option<String>,
+    reporter: Option<String>,
     assignee: Option<String>,
     priority: Option<Priority>,
     due_date: Option<String>,
@@ -67,12 +68,25 @@ pub fn run(
         fields.push("type");
     }
 
+    if let Some(value) = reporter
+        && updated_meta.reporter != value
+    {
+        match crate::model::is_valid_user(&value) {
+            Ok(true) => { /* valid, continue */ }
+            Ok(false) => return Err("Invalid reporter: Check users.yaml:users:id or ''".to_string()),
+            Err(e) => return Err(format!("Config error: {e}")),
+        }
+
+        updated_meta.reporter = value;
+        fields.push("reporter");
+    }
+
     if let Some(value) = assignee
         && updated_meta.assignee != value
     {
-        match crate::model::is_valid_assignee(&value) {
+        match crate::model::is_valid_user(&value) {
             Ok(true) => { /* valid, continue */ }
-            Ok(false) => return Err("Invalid assignee: Check users.yaml:users:id".to_string()),
+            Ok(false) => return Err("Invalid assignee: Check users.yaml:users:id or ''".to_string()),
             Err(e) => return Err(format!("Config error: {e}")),
         }
 

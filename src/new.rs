@@ -4,13 +4,14 @@ use std::path::Path;
 use indexmap::IndexMap;
 
 use crate::model::{
-    Meta, Priority, current_timestamp, git_commit, gitissues_base, is_valid_assignee, is_valid_iso_date, is_valid_type,
-    issue_attachments_dir, issue_desc_path, issue_dir, issue_meta_path, load_config,
+    Meta, Priority, current_timestamp, git_commit, gitissues_base, is_valid_iso_date, is_valid_type, is_valid_user, issue_attachments_dir,
+    issue_desc_path, issue_dir, issue_meta_path, load_config, load_settings,
 };
 
 pub fn run(
     title: String,
     type_: Option<String>,
+    reporter: Option<String>,
     assignee: Option<String>,
     priority: Option<Priority>,
     due_date: Option<String>,
@@ -34,10 +35,26 @@ pub fn run(
         Err(e) => return Err(format!("Config error: {e}")),
     }
 
+    let reporter_val = match reporter {
+        Some(value) => match is_valid_user(&value) {
+            Ok(true) => value,
+            Ok(false) => return Err("Invalid reporter: Check users.yaml:users:id or ''".to_string()),
+            Err(e) => return Err(format!("Config error: {e}")),
+        },
+        None => {
+            let settings = load_settings()?;
+            match is_valid_user(&settings.user) {
+                Ok(true) => settings.user,
+                Ok(false) => return Err("Invalid user: settings.yaml::user must be part of users.yaml:users:id or ''".to_string()),
+                Err(e) => return Err(format!("Config error: {e}")),
+            }
+        }
+    };
+
     let assignee_val = assignee.unwrap_or_default();
-    match is_valid_assignee(&assignee_val) {
+    match is_valid_user(&assignee_val) {
         Ok(true) => { /* valid, continue */ }
-        Ok(false) => return Err("Invalid assignee: Check users.yaml:users:id".to_string()),
+        Ok(false) => return Err("Invalid assignee: Check users.yaml:users:id or ''".to_string()),
         Err(e) => return Err(format!("Config error: {e}")),
     }
 
@@ -57,6 +74,7 @@ pub fn run(
         state: config.states.first().cloned().unwrap_or_else(|| "new".to_string()),
         type_: type_val,
         labels: labels.unwrap_or_default(),
+        reporter: reporter_val,
         assignee: assignee_val,
         priority: priority.unwrap_or(Priority::P2),
         due_date: due_date.unwrap_or_default(),

@@ -39,6 +39,10 @@ enum Commands {
         #[arg(long)]
         type_: Option<String>,
 
+        /// Issue meta field: reporter [possible values: see users.yaml:users:id or '']
+        #[arg(long)]
+        reporter: Option<String>,
+
         /// Issue meta field: assignee [possible values: see users.yaml:users:id or '']
         #[arg(long)]
         assignee: Option<String>,
@@ -98,6 +102,10 @@ enum Commands {
         #[arg(long)]
         type_: Option<String>,
 
+        /// Issue meta field: reporter [possible values: see users.yaml:users:id or '']
+        #[arg(long)]
+        reporter: Option<String>,
+
         /// Issue meta field: assignee [possible values: see users.yaml:users:id or '']
         #[arg(long)]
         assignee: Option<String>,
@@ -153,11 +161,12 @@ fn main() {
         Commands::New {
             title,
             type_,
+            reporter,
             assignee,
             priority,
             due_date,
             labels,
-        } => new::run(title, type_, assignee, priority, due_date, labels),
+        } => new::run(title, type_, reporter, assignee, priority, due_date, labels),
 
         Commands::List {
             columns,
@@ -173,6 +182,7 @@ fn main() {
             state,
             title,
             type_,
+            reporter,
             assignee,
             priority,
             due_date,
@@ -184,6 +194,7 @@ fn main() {
             state,
             title,
             type_,
+            reporter,
             assignee,
             priority,
             due_date,

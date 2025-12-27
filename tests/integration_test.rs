@@ -128,6 +128,7 @@ fn test_basic_workflow() {
     assert_eq!(meta1["title"].as_str().unwrap(), "First issue");
     assert_eq!(meta1["state"].as_str().unwrap(), "new"); // default
     assert_eq!(meta1["type"].as_str().unwrap(), "");
+    assert_eq!(meta1["reporter"].as_str().unwrap(), "alice");
     assert_eq!(meta1["assignee"].as_str().unwrap(), "");
     assert_eq!(meta1["priority"].as_str().unwrap(), "P2"); // default
     assert_eq!(meta1["due_date"].as_str().unwrap(), "");
@@ -168,6 +169,8 @@ fn test_basic_workflow() {
         "cli,fw",
         "--assignee",
         "alice",
+        "--reporter",
+        "bob",
         "--priority",
         "P1",
         "--due-date",
@@ -188,6 +191,7 @@ fn test_basic_workflow() {
         .collect();
     assert_eq!(labels, vec!["cli", "fw"]);
     assert_eq!(meta2_updated["assignee"].as_str().unwrap(), "alice");
+    assert_eq!(meta2_updated["reporter"].as_str().unwrap(), "bob");
     assert_eq!(meta2_updated["priority"].as_str().unwrap(), "P1");
     assert_eq!(meta2_updated["due_date"].as_str().unwrap(), "2026-06-15");
     assert!(meta2_updated["updated"].as_str().unwrap() >= prev_updated.as_str());
@@ -207,6 +211,8 @@ fn test_new_with_initial_metadata() {
         "feature",
         "--assignee",
         "alice",
+        "--reporter",
+        "bob",
         "--priority",
         "P0",
         "--due-date",
@@ -222,6 +228,7 @@ fn test_new_with_initial_metadata() {
     assert_eq!(meta["title"].as_str().unwrap(), "Complex issue");
     assert_eq!(meta["type"].as_str().unwrap(), "feature");
     assert_eq!(meta["assignee"].as_str().unwrap(), "alice");
+    assert_eq!(meta["reporter"].as_str().unwrap(), "bob");
     assert_eq!(meta["priority"].as_str().unwrap(), "P0");
     assert_eq!(meta["due_date"].as_str().unwrap(), "2026-01-15");
     let labels: Vec<String> = meta["labels"]
@@ -371,6 +378,7 @@ fn test_list_basic() {
     let stdout = String::from_utf8_lossy(&output.stdout);
     assert!(stdout.contains("id"));
     assert!(stdout.contains("state"));
+    assert!(stdout.contains("reporter"));
     assert!(stdout.contains("assignee"));
     assert!(stdout.contains("title"));
     assert!(stdout.contains("priority"));
@@ -433,6 +441,59 @@ fn test_set_assignee() {
     assert!(stdout.contains("title"));
     assert!(stdout.contains("Issue 1"));
     assert!(stdout.contains("assignee"));
+    assert!(!stdout.contains("bob"));
+    assert!(stdout.contains("-"));
+}
+
+#[test]
+fn test_set_reporter() {
+    let _env = TestEnv::new();
+
+    run_command(&["init", "--no-commit"]).expect("init failed");
+
+    // Create an issue
+    run_command(&["new", "Issue 1"]).expect("new 1 failed");
+
+    // List to check that reporter is alice
+    let output = run_command(&["list", "--columns", "title,reporter"]).expect("list with reporter failed");
+    let stdout = String::from_utf8_lossy(&output.stdout);
+    assert!(stdout.contains("title"));
+    assert!(stdout.contains("Issue 1"));
+    assert!(stdout.contains("reporter"));
+    assert!(stdout.contains("alice"));
+
+    // Set valid reporter
+    run_command(&["set", "1", "--reporter", "bob"]).expect("set reporter failed");
+
+    // List to check that reporter was set
+    let output = run_command(&["list", "--columns", "title,reporter"]).expect("list with reporter failed");
+    let stdout = String::from_utf8_lossy(&output.stdout);
+    assert!(stdout.contains("title"));
+    assert!(stdout.contains("Issue 1"));
+    assert!(stdout.contains("reporter"));
+    assert!(stdout.contains("bob"));
+
+    // Set invalid reporter
+    run_command(&["set", "1", "--reporter", "duck"]).expect_err("set reporter successful but should fail");
+
+    // List to check that invalid reporter was not set
+    let output = run_command(&["list", "--columns", "title,reporter"]).expect("list with reporter failed");
+    let stdout = String::from_utf8_lossy(&output.stdout);
+    assert!(stdout.contains("title"));
+    assert!(stdout.contains("Issue 1"));
+    assert!(stdout.contains("reporter"));
+    assert!(stdout.contains("bob"));
+    assert!(!stdout.contains("duck"));
+
+    // Remove reporter
+    run_command(&["set", "1", "--reporter", ""]).expect("remove reporter failed");
+
+    // List to check that reporter was removed
+    let output = run_command(&["list", "--columns", "title,reporter"]).expect("list with reporter failed");
+    let stdout = String::from_utf8_lossy(&output.stdout);
+    assert!(stdout.contains("title"));
+    assert!(stdout.contains("Issue 1"));
+    assert!(stdout.contains("reporter"));
     assert!(!stdout.contains("bob"));
     assert!(stdout.contains("-"));
 }

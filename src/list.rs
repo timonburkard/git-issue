@@ -1,3 +1,5 @@
+use std::cmp::Ordering;
+use std::cmp::Reverse;
 use std::fs;
 use std::path::Path;
 
@@ -66,7 +68,7 @@ fn validate_column_names(columns: &mut [String], context: &str) -> Result<(), St
         }
 
         if ![
-            "id", "title", "state", "type", "labels", "assignee", "priority", "due_date", "created", "updated", "*",
+            "id", "title", "state", "type", "labels", "reporter", "assignee", "priority", "due_date", "created", "updated", "*",
         ]
         .contains(&col.as_str())
         {
@@ -162,6 +164,7 @@ fn wildcard_expansion(columns: &mut Vec<String>) {
         *columns = vec![
             "id".to_string(),
             "state".to_string(),
+            "reporter".to_string(),
             "assignee".to_string(),
             "type".to_string(),
             "title".to_string(),
@@ -181,6 +184,7 @@ fn get_column_value(col: &str, meta: &Meta) -> Result<String, String> {
         "state" => Ok(meta.state.clone()),
         "type" => Ok(dash_if_empty(&meta.type_)),
         "labels" => Ok(dash_if_empty(&meta.labels.join(","))),
+        "reporter" => Ok(dash_if_empty(&meta.reporter)),
         "assignee" => Ok(dash_if_empty(&meta.assignee)),
         "priority" => Ok(format!("{:?}", meta.priority)),
         "due_date" => Ok(dash_if_empty(&meta.due_date)),
@@ -235,6 +239,7 @@ fn filter_issues(issues: &mut Vec<Meta>, filters: Option<Vec<Filter>>) -> Result
                 "state" => do_strings_match(&meta.state, &filter.value),
                 "type" => do_strings_match(&meta.type_, &filter.value),
                 "labels" => meta.labels.iter().any(|l| do_strings_match(l, &filter.value)),
+                "reporter" => do_strings_match(&meta.reporter, &filter.value),
                 "assignee" => do_strings_match(&meta.assignee, &filter.value),
                 "priority" => do_strings_match(&format!("{:?}", meta.priority), &filter.value),
                 "due_date" => do_strings_match(&meta.due_date, &filter.value),
@@ -285,25 +290,26 @@ fn sort_issues(issues: &mut [Meta], sorts: Option<Vec<Sorting>>) -> Result<(), S
                     "state" => a.state.cmp(&b.state),
                     "type" => a.type_.cmp(&b.type_),
                     "labels" => a.labels.cmp(&b.labels),
+                    "reporter" => a.reporter.cmp(&b.reporter),
                     "assignee" => a.assignee.cmp(&b.assignee),
                     "priority" => a.priority.as_int().cmp(&b.priority.as_int()),
                     "due_date" => a.due_date.cmp(&b.due_date),
                     "created" => a.created.cmp(&b.created),
                     "updated" => a.updated.cmp(&b.updated),
-                    _ => std::cmp::Ordering::Equal, // Unknown field: treat as equal
+                    _ => Ordering::Equal, // Unknown field: treat as equal
                 };
                 let ordering = match sort.order {
                     crate::model::Order::Asc => ordering,
                     crate::model::Order::Desc => ordering.reverse(),
                 };
-                if ordering != std::cmp::Ordering::Equal {
+                if ordering != Ordering::Equal {
                     return ordering;
                 }
             }
-            std::cmp::Ordering::Equal
+            Ordering::Equal
         });
     } else {
-        issues.sort_by_key(|m| m.id);
+        issues.sort_by_key(|m| Reverse(m.id));
     }
 
     Ok(())
