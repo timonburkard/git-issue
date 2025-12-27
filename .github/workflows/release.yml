@@ -104,6 +104,7 @@ jobs:
 
   publish:
     name: Publish to crates.io
+    needs: [build]
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
