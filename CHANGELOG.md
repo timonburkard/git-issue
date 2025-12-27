@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+    - [meta] added `reporter` field (GitHub Issue #64)
     - [settings] added `settings.yaml` to hold local non-version-controlled user settings (GitHub Issue #65)
 
 ### Changed
