@@ -1,3 +1,5 @@
+use std::cmp::Ordering;
+use std::cmp::Reverse;
 use std::fs;
 use std::path::Path;
 
@@ -290,20 +292,20 @@ fn sort_issues(issues: &mut [Meta], sorts: Option<Vec<Sorting>>) -> Result<(), S
                     "due_date" => a.due_date.cmp(&b.due_date),
                     "created" => a.created.cmp(&b.created),
                     "updated" => a.updated.cmp(&b.updated),
-                    _ => std::cmp::Ordering::Equal, // Unknown field: treat as equal
+                    _ => Ordering::Equal, // Unknown field: treat as equal
                 };
                 let ordering = match sort.order {
                     crate::model::Order::Asc => ordering,
                     crate::model::Order::Desc => ordering.reverse(),
                 };
-                if ordering != std::cmp::Ordering::Equal {
+                if ordering != Ordering::Equal {
                     return ordering;
                 }
             }
-            std::cmp::Ordering::Equal
+            Ordering::Equal
         });
     } else {
-        issues.sort_by_key(|m| std::cmp::Reverse(m.id));
+        issues.sort_by_key(|m| Reverse(m.id));
     }
 
     Ok(())
