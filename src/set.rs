@@ -2,6 +2,7 @@ use std::fs;
 
 use crate::model::{
     Priority, current_timestamp, git_commit, is_valid_iso_date, is_valid_state, is_valid_type, issue_dir, issue_meta_path, load_meta,
+    user_handle_me,
 };
 
 #[allow(clippy::too_many_arguments)]
@@ -68,30 +69,38 @@ pub fn run(
         fields.push("type");
     }
 
-    if let Some(value) = reporter
+    if let Some(mut value) = reporter
         && updated_meta.reporter != value
     {
         match crate::model::is_valid_user(&value) {
             Ok(true) => { /* valid, continue */ }
-            Ok(false) => return Err("Invalid reporter: Check users.yaml:users:id or ''".to_string()),
+            Ok(false) => return Err("Invalid reporter: Check users.yaml:users:id, 'me' or ''".to_string()),
             Err(e) => return Err(format!("Config error: {e}")),
         }
 
-        updated_meta.reporter = value;
-        fields.push("reporter");
+        user_handle_me(&mut value)?;
+
+        if updated_meta.reporter != value {
+            updated_meta.reporter = value;
+            fields.push("reporter");
+        }
     }
 
-    if let Some(value) = assignee
+    if let Some(mut value) = assignee
         && updated_meta.assignee != value
     {
         match crate::model::is_valid_user(&value) {
             Ok(true) => { /* valid, continue */ }
-            Ok(false) => return Err("Invalid assignee: Check users.yaml:users:id or ''".to_string()),
+            Ok(false) => return Err("Invalid assignee: Check users.yaml:users:id, 'me' or ''".to_string()),
             Err(e) => return Err(format!("Config error: {e}")),
         }
 
-        updated_meta.assignee = value;
-        fields.push("assignee");
+        user_handle_me(&mut value)?;
+
+        if updated_meta.assignee != value {
+            updated_meta.assignee = value;
+            fields.push("assignee");
+        }
     }
 
     if let Some(value) = priority

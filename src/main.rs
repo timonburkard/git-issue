@@ -39,11 +39,11 @@ enum Commands {
         #[arg(long)]
         type_: Option<String>,
 
-        /// Issue meta field: reporter [possible values: see users.yaml:users:id or '']
+        /// Issue meta field: reporter [possible values: see users.yaml:users:id, 'me' or '']
         #[arg(long)]
         reporter: Option<String>,
 
-        /// Issue meta field: assignee [possible values: see users.yaml:users:id or '']
+        /// Issue meta field: assignee [possible values: see users.yaml:users:id, 'me' or '']
         #[arg(long)]
         assignee: Option<String>,
 
@@ -102,11 +102,11 @@ enum Commands {
         #[arg(long)]
         type_: Option<String>,
 
-        /// Issue meta field: reporter [possible values: see users.yaml:users:id or '']
+        /// Issue meta field: reporter [possible values: see users.yaml:users:id, 'me' or '']
         #[arg(long)]
         reporter: Option<String>,
 
-        /// Issue meta field: assignee [possible values: see users.yaml:users:id or '']
+        /// Issue meta field: assignee [possible values: see users.yaml:users:id, 'me' or '']
         #[arg(long)]
         assignee: Option<String>,
 
