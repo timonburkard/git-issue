@@ -267,13 +267,13 @@ priority: P2                   # (Enum) Priority: P0 = highest, P2 = default, P4
 due_date: 2026-01-31           # (Date) Due date in ISO format: YYYY-MM-DD
 relationships:                 # (Object) Relationships with other issues
   related:
-  - 5678
-  - 7777
+    - 5678
+    - 7777
   parent:
-  - 5555
+    - 5555
   child:
-  - 3333
-  - 4444
+    - 3333
+    - 4444
 created: 2025-11-13T15:54:52Z  # (Timestamp) Issue was created at
 updated: 2025-12-22T20:36:11Z  # (Timestamp) Issue was last updated at
 ```
