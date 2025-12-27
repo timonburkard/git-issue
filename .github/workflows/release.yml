@@ -57,6 +57,7 @@ jobs:
 
   build:
     needs: [verify, create-release]
+    runs-on: ${{ matrix.os }}
     strategy:
       matrix:
         include:
@@ -79,9 +80,6 @@ jobs:
             target: x86_64-pc-windows-msvc
             artifact_name: git-issue.exe
             asset_name: git-issue-windows-x86_64.exe
-
-    runs-on: ${{ matrix.os }}
-
     steps:
       - uses: actions/checkout@v4
       - uses: dtolnay/rust-toolchain@stable
