@@ -203,7 +203,20 @@ pub fn is_valid_type(s: &str) -> Result<bool, String> {
 /// Validate if an user is in the list of valid users:id from users.yaml.
 pub fn is_valid_user(s: &str) -> Result<bool, String> {
     let users = load_users()?;
-    Ok(s.is_empty() || users.users.iter().any(|u| u.id == s))
+    Ok(s.is_empty() || s == "me" || users.users.iter().any(|u| u.id == s))
+}
+
+pub fn user_handle_me(value: &mut String) -> Result<(), String> {
+    if *value == "me" {
+        let settings = load_settings()?;
+        *value = match is_valid_user(&settings.user) {
+            Ok(true) => settings.user,
+            Ok(false) => return Err("Invalid user: settings.yaml::user must be part of users.yaml:users:id or ''".to_string()),
+            Err(e) => return Err(format!("Config error: {e}")),
+        }
+    }
+
+    Ok(())
 }
 
 pub fn load_config() -> Result<Config, String> {
