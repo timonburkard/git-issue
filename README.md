@@ -4,7 +4,7 @@ A Git-native, file-backed issue tracker.
 
 Issues live alongside your code inside `.gitissues/`, making them platform-independent, version-controlled, branchable, mergeable, reviewable and offline-friendly.
 
-## Features
+## 1.) Features
 
 - ✅ Git-native, file-backed issues under `.gitissues/`
 - ✅ Core commands: `init`, `new`, `list`, `show`, `set`, `edit`, `link`
@@ -20,7 +20,89 @@ Issues live alongside your code inside `.gitissues/`, making them platform-indep
 - 🚧 Add `search` command across all issue titles and descriptions
 - 🚧 Comments / discussions
 
-## Usage
+## 2.) Usage
+
+### 2.1) Installation
+
+Different installation approaches are explained here.
+
+#### 2.1.1) GitHub Release
+
+Download the latest release from GitHub and put the binary on your PATH.
+
+1) Go to the Releases page and download the binary for your platform:
+   - `git-issue-linux-x86_64`
+   - `git-issue-macos-x86_64` or `git-issue-macos-aarch64`
+   - `git-issue-windows-x86_64.exe`
+2) Rename to the canonical name and place on your PATH
+   - Linux/macOS:
+     ```bash
+     mv git-issue-<your-platform> git-issue
+     chmod +x git-issue
+     sudo mv git-issue /usr/local/bin/
+     ```
+   - Windows: rename `git-issue-windows-x86_64.exe` to `git-issue.exe` and move it to a directory on your PATH.
+3) Verify:
+   ```bash
+   git issue -h
+   ```
+
+#### 2.1.2) Cargo
+
+Installation with cargo works as follows:
+
+```
+cargo install --git https://github.com/timonburkard/git-issue
+```
+
+#### 2.1.3) Crates
+
+Package is available on https://crates.io/crates/git-issue, so it can be installed as follows:
+
+```
+cargo install git-issue
+```
+
+### 2.2) How To
+
+Lets image this is the structure of your git repo, for which you want to add issue tracking:
+
+```
+.git/
+src/
+README.md
+.gitignore
+```
+
+In the root of your repo, run:
+
+```bash
+git issue init
+```
+
+This will automatically create the `.gitissues/` directory in your git repo:
+
+```
+.git/
+.gitissues/
+src/
+README.md
+.gitignore
+```
+
+For infos about the `.gitissues/` directory structure, see chapter [4.) Storage Layout](#4-storage-layout).
+
+#### 2.3) Gitignore
+
+This is the suggested content for the `.gitignore`:
+
+```
+.gitissues/.tmp/
+.gitissues/exports/
+.gitissues/settings.yaml
+```
+
+### 2.3) Commands
 
 ```bash
 # Help page
@@ -67,19 +149,24 @@ git issue link 1234 --add related=5678,3333 parent=9999 --remove child=7777  # b
 git issue edit 1234
 ```
 
-## Example
+### 2.4) Example
 
-Dummy example project to see how `git-issue` is used in a repo: https://github.com/timonburkard/example-project
+Dummy example project to see how `git-issue` is used in a repo: [Example Project](https://github.com/timonburkard/example-project)
 
-## Configuration
+## 3.) Configuration
 
-### Config
+After running `git issue init`, the following default files are automatically created:
 
-After running `git issue init`, default config file and users are created at `.gitissues/config.yaml` resp. `.gitissues/users.yaml`.
+ - `.gitissues/config.yaml`:    Project configuration file (should be version-controlled)
+ - `.gitissues/settings.yaml`:  Local user settings file (should **not** be version-controlled)
+ - `.gitissues/users.yaml`:     Users (should be version-controlled)
+ - `.gitissues/description.md`: Issue description template (should be version-controlled)
 
 These files can be edited by the user.
 
-#### config.yaml
+### 3.1) config.yaml
+
+This file holds the project configuration. It should be version-controlled.
 
 ```yaml
 # Automatically create a git commit after mutating commands
@@ -88,10 +175,6 @@ commit_auto: true
 # Commit message template
 # Available placeholders: {action}, {id}, {title}
 commit_message: "[issue] {action} #{id} -- {title}"
-
-# Editor for editing issue descriptions
-# git = use the git-configured editor
-editor: git
 
 # Default columns to display in `issue list`
 # ["*"] can be used to include all available columns
@@ -133,21 +216,22 @@ relationships:
 export_csv_separator: ','
 ```
 
-#### Options
+#### 3.1.1) Options
 
 - `commit_auto` (boolean): If `true`, automatically commit changes to `.gitissues/`. Default: `true`
 - `commit_message` (string): Template for git commit messages. Supports placeholders:
   - `{id}`: Issue ID
   - `{title}`: Issue title
   - `{action}`: Command that triggered the commit (`new`, `edit description`, `set <field>`)
-- `editor` (string): External text editor (set `git` to use configured git core.editor)
 - `list_columns` (list of strings): Default columns shown in `list` command
 - `states` (list of strings): Available issue states. Default is the first element.
 - `types` (list of strings): Available issue types. Default is empty.
 - `relationships` (object): Available relationships between issues
 - `export_csv_separator` (char): Separator for CSV file exports
 
-#### users.yaml
+### 3.2) users.yaml
+
+This file holds the available users in the project. It should be version-controlled.
 
 ```yaml
 users:
@@ -156,9 +240,23 @@ users:
   - id: carol
 ```
 
-### Description Template
+### 3.3) settings.yaml
 
-After running `git issue init`, a default description template file is created at `.gitissues/description.md`:
+This file holds the local user settings. It should **not** be version-controlled.
+
+```yaml
+# Editor to edit/show issue descriptions
+# git = use the git-configured editor
+editor: git
+```
+
+#### 3.3.1) Options
+
+- `editor` (string): External text editor (set `git` to use configured git core.editor)
+
+### 3.4) description.md
+
+This file holds the template for the issue descriptions. It is use when a new issue is created with `git issue new`.
 
 ```md
 # Description
@@ -171,75 +269,18 @@ After running `git issue init`, a default description template file is created a
 
 ```
 
-This template can be edited by the user.
+## 4.) Storage Layout
 
-## Installation
-
-Different installation approaches are explained here.
-
-### GitHub Release
-
-Download the latest release from GitHub and put the binary on your PATH.
-
-1) Go to the Releases page and download the binary for your platform:
-   - `git-issue-linux-x86_64`
-   - `git-issue-macos-x86_64` or `git-issue-macos-aarch64`
-   - `git-issue-windows-x86_64.exe`
-2) Rename to the canonical name and place on your PATH
-   - Linux/macOS:
-     ```bash
-     mv git-issue-<your-platform> git-issue
-     chmod +x git-issue
-     sudo mv git-issue /usr/local/bin/
-     ```
-   - Windows: rename `git-issue-windows-x86_64.exe` to `git-issue.exe` and move it to a directory on your PATH.
-3) Verify:
-   ```bash
-   git issue -h
-   ```
-
-### Cargo
-
-Installation with cargo works as follows:
-
-```
-cargo install --git https://github.com/timonburkard/git-issue
-```
-
-### Crates
-
-Package is available on https://crates.io/crates/git-issue, so it can be installed as follows:
-
-```
-cargo install git-issue
-```
-
-## Building & Development
-
-```bash
-# Build
-cargo build
-
-# Format code
-cargo fmt
-
-# Lint
-cargo clippy
-
-# Run tests
-cargo test
-```
-
-## Storage Layout
-
-Issues live in `.gitissues/issues/{ID}/`:
+This is the directory structure of `.gitissues/`:
 
 ```
 .gitissues/
-├── .tmp/           # Temporary files: Put in `.gitignore`
-├── config.yaml     # Configuration
+├── .tmp/           # Temporary files (put in `.gitignore`)
+├── config.yaml     # Project configuration
 ├── description.md  # Description template
-├── exports/        # Location of CSV exports: Put in `.gitignore`
+├── users.yaml      # Available users
+├── settings.yaml   # Local user settings (put in `.gitignore`)
+├── exports/        # Location of CSV exports (put in `.gitignore`)
 └── issues/
     └── 0000000001/
         ├── meta.yaml       # Structured metadata
@@ -252,7 +293,7 @@ Issues live in `.gitissues/issues/{ID}/`:
     └── ...
 ```
 
-### meta.yaml Format
+### 4.1) meta.yaml Format
 
 ```yaml
 id: 1234                       # (Integer) Identifier
@@ -278,11 +319,33 @@ created: 2025-11-13T15:54:52Z  # (Timestamp) Issue was created at
 updated: 2025-12-22T20:36:11Z  # (Timestamp) Issue was last updated at
 ```
 
-## Architecture
+Don't edit these files manually. Instead use the `git issue set` and `git issue link` commands.
+
+## 5.) Development
+
+### 5.1) Building & Testing
+
+```bash
+# Build
+cargo build
+
+# Format code
+cargo fmt
+
+# Lint
+cargo clippy
+
+# Run tests
+cargo test
+```
+
+### 5.2) Architecture
 
 - `config/`
-  - `config-default.yaml`    -- Default configuration, applied at `git issue init`
-  - `description-default.md` -- Default description template, applied at `git issue init`
+  - `config-default.yaml`    -- Default configuration, copy-pasted at `git issue init` to `.gitissues/`
+  - `description-default.md` -- Default description template, copy-pasted at `git issue init` to `.gitissues/`
+  - `users-default.yaml`     -- Default users, copy-pasted at `git issue init` to `.gitissues/`
+  - `settings-default.yaml`  -- Default local user settings, copy-pasted at `git issue init` to `.gitissues/`
 - `src/`
   - `main.rs`  -- CLI parsing with clap
   - `model.rs` -- Shared data types, functions and utilities
@@ -293,8 +356,9 @@ updated: 2025-12-22T20:36:11Z  # (Timestamp) Issue was last updated at
   - `new.rs`   -- Create new issues
   - `set.rs`   -- Change issue meta fields
   - `show.rs`  -- Show all issue information
+- `tests/`     -- Automated tests
 
-## Dependencies
+### 5.3) Dependencies
 
 - `clap`        -- CLI argument parsing
 - `chrono`      -- Timestamp generation
