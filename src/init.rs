@@ -1,7 +1,7 @@
 use std::fs;
 use std::path::Path;
 
-use crate::model::{config_path, git_commit_non_templated, gitissues_base, users_path};
+use crate::model::{config_path, git_commit_non_templated, gitissues_base, settings_path, users_path};
 
 pub fn run(no_commit: bool) -> Result<(), String> {
     let root = gitissues_base();
@@ -18,6 +18,12 @@ pub fn run(no_commit: bool) -> Result<(), String> {
     const DEFAULT_CONFIG: &str = include_str!("../config/config-default.yaml");
     let config_dst = config_path();
     fs::write(&config_dst, DEFAULT_CONFIG).map_err(|e| format!("Failed to write default config to {}: {e}", config_dst.display()))?;
+
+    // Copy default settings file
+    const DEFAULT_SETTINGS: &str = include_str!("../config/settings-default.yaml");
+    let settings_dst = settings_path();
+    fs::write(&settings_dst, DEFAULT_SETTINGS)
+        .map_err(|e| format!("Failed to write default settings to {}: {e}", settings_dst.display()))?;
 
     // Copy default users file
     const DEFAULT_USERS: &str = include_str!("../config/users-default.yaml");
