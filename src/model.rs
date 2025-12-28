@@ -136,6 +136,13 @@ pub struct Relationship {
 }
 
 #[derive(Debug, Deserialize)]
+#[serde(rename_all = "lowercase")]
+pub enum IdGeneration {
+    Sequential, // Sequential numbers (1, 2, 3, ...)
+    Timestamp,  // Timestamps in seconds since 2025-01-01
+}
+
+#[derive(Debug, Deserialize)]
 pub struct Config {
     pub commit_auto: bool,
     pub commit_message: String,
@@ -144,6 +151,7 @@ pub struct Config {
     pub types: Vec<String>,
     pub relationships: IndexMap<String, Relationship>,
     pub export_csv_separator: char,
+    pub id_generation: IdGeneration,
 }
 
 #[derive(Debug, Deserialize)]
@@ -274,7 +282,7 @@ pub fn issue_title(id: u32) -> Result<String, String> {
     Ok(meta.title)
 }
 
-fn padded_id(id: u32) -> String {
+pub fn padded_id(id: u32) -> String {
     format!("{id:010}")
 }
 

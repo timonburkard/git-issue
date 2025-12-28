@@ -1,11 +1,15 @@
 use std::fs;
 use std::path::Path;
+use std::thread;
+use std::time::Duration;
+
+use chrono::Utc;
 
 use indexmap::IndexMap;
 
 use crate::model::{
-    Meta, Priority, current_timestamp, git_commit, gitissues_base, is_valid_iso_date, is_valid_type, is_valid_user, issue_attachments_dir,
-    issue_desc_path, issue_dir, issue_meta_path, load_config, load_settings, user_handle_me,
+    IdGeneration, Meta, Priority, current_timestamp, git_commit, gitissues_base, is_valid_iso_date, is_valid_type, is_valid_user,
+    issue_attachments_dir, issue_desc_path, issue_dir, issue_meta_path, load_config, load_settings, padded_id, user_handle_me,
 };
 
 pub fn run(
@@ -18,7 +22,7 @@ pub fn run(
     labels: Option<Vec<String>>,
 ) -> Result<(), String> {
     // Step 1: Allocate the next issue ID
-    let issue_id = allocate_id()?;
+    let issue_id = generate_id()?;
 
     // Step 2: Read config
     let config = load_config()?;
@@ -118,10 +122,8 @@ pub fn run(
     Ok(())
 }
 
-/// Allocate the next sequential issue ID.
-/// Scans .gitissues/issues/ for existing numeric directories,
-/// finds the max, and returns max+1 as a u32.
-fn allocate_id() -> Result<u32, String> {
+/// Generates new ID
+fn generate_id() -> Result<u32, String> {
     let issues_base = ".gitissues/issues";
     let path = Path::new(issues_base);
 
@@ -130,10 +132,21 @@ fn allocate_id() -> Result<u32, String> {
         return Err("Not initialized: .gitissues/issues does not exist. Run `git issue init` first.".to_string());
     }
 
+    let config = load_config()?;
+
+    let id = match config.id_generation {
+        IdGeneration::Sequential => generate_id_sequential(path)?,
+        IdGeneration::Timestamp => generate_id_timestamp(path)?,
+    };
+
+    Ok(id)
+}
+
+fn generate_id_sequential(issues_path: &Path) -> Result<u32, String> {
     let mut max_id = 0u32;
 
     // Read directory entries and find the highest numeric ID
-    for entry in fs::read_dir(path).map_err(|e| format!("Failed to read issues directory: {e}"))? {
+    for entry in fs::read_dir(issues_path).map_err(|e| format!("Failed to read issues directory: {e}"))? {
         let entry = entry.map_err(|e| format!("Failed to read entry: {e}"))?;
         let file_name = entry.file_name();
         let name_str = file_name.to_string_lossy();
@@ -147,6 +160,28 @@ fn allocate_id() -> Result<u32, String> {
         // Silently skip non-numeric directory names
     }
 
-    let next_id = max_id + 1;
-    Ok(next_id)
+    Ok(max_id + 1)
+}
+
+fn generate_id_timestamp(issues_path: &Path) -> Result<u32, String> {
+    const START_2025: i64 = 1735689600;
+
+    let mut id = (Utc::now().timestamp() - START_2025) as u32;
+
+    let mut issue_dir = issues_path.join(padded_id(id));
+
+    if issue_dir.exists() {
+        // In the rare case of a collision, wait one second and try again
+        thread::sleep(Duration::from_secs(1));
+
+        id = (Utc::now().timestamp() - START_2025) as u32;
+
+        issue_dir = issues_path.join(padded_id(id));
+
+        if issue_dir.exists() {
+            return Err("Failed to generate unique ID using timestamp due to collision.".to_string());
+        }
+    }
+
+    Ok(id)
 }
