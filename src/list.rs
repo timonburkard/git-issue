@@ -258,7 +258,7 @@ fn filter_issues(issues: &mut Vec<Meta>, filters: Option<Vec<Filter>>) -> Result
                 "title" => do_strings_match(&meta.title, &filter.value),
                 "state" => do_strings_match(&meta.state, &filter.value),
                 "type" => do_strings_match(&meta.type_, &filter.value),
-                "labels" => meta.labels.iter().any(|l| do_strings_match(l, &filter.value)),
+                "labels" => is_in_str_list(&meta.labels, &filter.value),
                 "reporter" => do_strings_match(&meta.reporter, &filter.value),
                 "assignee" => do_strings_match(&meta.assignee, &filter.value),
                 "priority" => do_strings_match(&format!("{:?}", meta.priority), &filter.value),
@@ -278,6 +278,7 @@ fn filter_issues(issues: &mut Vec<Meta>, filters: Option<Vec<Filter>>) -> Result
     Ok(())
 }
 
+/// Check if value matches pattern with wildcard support
 fn do_strings_match(value: &str, pattern: &str) -> bool {
     let value = value.trim().to_lowercase();
     let pattern = pattern.trim().to_lowercase();
@@ -295,6 +296,15 @@ fn do_strings_match(value: &str, pattern: &str) -> bool {
     };
 
     re.is_match(&value)
+}
+
+/// Check if pattern matches any string in the list
+fn is_in_str_list(list: &[String], pattern: &str) -> bool {
+    if pattern.is_empty() && list.is_empty() {
+        return true;
+    }
+
+    list.iter().any(|str| do_strings_match(str, pattern))
 }
 
 fn sort_issues(issues: &mut [Meta], sorts: Option<Vec<Sorting>>) -> Result<(), String> {
