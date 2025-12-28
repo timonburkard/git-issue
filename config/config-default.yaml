@@ -43,3 +43,10 @@ relationships:
 
 # Separator used when exporting to CSV
 export_csv_separator: ','
+
+# ID generation strategy (always u32)
+# Options:
+#  - sequential: Sequential numbers (1, 2, 3, ...)
+#  - timestamp:  Timestamps in seconds since 2025-01-01
+#                (in teams this reduces the chance of merge conflicts)
+id_generation: sequential
