@@ -60,8 +60,10 @@ fn get_issues_metadata() -> Result<Vec<Meta>, String> {
     Ok(issues)
 }
 
-fn get_all_column_names() -> Vec<String> {
-    let columns = vec![
+fn get_all_column_names() -> Result<Vec<String>, String> {
+    let config = load_config()?;
+
+    let mut columns = vec![
         "id".to_string(),
         "title".to_string(),
         "state".to_string(),
@@ -71,11 +73,13 @@ fn get_all_column_names() -> Vec<String> {
         "assignee".to_string(),
         "priority".to_string(),
         "due_date".to_string(),
-        "created".to_string(),
-        "updated".to_string(),
     ];
 
-    columns
+    columns.extend(config.relationships.keys().cloned().collect::<Vec<String>>());
+
+    columns.extend(vec!["created".to_string(), "updated".to_string()]);
+
+    Ok(columns)
 }
 
 fn validate_column_names(columns: &mut [String], context: &str) -> Result<(), String> {
@@ -85,7 +89,7 @@ fn validate_column_names(columns: &mut [String], context: &str) -> Result<(), St
             *col = "due_date".to_string();
         }
 
-        let valid_columns = get_all_column_names();
+        let valid_columns = get_all_column_names()?;
 
         if !valid_columns.contains(col) {
             return Err(format!("Invalid column name in {}: {}", context, col));
@@ -125,7 +129,7 @@ fn print_list(issues: &Vec<Meta>, columns: Option<Vec<String>>, print_csv: bool)
         "config.yaml:list_columns"
     };
 
-    wildcard_expansion(&mut cols);
+    wildcard_expansion(&mut cols)?;
 
     validate_column_names(&mut cols, context)?;
 
@@ -175,9 +179,21 @@ fn print_list(issues: &Vec<Meta>, columns: Option<Vec<String>>, print_csv: bool)
     Ok(())
 }
 
-fn wildcard_expansion(columns: &mut Vec<String>) {
+fn wildcard_expansion(columns: &mut Vec<String>) -> Result<(), String> {
     if columns.contains(&"*".to_string()) {
-        *columns = get_all_column_names();
+        *columns = get_all_column_names()?;
+    }
+
+    Ok(())
+}
+
+fn get_relationship_value(col: &str, meta: &Meta) -> String {
+    match meta.relationships.get(col) {
+        Some(ids) => {
+            let ids_joined = ids.iter().map(|id| id.to_string()).collect::<Vec<_>>().join(",");
+            dash_if_empty(&ids_joined)
+        }
+        None => "-".to_string(),
     }
 }
 
@@ -194,7 +210,7 @@ fn get_column_value(col: &str, meta: &Meta) -> Result<String, String> {
         "due_date" => Ok(dash_if_empty(&meta.due_date)),
         "created" => Ok(meta.created.clone()),
         "updated" => Ok(meta.updated.clone()),
-        _ => Err(format!("Unknown column: {}", col)),
+        _ => Ok(get_relationship_value(col, meta)),
     }
 }
 
