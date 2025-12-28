@@ -127,7 +127,7 @@ git issue list --columns id,assignee,title
 git issue list --columns "*"
 git issue list --filter priority=p2 title=*driver*
 git issue list --sort assignee=asc priority=desc
-git issue list --csv
+git issue list --csv  # export issue list into CSV file (.gitissues/exports/)
 
 # Show all issue information (markdown) -- launches external text editor
 git issue show 1234
