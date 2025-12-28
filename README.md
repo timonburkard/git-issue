@@ -216,6 +216,13 @@ relationships:
 
 # Separator used when exporting to CSV
 export_csv_separator: ','
+
+# ID generation strategy (always u32)
+# Options:
+#  - sequential: Sequential numbers (1, 2, 3, ...)
+#  - timestamp:  Timestamps in seconds since 2025-01-01
+#                (in teams this reduces the chance of merge conflicts)
+id_generation: sequential
 ```
 
 #### 3.1.1) Options
@@ -230,6 +237,9 @@ export_csv_separator: ','
 - `types` (list of strings): Available issue types. Default is empty.
 - `relationships` (object): Available relationships between issues
 - `export_csv_separator` (char): Separator for CSV file exports
+- `id_generation` (string): ID generation strategy. Supports options:
+  - `sequential`: Sequential numbers (1, 2, 3, ...)
+  - `timestamp`: Timestamps in seconds since 2025-01-01 (in teams this reduces the chance of merge conflicts)
 
 ### 3.2) users.yaml
 
