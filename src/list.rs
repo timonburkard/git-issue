@@ -60,6 +60,28 @@ fn get_issues_metadata() -> Result<Vec<Meta>, String> {
     Ok(issues)
 }
 
+fn get_all_column_names() -> Result<Vec<String>, String> {
+    let config = load_config()?;
+
+    let mut columns = vec![
+        "id".to_string(),
+        "title".to_string(),
+        "state".to_string(),
+        "type".to_string(),
+        "labels".to_string(),
+        "reporter".to_string(),
+        "assignee".to_string(),
+        "priority".to_string(),
+        "due_date".to_string(),
+    ];
+
+    columns.extend(config.relationships.keys().cloned().collect::<Vec<String>>());
+
+    columns.extend(vec!["created".to_string(), "updated".to_string()]);
+
+    Ok(columns)
+}
+
 fn validate_column_names(columns: &mut [String], context: &str) -> Result<(), String> {
     for col in columns.iter_mut() {
         // normalize aliases
@@ -67,11 +89,9 @@ fn validate_column_names(columns: &mut [String], context: &str) -> Result<(), St
             *col = "due_date".to_string();
         }
 
-        if ![
-            "id", "title", "state", "type", "labels", "reporter", "assignee", "priority", "due_date", "created", "updated", "*",
-        ]
-        .contains(&col.as_str())
-        {
+        let valid_columns = get_all_column_names()?;
+
+        if !valid_columns.contains(col) {
             return Err(format!("Invalid column name in {}: {}", context, col));
         }
     }
@@ -109,9 +129,9 @@ fn print_list(issues: &Vec<Meta>, columns: Option<Vec<String>>, print_csv: bool)
         "config.yaml:list_columns"
     };
 
-    validate_column_names(&mut cols, context)?;
+    wildcard_expansion(&mut cols)?;
 
-    wildcard_expansion(&mut cols);
+    validate_column_names(&mut cols, context)?;
 
     let column_widths = calculate_column_widths(issues, &cols)?;
 
@@ -159,21 +179,21 @@ fn print_list(issues: &Vec<Meta>, columns: Option<Vec<String>>, print_csv: bool)
     Ok(())
 }
 
-fn wildcard_expansion(columns: &mut Vec<String>) {
+fn wildcard_expansion(columns: &mut Vec<String>) -> Result<(), String> {
     if columns.contains(&"*".to_string()) {
-        *columns = vec![
-            "id".to_string(),
-            "state".to_string(),
-            "reporter".to_string(),
-            "assignee".to_string(),
-            "type".to_string(),
-            "title".to_string(),
-            "priority".to_string(),
-            "labels".to_string(),
-            "due_date".to_string(),
-            "created".to_string(),
-            "updated".to_string(),
-        ];
+        *columns = get_all_column_names()?;
+    }
+
+    Ok(())
+}
+
+fn get_relationship_value(col: &str, meta: &Meta) -> String {
+    match meta.relationships.get(col) {
+        Some(ids) => {
+            let ids_joined = ids.iter().map(|id| id.to_string()).collect::<Vec<_>>().join(",");
+            dash_if_empty(&ids_joined)
+        }
+        None => "-".to_string(),
     }
 }
 
@@ -190,7 +210,7 @@ fn get_column_value(col: &str, meta: &Meta) -> Result<String, String> {
         "due_date" => Ok(dash_if_empty(&meta.due_date)),
         "created" => Ok(meta.created.clone()),
         "updated" => Ok(meta.updated.clone()),
-        _ => Err(format!("Unknown column: {}", col)),
+        _ => Ok(get_relationship_value(col, meta)),
     }
 }
 
@@ -245,7 +265,13 @@ fn filter_issues(issues: &mut Vec<Meta>, filters: Option<Vec<Filter>>) -> Result
                 "due_date" => do_strings_match(&meta.due_date, &filter.value),
                 "created" => do_strings_match(&meta.created, &filter.value),
                 "updated" => do_strings_match(&meta.updated, &filter.value),
-                _ => unreachable!("All filter fields should have been validated above"),
+                relationship => {
+                    if let Some(ids) = meta.relationships.get(relationship) {
+                        ids.iter().any(|id| do_strings_match(&id.to_string(), &filter.value))
+                    } else {
+                        false
+                    }
+                }
             })
         });
     }
@@ -296,7 +322,19 @@ fn sort_issues(issues: &mut [Meta], sorts: Option<Vec<Sorting>>) -> Result<(), S
                     "due_date" => a.due_date.cmp(&b.due_date),
                     "created" => a.created.cmp(&b.created),
                     "updated" => a.updated.cmp(&b.updated),
-                    _ => Ordering::Equal, // Unknown field: treat as equal
+                    relationship => {
+                        if let Some(a_ids) = a.relationships.get(relationship) {
+                            if let Some(b_ids) = b.relationships.get(relationship) {
+                                a_ids.cmp(b_ids)
+                            } else {
+                                Ordering::Less
+                            }
+                        } else if b.relationships.get(relationship).is_some() {
+                            Ordering::Greater
+                        } else {
+                            Ordering::Equal
+                        }
+                    }
                 };
                 let ordering = match sort.order {
                     crate::model::Order::Asc => ordering,

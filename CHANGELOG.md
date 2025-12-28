@@ -7,6 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [unreleased]
 
+    - [cmd/list] added support for relationships (GitHub Issue #59)
     - [config] added possibility to change ID generation strategy `id_generation` (GitHub Issue #9)
 
 ## [v0.5.0] - 2025-12-27
