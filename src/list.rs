@@ -60,6 +60,24 @@ fn get_issues_metadata() -> Result<Vec<Meta>, String> {
     Ok(issues)
 }
 
+fn get_all_column_names() -> Vec<String> {
+    let columns = vec![
+        "id".to_string(),
+        "title".to_string(),
+        "state".to_string(),
+        "type".to_string(),
+        "labels".to_string(),
+        "reporter".to_string(),
+        "assignee".to_string(),
+        "priority".to_string(),
+        "due_date".to_string(),
+        "created".to_string(),
+        "updated".to_string(),
+    ];
+
+    columns
+}
+
 fn validate_column_names(columns: &mut [String], context: &str) -> Result<(), String> {
     for col in columns.iter_mut() {
         // normalize aliases
@@ -67,11 +85,9 @@ fn validate_column_names(columns: &mut [String], context: &str) -> Result<(), St
             *col = "due_date".to_string();
         }
 
-        if ![
-            "id", "title", "state", "type", "labels", "reporter", "assignee", "priority", "due_date", "created", "updated", "*",
-        ]
-        .contains(&col.as_str())
-        {
+        let valid_columns = get_all_column_names();
+
+        if !valid_columns.contains(col) {
             return Err(format!("Invalid column name in {}: {}", context, col));
         }
     }
@@ -109,9 +125,9 @@ fn print_list(issues: &Vec<Meta>, columns: Option<Vec<String>>, print_csv: bool)
         "config.yaml:list_columns"
     };
 
-    validate_column_names(&mut cols, context)?;
-
     wildcard_expansion(&mut cols);
+
+    validate_column_names(&mut cols, context)?;
 
     let column_widths = calculate_column_widths(issues, &cols)?;
 
@@ -161,19 +177,7 @@ fn print_list(issues: &Vec<Meta>, columns: Option<Vec<String>>, print_csv: bool)
 
 fn wildcard_expansion(columns: &mut Vec<String>) {
     if columns.contains(&"*".to_string()) {
-        *columns = vec![
-            "id".to_string(),
-            "state".to_string(),
-            "reporter".to_string(),
-            "assignee".to_string(),
-            "type".to_string(),
-            "title".to_string(),
-            "priority".to_string(),
-            "labels".to_string(),
-            "due_date".to_string(),
-            "created".to_string(),
-            "updated".to_string(),
-        ];
+        *columns = get_all_column_names();
     }
 }
 
