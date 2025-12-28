@@ -7,8 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [unreleased]
 
+### Added
+
     - [cmd/list] added support for relationships (GitHub Issue #59)
     - [config] added possibility to change ID generation strategy `id_generation` (GitHub Issue #9)
+
+### Fixed
+
+    - [cmd/list] fix: filter for empty `labels` and `relationships` does not work (GitHub Issue #73)
 
 ## [v0.5.0] - 2025-12-27
 
