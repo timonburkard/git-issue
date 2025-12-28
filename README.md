@@ -65,7 +65,7 @@ cargo install git-issue
 
 ### 2.2) How To
 
-Lets image this is the structure of your git repo, for which you want to add issue tracking:
+Lets imagine this is the structure of your git repo, for which you want to add issue tracking:
 
 ```
 .git/
@@ -92,7 +92,7 @@ README.md
 
 For infos about the `.gitissues/` directory structure, see chapter [4.) Storage Layout](#4-storage-layout).
 
-#### 2.3) Gitignore
+#### 2.2.1) Gitignore
 
 This is the suggested content for the `.gitignore`:
 
@@ -227,14 +227,14 @@ id_generation: sequential
 
 #### 3.1.1) Options
 
-- `commit_auto` (boolean): If `true`, automatically commit changes to `.gitissues/`. Default: `true`
+- `commit_auto` (boolean): If `true`, automatically commit changes to `.gitissues/`
 - `commit_message` (string): Template for git commit messages. Supports placeholders:
   - `{id}`: Issue ID
   - `{title}`: Issue title
-  - `{action}`: Command that triggered the commit (`new`, `edit description`, `set <field>`)
+  - `{action}`: Command that triggered the commit (`new`, `edit description`, `set <fields>`, `links updated`)
 - `list_columns` (list of strings): Default columns shown in `list` command
-- `states` (list of strings): Available issue states. Default is the first element.
-- `types` (list of strings): Available issue types. Default is empty.
+- `states` (list of strings): Available issue states. The default for new issues is the first element.
+- `types` (list of strings): Available issue types. The default for new issues is empty.
 - `relationships` (object): Available relationships between issues
 - `export_csv_separator` (char): Separator for CSV file exports
 - `id_generation` (string): ID generation strategy. Supports options:
@@ -373,7 +373,7 @@ cargo test
   - `list.rs`  -- List all issues
   - `new.rs`   -- Create new issues
   - `set.rs`   -- Change issue meta fields
-  - `show.rs`  -- Show all issue information
+  - `show.rs`  -- Show all issue information (markdown) with external text editor
 - `tests/`     -- Automated tests
 
 ### 5.3) Dependencies
