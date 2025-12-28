@@ -267,9 +267,9 @@ fn filter_issues(issues: &mut Vec<Meta>, filters: Option<Vec<Filter>>) -> Result
                 "updated" => do_strings_match(&meta.updated, &filter.value),
                 relationship => {
                     if let Some(ids) = meta.relationships.get(relationship) {
-                        ids.iter().any(|id| do_strings_match(&id.to_string(), &filter.value))
+                        is_in_u32_list(ids, &filter.value)
                     } else {
-                        false
+                        filter.value.is_empty()
                     }
                 }
             })
@@ -305,6 +305,15 @@ fn is_in_str_list(list: &[String], pattern: &str) -> bool {
     }
 
     list.iter().any(|str| do_strings_match(str, pattern))
+}
+
+/// Check if pattern matches any u32 in the list
+fn is_in_u32_list(list: &[u32], pattern: &str) -> bool {
+    if pattern.is_empty() && list.is_empty() {
+        return true;
+    }
+
+    list.iter().any(|id| do_strings_match(&id.to_string(), pattern))
 }
 
 fn sort_issues(issues: &mut [Meta], sorts: Option<Vec<Sorting>>) -> Result<(), String> {
