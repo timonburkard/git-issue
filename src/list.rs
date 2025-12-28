@@ -297,6 +297,33 @@ fn do_strings_match(value: &str, pattern: &str) -> bool {
     re.is_match(&value)
 }
 
+fn cmp_empty_last(a: &str, b: &str) -> Ordering {
+    match (a.is_empty(), b.is_empty()) {
+        (true, true) => Ordering::Equal,
+        (true, false) => Ordering::Greater,
+        (false, true) => Ordering::Less,
+        (false, false) => a.cmp(b),
+    }
+}
+
+fn cmp_empty_last_vec_str(a: &Vec<String>, b: &Vec<String>) -> Ordering {
+    match (a.is_empty(), b.is_empty()) {
+        (true, true) => Ordering::Equal,
+        (true, false) => Ordering::Greater,
+        (false, true) => Ordering::Less,
+        (false, false) => a.cmp(b),
+    }
+}
+
+fn cmp_empty_last_vec_u32(a: &Vec<u32>, b: &Vec<u32>) -> Ordering {
+    match (a.is_empty(), b.is_empty()) {
+        (true, true) => Ordering::Equal,
+        (true, false) => Ordering::Greater,
+        (false, true) => Ordering::Less,
+        (false, false) => a.cmp(b),
+    }
+}
+
 fn sort_issues(issues: &mut [Meta], sorts: Option<Vec<Sorting>>) -> Result<(), String> {
     if let Some(mut sorts) = sorts {
         // Validate all sort fields
@@ -312,20 +339,20 @@ fn sort_issues(issues: &mut [Meta], sorts: Option<Vec<Sorting>>) -> Result<(), S
             for sort in &sorts {
                 let ordering = match sort.field.as_str() {
                     "id" => a.id.cmp(&b.id),
-                    "title" => a.title.cmp(&b.title),
-                    "state" => a.state.cmp(&b.state),
-                    "type" => a.type_.cmp(&b.type_),
-                    "labels" => a.labels.cmp(&b.labels),
-                    "reporter" => a.reporter.cmp(&b.reporter),
-                    "assignee" => a.assignee.cmp(&b.assignee),
+                    "title" => cmp_empty_last(&a.title, &b.title),
+                    "state" => cmp_empty_last(&a.state, &b.state),
+                    "type" => cmp_empty_last(&a.type_, &b.type_),
+                    "labels" => cmp_empty_last_vec_str(&a.labels, &b.labels),
+                    "reporter" => cmp_empty_last(&a.reporter, &b.reporter),
+                    "assignee" => cmp_empty_last(&a.assignee, &b.assignee),
                     "priority" => a.priority.as_int().cmp(&b.priority.as_int()),
-                    "due_date" => a.due_date.cmp(&b.due_date),
-                    "created" => a.created.cmp(&b.created),
-                    "updated" => a.updated.cmp(&b.updated),
+                    "due_date" => cmp_empty_last(&a.due_date, &b.due_date),
+                    "created" => cmp_empty_last(&a.created, &b.created),
+                    "updated" => cmp_empty_last(&a.updated, &b.updated),
                     relationship => {
                         if let Some(a_ids) = a.relationships.get(relationship) {
                             if let Some(b_ids) = b.relationships.get(relationship) {
-                                a_ids.cmp(b_ids)
+                                cmp_empty_last_vec_u32(a_ids, b_ids)
                             } else {
                                 Ordering::Less
                             }
