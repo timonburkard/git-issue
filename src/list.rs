@@ -265,7 +265,13 @@ fn filter_issues(issues: &mut Vec<Meta>, filters: Option<Vec<Filter>>) -> Result
                 "due_date" => do_strings_match(&meta.due_date, &filter.value),
                 "created" => do_strings_match(&meta.created, &filter.value),
                 "updated" => do_strings_match(&meta.updated, &filter.value),
-                _ => unreachable!("All filter fields should have been validated above"),
+                relationship => {
+                    if let Some(ids) = meta.relationships.get(relationship) {
+                        ids.iter().any(|id| do_strings_match(&id.to_string(), &filter.value))
+                    } else {
+                        false
+                    }
+                }
             })
         });
     }
@@ -316,7 +322,19 @@ fn sort_issues(issues: &mut [Meta], sorts: Option<Vec<Sorting>>) -> Result<(), S
                     "due_date" => a.due_date.cmp(&b.due_date),
                     "created" => a.created.cmp(&b.created),
                     "updated" => a.updated.cmp(&b.updated),
-                    _ => Ordering::Equal, // Unknown field: treat as equal
+                    relationship => {
+                        if let Some(a_ids) = a.relationships.get(relationship) {
+                            if let Some(b_ids) = b.relationships.get(relationship) {
+                                a_ids.cmp(b_ids)
+                            } else {
+                                Ordering::Less
+                            }
+                        } else if b.relationships.get(relationship).is_some() {
+                            Ordering::Greater
+                        } else {
+                            Ordering::Equal
+                        }
+                    }
                 };
                 let ordering = match sort.order {
                     crate::model::Order::Asc => ordering,
