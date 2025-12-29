@@ -12,7 +12,7 @@ Issues live alongside your code inside `.gitissues/`, making them platform-indep
 - ✅ Each issue has metadata: `id`, `title`, `state`, `type`, `labels`, `reporter`, `assignee`, `priority`, `due_date`, `created`, `updated`
 - ✅ Each issue has `relationships`: Desired relationship categories (e.g, related, child/parent, ...) are configurable and bidirectional links can be managed automatically
 - ✅ Issues can be filtered and sorted
-- ✅ Highly configurable: default columns for `list`, available options for `state` and `type`, relation ship categories, commit message template, external editor
+- ✅ Highly configurable: default columns for `list`, available options for `state` and `type`, relationship categories, commit message template, external editor, and more...
 - ✅ External editor renders issue information as markdown
 - ✅ Git-integration: auto-commit of changes
 - ✅ Possibility to export issue list into CSV file
@@ -125,7 +125,7 @@ git issue new "Login redirection problem" --reporter me --assignee me  # 'me' is
 git issue list
 git issue list --columns id,assignee,title
 git issue list --columns "*"
-git issue list --filter priority=p2 title=*driver* assignee=''
+git issue list --filter priority=P2 title=*driver* assignee=''
 git issue list --filter due_date\>2025-05-31 due_date\<2026-01-01
 git issue list --sort assignee=asc priority=desc
 git issue list --csv  # export issue list into CSV file (.gitissues/exports/)
@@ -224,6 +224,10 @@ export_csv_separator: ','
 #  - timestamp:  Timestamps in seconds since 2025-01-01
 #                (in teams this reduces the chance of merge conflicts)
 id_generation: sequential
+
+# Default priority for new issues
+# Options: '', P0, P1, P2, P3, P4
+priority_default: ''
 ```
 
 #### 3.1.1) Options
@@ -241,6 +245,7 @@ id_generation: sequential
 - `id_generation` (string): ID generation strategy. Supports options:
   - `sequential`: Sequential numbers (1, 2, 3, ...)
   - `timestamp`: Timestamps in seconds since 2025-01-01 (in teams this reduces the chance of merge conflicts)
+- `priority_default`: (string): Default priority for new issues.
 
 ### 3.2) users.yaml
 
@@ -323,7 +328,7 @@ labels:                        # (List of Strings) Labels / tags
   - ui
 reporter: t.burkard            # (String) Who reported the issue
 assignee: j.doe                # (String) To whom the issue is assigned
-priority: P2                   # (Enum) Priority: P0 = highest, P2 = default, P4 = lowest
+priority: P2                   # (Enum) Priority: P0 = highest, P4 = lowest
 due_date: 2026-01-31           # (Date) Due date in ISO format: YYYY-MM-DD
 relationships:                 # (Object) Relationships with other issues
   related:
