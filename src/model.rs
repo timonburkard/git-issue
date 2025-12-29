@@ -33,6 +33,22 @@ impl Priority {
             Priority::P4 => 4,
         }
     }
+
+    pub fn from_str(s: &str) -> Result<Self, String> {
+        match s {
+            "p0" => Ok(Priority::P0),
+            "P0" => Ok(Priority::P0),
+            "p1" => Ok(Priority::P1),
+            "P1" => Ok(Priority::P1),
+            "p2" => Ok(Priority::P2),
+            "P2" => Ok(Priority::P2),
+            "p3" => Ok(Priority::P3),
+            "P3" => Ok(Priority::P3),
+            "p4" => Ok(Priority::P4),
+            "P4" => Ok(Priority::P4),
+            _ => Err(format!("Unknown priority: {s}")),
+        }
+    }
 }
 
 #[derive(Clone)]
@@ -64,8 +80,16 @@ impl FromStr for RelationshipLink {
 }
 
 #[derive(Clone)]
+pub enum Operator {
+    Eq,
+    Lt,
+    Gt,
+}
+
+#[derive(Clone)]
 pub struct Filter {
     pub field: String,
+    pub operator: Operator,
     pub value: String,
 }
 
@@ -73,10 +97,26 @@ impl FromStr for Filter {
     type Err = String;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
-        let (field, value) = s.split_once('=').ok_or("expected format: <field>=<value>")?;
+        let field: &str;
+        let operator: Operator;
+        let value: &str;
+
+        if s.contains('=') {
+            operator = Operator::Eq;
+            (field, value) = s.split_once('=').ok_or("expected format: <field>{=|>|<}<value>")?;
+        } else if s.contains('>') {
+            operator = Operator::Gt;
+            (field, value) = s.split_once('>').ok_or("expected format: <field>{=|>|<}<value>")?;
+        } else if s.contains('<') {
+            operator = Operator::Lt;
+            (field, value) = s.split_once('<').ok_or("expected format: <field>{=|>|<}<value>")?;
+        } else {
+            return Err("expected operator: =, >, or <".to_string());
+        }
 
         Ok(Filter {
             field: field.to_string(),
+            operator,
             value: value.to_string(),
         })
     }
