@@ -84,7 +84,7 @@ pub fn run(
         labels: labels.unwrap_or_default(),
         reporter: reporter_val,
         assignee: assignee_val,
-        priority: priority.unwrap_or(Priority::P2),
+        priority: priority.unwrap_or(config.priority_default),
         due_date: due_date.unwrap_or_default(),
         relationships: IndexMap::new(),
         created: timestamp.clone(),
