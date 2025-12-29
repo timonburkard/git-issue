@@ -5,7 +5,9 @@ use std::path::Path;
 
 use regex::Regex;
 
-use crate::model::{Filter, Meta, Sorting, current_timestamp, dash_if_empty, gitissues_base, issue_exports_dir, load_config, load_meta};
+use crate::model::{
+    Filter, Meta, Operator, Priority, Sorting, current_timestamp, dash_if_empty, gitissues_base, issue_exports_dir, load_config, load_meta,
+};
 
 pub fn run(columns: Option<Vec<String>>, filter: Option<Vec<Filter>>, sort: Option<Vec<Sorting>>, print_csv: bool) -> Result<(), String> {
     let mut issues = get_issues_metadata()?;
@@ -251,31 +253,97 @@ fn filter_issues(issues: &mut Vec<Meta>, filters: Option<Vec<Filter>>) -> Result
             filter.field = normalized;
         }
 
+        validate_filters(&filters)?;
+
         // Apply filters
         issues.retain(|meta| {
-            filters.iter().all(|filter| match filter.field.as_str() {
-                "id" => do_strings_match(&meta.id.to_string(), &filter.value),
-                "title" => do_strings_match(&meta.title, &filter.value),
-                "state" => do_strings_match(&meta.state, &filter.value),
-                "type" => do_strings_match(&meta.type_, &filter.value),
-                "labels" => is_in_str_list(&meta.labels, &filter.value),
-                "reporter" => do_strings_match(&meta.reporter, &filter.value),
-                "assignee" => do_strings_match(&meta.assignee, &filter.value),
-                "priority" => do_strings_match(&format!("{:?}", meta.priority), &filter.value),
-                "due_date" => do_strings_match(&meta.due_date, &filter.value),
-                "created" => do_strings_match(&meta.created, &filter.value),
-                "updated" => do_strings_match(&meta.updated, &filter.value),
-                relationship => {
-                    if let Some(ids) = meta.relationships.get(relationship) {
-                        is_in_u32_list(ids, &filter.value)
-                    } else {
-                        filter.value.is_empty()
-                    }
-                }
+            filters.iter().all(|filter| match filter.operator {
+                Operator::Eq => filter_eq(filter, meta),
+                Operator::Gt => filter_gt(filter, meta).unwrap_or(false),
+                Operator::Lt => filter_lt(filter, meta).unwrap_or(false),
             })
         });
     }
+
     Ok(())
+}
+
+fn validate_filters(filters: &[Filter]) -> Result<(), String> {
+    for filter in filters {
+        match filter.field.as_str() {
+            "id" => {
+                if filter.value.parse::<u32>().is_err() {
+                    return Err("ID must be an integer".to_string());
+                }
+            }
+            "priority" => {
+                if Priority::from_str(&filter.value).is_err() {
+                    return Err("Invalid priority value".to_string());
+                }
+            }
+            _ => {}
+        }
+
+        match filter.operator {
+            Operator::Eq => { /* all fields support '=' */ }
+            Operator::Gt | Operator::Lt => match filter.field.as_str() {
+                "id" | "priority" | "due_date" | "created" | "updated" => { /* supported */ }
+                _ => return Err(format!("Operator '>' and '<' not supported for field: {}", filter.field)),
+            },
+        }
+    }
+    Ok(())
+}
+
+fn filter_eq(filter: &Filter, meta: &Meta) -> bool {
+    match filter.field.as_str() {
+        "id" => do_strings_match(&meta.id.to_string(), &filter.value),
+        "title" => do_strings_match(&meta.title, &filter.value),
+        "state" => do_strings_match(&meta.state, &filter.value),
+        "type" => do_strings_match(&meta.type_, &filter.value),
+        "labels" => is_in_str_list(&meta.labels, &filter.value),
+        "reporter" => do_strings_match(&meta.reporter, &filter.value),
+        "assignee" => do_strings_match(&meta.assignee, &filter.value),
+        "priority" => do_strings_match(&format!("{:?}", meta.priority), &filter.value),
+        "due_date" => do_strings_match(&meta.due_date, &filter.value),
+        "created" => do_strings_match(&meta.created, &filter.value),
+        "updated" => do_strings_match(&meta.updated, &filter.value),
+        relationship => {
+            if let Some(ids) = meta.relationships.get(relationship) {
+                is_in_u32_list(ids, &filter.value)
+            } else {
+                filter.value.is_empty()
+            }
+        }
+    }
+}
+
+fn filter_gt(filter: &Filter, meta: &Meta) -> Result<bool, String> {
+    match filter.field.as_str() {
+        "id" => Ok(meta.id > filter.value.parse::<u32>().map_err(|e| format!("Parse error: {e}"))?),
+        "priority" => Ok(meta.priority.as_int() > Priority::from_str(&filter.value)?.as_int()),
+        "due_date" => Ok(meta.due_date.cmp(&filter.value) == Ordering::Greater),
+        "created" => Ok(meta.created.cmp(&filter.value) == Ordering::Greater),
+        "updated" => Ok(meta.updated.cmp(&filter.value) == Ordering::Greater),
+        _ => unreachable!(
+            "Operator '>' not supported for field: {}. Should have been caught by `validate_filters()`.",
+            filter.field
+        ),
+    }
+}
+
+fn filter_lt(filter: &Filter, meta: &Meta) -> Result<bool, String> {
+    match filter.field.as_str() {
+        "id" => Ok(meta.id < filter.value.parse::<u32>().map_err(|e| format!("Parse error: {e}"))?),
+        "priority" => Ok(meta.priority.as_int() < Priority::from_str(&filter.value)?.as_int()),
+        "due_date" => Ok(meta.due_date.cmp(&filter.value) == Ordering::Less),
+        "created" => Ok(meta.created.cmp(&filter.value) == Ordering::Less),
+        "updated" => Ok(meta.updated.cmp(&filter.value) == Ordering::Less),
+        _ => unreachable!(
+            "Operator '<' not supported for field: {}. Should have been caught by `validate_filters()`.",
+            filter.field
+        ),
+    }
 }
 
 /// Check if value matches pattern with wildcard support
