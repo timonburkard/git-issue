@@ -304,7 +304,7 @@ fn filter_eq(filter: &Filter, meta: &Meta) -> bool {
         "labels" => is_in_str_list(&meta.labels, &filter.value),
         "reporter" => do_strings_match(&meta.reporter, &filter.value),
         "assignee" => do_strings_match(&meta.assignee, &filter.value),
-        "priority" => do_strings_match(&format!("{:?}", meta.priority), &filter.value),
+        "priority" => meta.priority == Priority::from_str(&filter.value).unwrap_or(Priority::Empty),
         "due_date" => do_strings_match(&meta.due_date, &filter.value),
         "created" => do_strings_match(&meta.created, &filter.value),
         "updated" => do_strings_match(&meta.updated, &filter.value),

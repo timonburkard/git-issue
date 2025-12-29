@@ -1,3 +1,4 @@
+use std::fmt;
 use std::fs;
 use std::path::Path;
 use std::process::Command;
@@ -8,9 +9,13 @@ use clap::ValueEnum;
 use indexmap::IndexMap;
 use serde::{Deserialize, Serialize};
 
-#[derive(Debug, Serialize, Deserialize, Clone, PartialEq, Eq, ValueEnum)]
+#[derive(Serialize, Deserialize, Clone, PartialEq, Eq, ValueEnum)]
 pub enum Priority {
     // clap default to lower case, so add aliases for upper case too
+    #[serde(rename = "")]
+    #[value(name = "''")]
+    #[value(alias = "")]
+    Empty,
     #[value(alias = "P0")]
     P0,
     #[value(alias = "P1")]
@@ -26,6 +31,7 @@ pub enum Priority {
 impl Priority {
     pub fn as_int(&self) -> u8 {
         match self {
+            Priority::Empty => 255,
             Priority::P0 => 0,
             Priority::P1 => 1,
             Priority::P2 => 2,
@@ -36,6 +42,7 @@ impl Priority {
 
     pub fn from_str(s: &str) -> Result<Self, String> {
         match s {
+            "" => Ok(Priority::Empty),
             "p0" => Ok(Priority::P0),
             "P0" => Ok(Priority::P0),
             "p1" => Ok(Priority::P1),
@@ -47,6 +54,19 @@ impl Priority {
             "p4" => Ok(Priority::P4),
             "P4" => Ok(Priority::P4),
             _ => Err(format!("Unknown priority: {s}")),
+        }
+    }
+}
+
+impl fmt::Debug for Priority {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            Priority::Empty => write!(f, "-"),
+            Priority::P0 => write!(f, "P0"),
+            Priority::P1 => write!(f, "P1"),
+            Priority::P2 => write!(f, "P2"),
+            Priority::P3 => write!(f, "P3"),
+            Priority::P4 => write!(f, "P4"),
         }
     }
 }
@@ -192,6 +212,7 @@ pub struct Config {
     pub relationships: IndexMap<String, Relationship>,
     pub export_csv_separator: char,
     pub id_generation: IdGeneration,
+    pub priority_default: Priority,
 }
 
 #[derive(Debug, Deserialize)]

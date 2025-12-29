@@ -130,7 +130,7 @@ fn test_basic_workflow() {
     assert_eq!(meta1["type"].as_str().unwrap(), "");
     assert_eq!(meta1["reporter"].as_str().unwrap(), "alice");
     assert_eq!(meta1["assignee"].as_str().unwrap(), "");
-    assert_eq!(meta1["priority"].as_str().unwrap(), "P2"); // default
+    assert_eq!(meta1["priority"].as_str().unwrap(), ""); // default
     assert_eq!(meta1["due_date"].as_str().unwrap(), "");
 
     let created = meta1["created"].as_str().unwrap();
@@ -610,13 +610,13 @@ fn test_set_priority() {
     // Create an issue
     run_command(&["new", "Issue 1"]).expect("new 1 failed");
 
-    // List to check that priority is P2
+    // List to check that priority is empty
     let output = run_command(&["list", "--columns", "title,priority"]).expect("list with priority failed");
     let stdout = String::from_utf8_lossy(&output.stdout);
     assert!(stdout.contains("title"));
     assert!(stdout.contains("Issue 1"));
     assert!(stdout.contains("priority"));
-    assert!(stdout.contains("P2"));
+    assert!(stdout.contains("-"));
 
     // Set valid priority
     run_command(&["set", "1", "--priority", "P1"]).expect("set priority failed");
@@ -664,14 +664,15 @@ fn test_set_priority() {
     assert!(stdout.contains("P0"));
     assert!(!stdout.contains("3"));
 
-    // Try to remove priority
-    run_command(&["set", "1", "--priority", ""]).expect_err("remove priority successful but should fail");
+    // Remove priority
+    run_command(&["set", "1", "--priority", ""]).expect("remove priority failed");
 
-    // List to check that priority was not removed
+    // List to check that priority was removed
     let output = run_command(&["list", "--columns", "title,priority"]).expect("list with priority failed");
     let stdout = String::from_utf8_lossy(&output.stdout);
     assert!(stdout.contains("title"));
     assert!(stdout.contains("Issue 1"));
     assert!(stdout.contains("priority"));
-    assert!(stdout.contains("P0"));
+    assert!(!stdout.contains("P0"));
+    assert!(stdout.contains("-"));
 }

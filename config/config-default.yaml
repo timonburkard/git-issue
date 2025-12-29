@@ -50,3 +50,7 @@ export_csv_separator: ','
 #  - timestamp:  Timestamps in seconds since 2025-01-01
 #                (in teams this reduces the chance of merge conflicts)
 id_generation: sequential
+
+# Default priority for new issues
+# Options: '', P0, P1, P2, P3, P4
+priority_default: ''
