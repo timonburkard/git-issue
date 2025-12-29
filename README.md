@@ -125,7 +125,8 @@ git issue new "Login redirection problem" --reporter me --assignee me  # 'me' is
 git issue list
 git issue list --columns id,assignee,title
 git issue list --columns "*"
-git issue list --filter priority=p2 title=*driver*
+git issue list --filter priority=p2 title=*driver* assignee=''
+git issue list --filter due_date\>2025-05-31 due_date\<2026-01-01
 git issue list --sort assignee=asc priority=desc
 git issue list --csv  # export issue list into CSV file (.gitissues/exports/)
 
