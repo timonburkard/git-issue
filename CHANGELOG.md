@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+    - [cmd/list] added possibility to filter for ranges: `>` and `<` (GitHub Issue #75)
     - [cmd/list] added support for relationships (GitHub Issue #59)
     - [config] added possibility to change ID generation strategy `id_generation` (GitHub Issue #9)
 
