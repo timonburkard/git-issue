@@ -346,24 +346,32 @@ fn filter_lt(filter: &Filter, meta: &Meta) -> Result<bool, String> {
     }
 }
 
-/// Check if value matches pattern with wildcard support
+/// Check if value matches any pattern with wildcard support
 fn do_strings_match(value: &str, pattern: &str) -> bool {
     let value = value.trim().to_lowercase();
     let pattern = pattern.trim().to_lowercase();
 
-    // Escape regex special characters except '*'
-    let regex_pattern = regex::escape(&pattern).replace(r"\*", ".*");
+    for str in pattern.split(',') {
+        let str = str.trim();
 
-    // Add anchors to match the whole string
-    let regex_pattern = format!("^{}$", regex_pattern);
+        // Escape regex special characters except '*'
+        let regex_pattern = regex::escape(str).replace(r"\*", ".*");
 
-    // Compile the regex
-    let re = match Regex::new(&regex_pattern) {
-        Ok(re) => re,
-        Err(_) => return false, // invalid regex
-    };
+        // Add anchors to match the whole string
+        let regex_pattern = format!("^{}$", regex_pattern);
 
-    re.is_match(&value)
+        // Compile the regex
+        let re = match Regex::new(&regex_pattern) {
+            Ok(re) => re,
+            Err(_) => return false, // invalid regex
+        };
+
+        if re.is_match(&value) {
+            return true;
+        }
+    }
+
+    false
 }
 
 /// Check if pattern matches any string in the list
