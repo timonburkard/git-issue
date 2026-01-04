@@ -3,10 +3,10 @@ commit_auto: true
 
 # Commit message template
 # Available placeholders: {action}, {id}, {title}
-commit_message: "[issue] {action} #{id} -- {title}"
+commit_message: '[issue] {action} #{id} -- {title}'
 
 # Default columns to display in `issue list`
-# ["*"] can be used to include all available columns
+# ['*'] can be used to include all available columns
 list_columns:
   - id
   - state
