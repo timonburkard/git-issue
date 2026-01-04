@@ -117,14 +117,14 @@ git issue init
 git issue init --no-commit
 
 # Create a new issue
-git issue new "Login redirection problem"
-git issue new "Login redirection problem" --type bug --labels software,ui --reporter alice --assignee bob --priority P1 --due-date 2026-02-15
-git issue new "Login redirection problem" --reporter me --assignee me  # 'me' is automatically replaced with `settings.yaml:user`
+git issue new 'Login redirection problem'
+git issue new 'Login redirection problem' --type bug --labels software,ui --reporter alice --assignee bob --priority P1 --due-date 2026-02-15
+git issue new 'Login redirection problem' --reporter me --assignee me  # 'me' is automatically replaced with `settings.yaml:user`
 
 # List issues
 git issue list
 git issue list --columns id,assignee,title
-git issue list --columns "*"
+git issue list --columns '*'
 git issue list --filter priority=P2 title=*driver* assignee=''
 git issue list --filter due_date\>2025-05-31 due_date\<2026-01-01
 git issue list --sort assignee=asc priority=desc
@@ -134,7 +134,7 @@ git issue list --csv  # export issue list into CSV file (.gitissues/exports/)
 git issue show 1234
 
 # Change issue meta fields
-git issue set 1234 --title "LCD driver has a problem"
+git issue set 1234 --title 'LCD driver has a problem'
 git issue set 1234 --state resolved --type bug --reporter alice --assignee bob --priority P1 --due-date 2026-01-31
 git issue set 1234 --reporter me --assignee me  # 'me' is automatically replaced with `settings.yaml:user`
 
@@ -177,10 +177,10 @@ commit_auto: true
 
 # Commit message template
 # Available placeholders: {action}, {id}, {title}
-commit_message: "[issue] {action} #{id} -- {title}"
+commit_message: '[issue] {action} #{id} -- {title}'
 
 # Default columns to display in `issue list`
-# ["*"] can be used to include all available columns
+# ['*'] can be used to include all available columns
 list_columns:
   - id
   - state
