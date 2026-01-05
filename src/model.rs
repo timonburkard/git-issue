@@ -9,7 +9,7 @@ use clap::ValueEnum;
 use indexmap::IndexMap;
 use serde::{Deserialize, Serialize};
 
-#[derive(Serialize, Deserialize, Clone, PartialEq, Eq, ValueEnum)]
+#[derive(Serialize, Deserialize, Clone, Copy, PartialEq, Eq, ValueEnum)]
 pub enum Priority {
     // clap default to lower case, so add aliases for upper case too
     #[serde(rename = "")]

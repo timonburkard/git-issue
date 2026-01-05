@@ -87,8 +87,9 @@ enum Commands {
 
     /// Change issue meta fields
     Set {
-        /// Issue ID
-        id: u32,
+        /// Issue IDs
+        #[arg(value_delimiter = ',')]
+        ids: Vec<u32>,
 
         /// Issue meta field: title
         #[arg(long)]
@@ -178,7 +179,7 @@ fn main() {
         Commands::Show { id } => show::run(id),
 
         Commands::Set {
-            id,
+            ids,
             state,
             title,
             type_,
@@ -190,7 +191,7 @@ fn main() {
             labels_add,
             labels_remove,
         } => set::run(
-            id,
+            ids,
             state,
             title,
             type_,
