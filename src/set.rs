@@ -45,11 +45,11 @@ pub fn run(
         let path = dir.as_path();
 
         if !path.exists() {
-            return Err("Not available: ID does not exist.".to_string());
+            return Err(format!("Not available: ID #{id} does not exist."));
         }
     }
 
-    let mut any_issue_updated = false;
+    let mut num_updated_issues = 0;
 
     for id in ids {
         // Load meta.yaml
@@ -190,8 +190,6 @@ pub fn run(
 
         if fields.is_empty() {
             continue;
-        } else {
-            any_issue_updated = true;
         }
 
         updated_meta.updated = current_timestamp();
@@ -201,13 +199,15 @@ pub fn run(
         fs::write(&meta_path, updated_yaml).map_err(|_| "Failed to write meta.yaml".to_string())?;
 
         git_commit(id, updated_meta.title, &format!("set {}", fields.join(",")))?;
+
+        num_updated_issues += 1;
     }
 
-    if !any_issue_updated {
-        return Err("No fields changed".to_string());
-    }
-
-    println!("Updated issue field(s)");
+    match num_updated_issues {
+        0 => return Err("No fields changed".to_string()),
+        1 => println!("Updated issue field(s)"),
+        _ => println!("Updated {} issues' field(s)", num_updated_issues),
+    };
 
     Ok(())
 }
