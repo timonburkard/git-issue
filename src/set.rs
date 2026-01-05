@@ -1,4 +1,5 @@
 use std::fs;
+use std::io::{self, Write};
 
 use crate::model::{
     Priority, cache_path, current_timestamp, git_commit, is_valid_iso_date, is_valid_state, is_valid_type, issue_dir, issue_meta_path,
@@ -19,7 +20,9 @@ pub fn run(
     labels_add: Option<Vec<String>>,
     labels_remove: Option<Vec<String>>,
 ) -> Result<(), String> {
-    let ids: Vec<u32> = if ids.len() == 1 && ids[0] == "*" {
+    let using_wildcard = ids.len() == 1 && ids[0] == "*";
+
+    let ids: Vec<u32> = if using_wildcard {
         read_cached_issue_ids()?
     } else {
         if ids.iter().any(|t| t == "*") {
@@ -30,6 +33,10 @@ pub fn run(
             .map(|t| t.parse::<u32>().map_err(|_| format!("Invalid issue ID: {t}")))
             .collect::<Result<Vec<u32>, _>>()?
     };
+
+    if using_wildcard {
+        wildcard_confirmation(ids.len())?;
+    }
 
     // Precondition: .gitissues/issues/ID must exist
     for id in &ids {
@@ -207,12 +214,28 @@ pub fn run(
 fn read_cached_issue_ids() -> Result<Vec<u32>, String> {
     let cache_file = cache_path();
 
-    let cache_content = fs::read_to_string(&cache_file).map_err(|e| format!("Failed to read cache file {}: {e}", cache_file.display()))?;
+    let cache_content = fs::read_to_string(&cache_file).map_err(|_| "Cached ID list is empty; run 'git issue list' first.".to_string())?;
     let issue_ids: Result<Vec<u32>, _> = cache_content.split(',').map(|s| s.trim().parse::<u32>()).collect();
 
     if let Ok(value) = issue_ids {
         Ok(value)
     } else {
-        Err("Failed to parse issue IDs from cache".to_string())
+        Err("Cached ID list is empty; run 'git issue list' first.".to_string())
     }
+}
+
+fn wildcard_confirmation(num_of_ids: usize) -> Result<(), String> {
+    println!("Modify {} issues from last list cache.", num_of_ids);
+    print!("Continue? [y/N] ");
+    io::stdout().flush().map_err(|e| format!("Failed to flush stdout: {e}"))?;
+
+    let mut input = String::new();
+    io::stdin()
+        .read_line(&mut input)
+        .map_err(|e| format!("Failed to read input: {e}"))?;
+    if !input.trim().eq_ignore_ascii_case("y") {
+        return Err("Cancelled".to_string());
+    }
+
+    Ok(())
 }
