@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+    - [cmd/set] added support for bulk operation with list of issue IDs or wildcard (GitHub Issue #80)
     - [cmd/list] added support for OR filter (GitHub Issues #82, #83)
 
 ## [v0.6.0] - 2025-12-29
