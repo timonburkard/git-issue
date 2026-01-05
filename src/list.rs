@@ -6,7 +6,8 @@ use std::path::Path;
 use regex::Regex;
 
 use crate::model::{
-    Filter, Meta, Operator, Priority, Sorting, current_timestamp, dash_if_empty, gitissues_base, issue_exports_dir, load_config, load_meta,
+    Filter, Meta, Operator, Priority, Sorting, cache_path, current_timestamp, dash_if_empty, gitissues_base, issue_exports_dir,
+    load_config, load_meta,
 };
 
 pub fn run(columns: Option<Vec<String>>, filter: Option<Vec<Filter>>, sort: Option<Vec<Sorting>>, print_csv: bool) -> Result<(), String> {
@@ -177,6 +178,8 @@ fn print_list(issues: &Vec<Meta>, columns: Option<Vec<String>>, print_csv: bool)
         let export_file = export_dir.join(format!("{}.csv", current_timestamp().replace(":", "-")));
         fs::write(&export_file, csv_content).map_err(|e| format!("Failed to write {}: {e}", export_file.display()))?;
     }
+
+    cache_issue_ids(issues)?; // For `set` command wildcard support
 
     Ok(())
 }
@@ -444,6 +447,20 @@ fn sort_issues(issues: &mut [Meta], sorts: Option<Vec<Sorting>>) -> Result<(), S
     } else {
         issues.sort_by_key(|m| Reverse(m.id));
     }
+
+    Ok(())
+}
+
+fn cache_issue_ids(issues: &[Meta]) -> Result<(), String> {
+    let issue_ids: Vec<String> = issues.iter().map(|m| m.id.to_string()).collect();
+    let cache_content = issue_ids.join(",");
+    let cache_file = cache_path();
+
+    if let Some(parent) = cache_file.parent() {
+        fs::create_dir_all(parent).map_err(|e| format!("Failed to create cache directory: {e}"))?;
+    }
+
+    fs::write(&cache_file, cache_content).map_err(|e| format!("Failed to write cache file {}: {e}", cache_file.display()))?;
 
     Ok(())
 }

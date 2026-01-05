@@ -1,7 +1,10 @@
 #![deny(warnings, clippy::unwrap_used, clippy::expect_used)]
+use std::fs;
+use std::io::ErrorKind;
+
 use clap::{Parser, Subcommand};
 
-use crate::model::{Filter, Priority, RelationshipLink, Sorting};
+use crate::model::{Filter, Priority, RelationshipLink, Sorting, cache_path};
 
 mod edit;
 mod init;
@@ -87,8 +90,9 @@ enum Commands {
 
     /// Change issue meta fields
     Set {
-        /// Issue ID
-        id: u32,
+        /// Issue IDs [single ID, comma-separated IDs, or '*' to bulk update all issues from latest `list` command]
+        #[arg(value_delimiter = ',', num_args = 1..)]
+        ids: Vec<String>,
 
         /// Issue meta field: title
         #[arg(long)]
@@ -155,6 +159,18 @@ enum Commands {
 fn main() {
     let args = Args::parse();
 
+    match &args.command {
+        Commands::List { .. } | Commands::Set { .. } => { /* keep cache for list/set */ }
+        _ => {
+            let cache_file = cache_path();
+            if let Err(e) = fs::remove_file(&cache_file)
+                && e.kind() != ErrorKind::NotFound
+            {
+                eprintln!("Warning: failed to clear cache {}: {e}", cache_file.display());
+            }
+        }
+    }
+
     let result = match args.command {
         Commands::Init { no_commit } => init::run(no_commit),
 
@@ -178,7 +194,7 @@ fn main() {
         Commands::Show { id } => show::run(id),
 
         Commands::Set {
-            id,
+            ids,
             state,
             title,
             type_,
@@ -190,7 +206,7 @@ fn main() {
             labels_add,
             labels_remove,
         } => set::run(
-            id,
+            ids,
             state,
             title,
             type_,
