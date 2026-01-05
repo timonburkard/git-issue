@@ -383,8 +383,17 @@ pub fn issue_attachments_dir(id: u32) -> std::path::PathBuf {
     issue_dir(id).join("attachments")
 }
 
+pub fn issue_tmp_dir() -> std::path::PathBuf {
+    Path::new(gitissues_base()).join(".tmp")
+}
+
 pub fn issue_tmp_show_dir(id: u32) -> std::path::PathBuf {
-    Path::new(gitissues_base()).join(".tmp").join(format!("show-{id}"))
+    issue_tmp_dir().join(format!("show-{id}"))
+}
+
+/// Returns the path to the cache.txt file.
+pub fn cache_path() -> std::path::PathBuf {
+    issue_tmp_dir().join("cache.txt")
 }
 
 pub fn issue_exports_dir() -> std::path::PathBuf {

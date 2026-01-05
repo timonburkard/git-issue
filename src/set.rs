@@ -1,13 +1,13 @@
 use std::fs;
 
 use crate::model::{
-    Priority, current_timestamp, git_commit, is_valid_iso_date, is_valid_state, is_valid_type, issue_dir, issue_meta_path, load_meta,
-    user_handle_me,
+    Priority, cache_path, current_timestamp, git_commit, is_valid_iso_date, is_valid_state, is_valid_type, issue_dir, issue_meta_path,
+    load_meta, user_handle_me,
 };
 
 #[allow(clippy::too_many_arguments)]
 pub fn run(
-    ids: Vec<u32>,
+    ids: Vec<String>,
     state: Option<String>,
     title: Option<String>,
     type_: Option<String>,
@@ -19,6 +19,18 @@ pub fn run(
     labels_add: Option<Vec<String>>,
     labels_remove: Option<Vec<String>>,
 ) -> Result<(), String> {
+    let ids: Vec<u32> = if ids.len() == 1 && ids[0] == "*" {
+        read_cached_issue_ids()?
+    } else {
+        if ids.iter().any(|t| t == "*") {
+            return Err("Cannot mix '*' with explicit IDs".to_string());
+        }
+
+        ids.iter()
+            .map(|t| t.parse::<u32>().map_err(|_| format!("Invalid issue ID: {t}")))
+            .collect::<Result<Vec<u32>, _>>()?
+    };
+
     // Precondition: .gitissues/issues/ID must exist
     for id in &ids {
         let dir = issue_dir(*id);
@@ -190,4 +202,17 @@ pub fn run(
     println!("Updated issue field(s)");
 
     Ok(())
+}
+
+fn read_cached_issue_ids() -> Result<Vec<u32>, String> {
+    let cache_file = cache_path();
+
+    let cache_content = fs::read_to_string(&cache_file).map_err(|e| format!("Failed to read cache file {}: {e}", cache_file.display()))?;
+    let issue_ids: Result<Vec<u32>, _> = cache_content.split(',').map(|s| s.trim().parse::<u32>()).collect();
+
+    if let Ok(value) = issue_ids {
+        Ok(value)
+    } else {
+        Err("Failed to parse issue IDs from cache".to_string())
+    }
 }

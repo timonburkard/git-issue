@@ -87,9 +87,9 @@ enum Commands {
 
     /// Change issue meta fields
     Set {
-        /// Issue IDs
-        #[arg(value_delimiter = ',')]
-        ids: Vec<u32>,
+        /// Issue IDs [single ID, comma-separated IDs, or '*' to bulk update all issues from latest `list` command]
+        #[arg(value_delimiter = ',', num_args = 1..)]
+        ids: Vec<String>,
 
         /// Issue meta field: title
         #[arg(long)]
