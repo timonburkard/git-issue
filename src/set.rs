@@ -1,5 +1,6 @@
 use std::fs;
 use std::io::{self, Write};
+use std::time::Duration;
 
 use crate::model::{
     Priority, cache_path, current_timestamp, git_commit, is_valid_iso_date, is_valid_state, is_valid_type, issue_dir, issue_meta_path,
@@ -213,6 +214,15 @@ pub fn run(
 
 fn read_cached_issue_ids() -> Result<Vec<u32>, String> {
     let cache_file = cache_path();
+
+    // ensure cache file is not too old
+    let metadata = fs::metadata(&cache_file).map_err(|_| "Cached ID list is empty; run 'git issue list' first.".to_string())?;
+    if let Ok(modified) = metadata.modified()
+        && let Ok(elapsed) = modified.elapsed()
+        && elapsed > Duration::from_secs(300)
+    {
+        return Err("Cached ID list is stale; run 'git issue list' first.".to_string());
+    }
 
     let cache_content = fs::read_to_string(&cache_file).map_err(|_| "Cached ID list is empty; run 'git issue list' first.".to_string())?;
     let issue_ids: Result<Vec<u32>, _> = cache_content.split(',').map(|s| s.trim().parse::<u32>()).collect();

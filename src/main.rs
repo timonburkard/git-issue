@@ -1,7 +1,10 @@
 #![deny(warnings, clippy::unwrap_used, clippy::expect_used)]
+use std::fs;
+use std::io::ErrorKind;
+
 use clap::{Parser, Subcommand};
 
-use crate::model::{Filter, Priority, RelationshipLink, Sorting};
+use crate::model::{Filter, Priority, RelationshipLink, Sorting, cache_path};
 
 mod edit;
 mod init;
@@ -155,6 +158,18 @@ enum Commands {
 
 fn main() {
     let args = Args::parse();
+
+    match &args.command {
+        Commands::List { .. } | Commands::Set { .. } => { /* keep cache for list/set */ }
+        _ => {
+            let cache_file = cache_path();
+            if let Err(e) = fs::remove_file(&cache_file)
+                && e.kind() != ErrorKind::NotFound
+            {
+                eprintln!("Warning: failed to clear cache {}: {e}", cache_file.display());
+            }
+        }
+    }
 
     let result = match args.command {
         Commands::Init { no_commit } => init::run(no_commit),
