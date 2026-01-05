@@ -12,12 +12,13 @@ Issues live alongside your code inside `.gitissues/`, making them platform-indep
 - ✅ Each issue has metadata: `id`, `title`, `state`, `type`, `labels`, `reporter`, `assignee`, `priority`, `due_date`, `created`, `updated`
 - ✅ Each issue has `relationships`: Desired relationship categories (e.g, related, child/parent, ...) are configurable and bidirectional links can be managed automatically
 - ✅ Issues can be filtered and sorted
+- ✅ Issues can be bulk-edited incl. wildcard support based on filter list
 - ✅ Highly configurable: default columns for `list`, available options for `state` and `type`, relationship categories, commit message template, external editor, and more...
 - ✅ External editor renders issue information as markdown
 - ✅ Git-integration: auto-commit of changes
 - ✅ Possibility to export issue list into CSV file
 - ✅ Automated integration tests
-- 🚧 Add `search` command across all issue titles and descriptions
+- 🚧 `search` command across all issue titles and descriptions
 - 🚧 Comments / discussions
 
 ## 2.) Usage
@@ -146,6 +147,13 @@ git issue set 1234 --reporter me --assignee me  # 'me' is automatically replaced
 git issue set 1234 --labels cli,driver         # set labels (overwrite)
 git issue set 1234 --labels-add cli,driver     # add labels
 git issue set 1234 --labels-remove cli,driver  # remove labels
+
+# Change issue meta fields: bulk action for multiple IDs
+git issue set 1234,5678 --assignee alice
+
+# Change issue meta fields: bulk action for all issues shown in the last `list` command
+git issue list --filter state=new labels=gui
+git issue set '*' --assignee alice
 
 # Change issue relationships
 git issue link 1234 --add related=5678                                       # add relationship link
