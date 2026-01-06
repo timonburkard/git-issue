@@ -4,6 +4,28 @@ mod common;
 use common::{TestEnv, get_binary_path, load_meta_value, run_command};
 
 #[test]
+fn test_new() {
+    let _env = TestEnv::new();
+
+    run_command(&["init", "--no-commit"]).expect("init failed");
+
+    // Create simple issue
+    run_command(&["new", "Simple issue"]).expect("new failed");
+
+    // Verify metadata
+    let meta = load_meta_value(".gitissues/issues/0000000001/meta.yaml");
+    assert_eq!(meta["id"].as_i64().unwrap(), 1);
+    assert_eq!(meta["title"].as_str().unwrap(), "Simple issue");
+    assert_eq!(meta["type"].as_str().unwrap(), "");
+    assert_eq!(meta["assignee"].as_str().unwrap(), "");
+    assert_eq!(meta["reporter"].as_str().unwrap(), "");
+    assert_eq!(meta["priority"].as_str().unwrap(), "");
+    assert_eq!(meta["due_date"].as_str().unwrap(), "");
+    assert_eq!(meta["labels"].as_sequence().unwrap().len(), 0);
+    assert_eq!(meta["state"].as_str().unwrap(), "new");
+}
+
+#[test]
 fn test_new_initial_metadata() {
     let _env = TestEnv::new();
 
