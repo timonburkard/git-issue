@@ -425,10 +425,10 @@ fn sort_issues(issues: &mut [Meta], sorts: Option<Vec<Sorting>>) -> Result<(), S
                             if let Some(b_ids) = b.relationships.get(relationship) {
                                 a_ids.cmp(b_ids)
                             } else {
-                                Ordering::Less
+                                Ordering::Greater
                             }
                         } else if b.relationships.get(relationship).is_some() {
-                            Ordering::Greater
+                            Ordering::Less
                         } else {
                             Ordering::Equal
                         }
