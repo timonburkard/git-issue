@@ -77,11 +77,11 @@ pub fn run_command(args: &[&str]) -> Result<std::process::Output, String> {
 }
 
 pub fn load_yaml_values(path: &str) -> Value {
-    let content = fs::read_to_string(path).expect(&format!("Failed to read {path}"));
+    let content = fs::read_to_string(path).unwrap_or_else(|_| panic!("Failed to read {path}"));
     serde_yaml::from_str::<Value>(&content).expect("Failed to parse meta.yaml")
 }
 
 pub fn save_yaml_values(path: &str, value: &Value) {
-    let content = serde_yaml::to_string(value).expect(&format!("Failed to serialize {path}"));
-    fs::write(path, content).expect(&format!("Failed to write {path}"));
+    let content = serde_yaml::to_string(value).unwrap_or_else(|_| panic!("Failed to serialize {path}"));
+    fs::write(path, content).unwrap_or_else(|_| panic!("Failed to write {path}"));
 }
