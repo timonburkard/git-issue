@@ -351,3 +351,129 @@ fn test_list_filter() {
     assert!(!stdout.contains("2"));
     assert!(stdout.contains("3"));
 }
+
+#[test]
+fn test_list_sort() {
+    let _env = TestEnv::new();
+
+    run_command(&["init", "--no-commit"]).expect("init failed");
+
+    // Create a few issues
+    run_command(&[
+        "new",
+        "Issue 1",
+        "--type",
+        "feature",
+        "--assignee",
+        "alice",
+        "--reporter",
+        "bob",
+        "--labels",
+        "ui,cli",
+        "--priority",
+        "P1",
+        "--due_date",
+        "2026-01-30",
+    ])
+    .expect("new 1 failed");
+    run_command(&[
+        "new",
+        "Issue 2",
+        "--type",
+        "feature",
+        "--assignee",
+        "alice",
+        "--reporter",
+        "carol",
+        "--labels",
+        "ui,gui",
+        "--priority",
+        "P3",
+        "--due_date",
+        "2027-01-02",
+    ])
+    .expect("new 2 failed");
+    run_command(&[
+        "new",
+        "Issue 3",
+        "--type",
+        "bug",
+        "--assignee",
+        "carol",
+        "--reporter",
+        "carol",
+        "--labels",
+        "fw",
+        "--priority",
+        "",
+        "--due_date",
+        "2026-06-16",
+    ])
+    .expect("new 3 failed");
+
+    // List without sort (default is desc ID)
+    let output = run_command(&["list", "--columns", "id"]).expect("list without filters failed");
+    let stdout = String::from_utf8_lossy(&output.stdout);
+    let position_header = stdout.find("id").expect("id header not found");
+    let position1 = stdout.find("1").expect("id 1 not found");
+    let position2 = stdout.find("2").expect("id 2 not found");
+    let position3 = stdout.find("3").expect("id 3 not found");
+    assert!(position_header < position3);
+    assert!(position3 < position2);
+    assert!(position2 < position1);
+
+    // List with sort: asc ID
+    let output = run_command(&["list", "--columns", "id", "--sort", "id=asc"]).expect("list with sort failed");
+    let stdout = String::from_utf8_lossy(&output.stdout);
+    let position_header = stdout.find("id").expect("id header not found");
+    let position1 = stdout.find("1").expect("id 1 not found");
+    let position2 = stdout.find("2").expect("id 2 not found");
+    let position3 = stdout.find("3").expect("id 3 not found");
+    assert!(position_header < position1);
+    assert!(position1 < position2);
+    assert!(position2 < position3);
+
+    // List with sort: desc ID
+    let output = run_command(&["list", "--columns", "id", "--sort", "id=desc"]).expect("list with sort failed");
+    let stdout = String::from_utf8_lossy(&output.stdout);
+    let position_header = stdout.find("id").expect("id header not found");
+    let position1 = stdout.find("1").expect("id 1 not found");
+    let position2 = stdout.find("2").expect("id 2 not found");
+    let position3 = stdout.find("3").expect("id 3 not found");
+    assert!(position_header < position3);
+    assert!(position3 < position2);
+    assert!(position2 < position1);
+
+    // List with sort: asc due_date
+    let output = run_command(&["list", "--columns", "id", "--sort", "due_date=asc"]).expect("list with sort failed");
+    let stdout = String::from_utf8_lossy(&output.stdout);
+    let position_header = stdout.find("id").expect("id header not found");
+    let position1 = stdout.find("1").expect("id 1 not found");
+    let position2 = stdout.find("2").expect("id 2 not found");
+    let position3 = stdout.find("3").expect("id 3 not found");
+    assert!(position_header < position1);
+    assert!(position1 < position3);
+    assert!(position3 < position2);
+
+    // List with sort: desc due_date
+    let output = run_command(&["list", "--columns", "id", "--sort", "due_date=desc"]).expect("list with sort failed");
+    let stdout = String::from_utf8_lossy(&output.stdout);
+    let position_header = stdout.find("id").expect("id header not found");
+    let position1 = stdout.find("1").expect("id 1 not found");
+    let position2 = stdout.find("2").expect("id 2 not found");
+    let position3 = stdout.find("3").expect("id 3 not found");
+    assert!(position_header < position2);
+    assert!(position2 < position3);
+    assert!(position3 < position1);
+
+    // List with sort: asc assignee, desc reporter
+    let output = run_command(&["list", "--columns", "id", "--sort", "assignee=asc", "reporter=desc"]).expect("list with sort failed");
+    let stdout = String::from_utf8_lossy(&output.stdout);
+    let position_header = stdout.find("id").expect("id header not found");
+    let position1 = stdout.find("1").expect("id 1 not found");
+    let position2 = stdout.find("2").expect("id 2 not found");
+    let position3 = stdout.find("3").expect("id 3 not found");
+    assert!(position_header < position2);
+    assert!(position2 < position1);
+    assert!(position1 < position3);
+}
