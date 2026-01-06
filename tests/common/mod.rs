@@ -41,7 +41,7 @@ impl Drop for TestEnv {
 }
 
 /// Helper to get the path to the git-issue binary
-pub fn get_binary_path() -> PathBuf {
+fn get_binary_path() -> PathBuf {
     // Use the binary built by cargo test
     let mut path = env::current_exe().expect("Failed to get test executable path");
     path.pop(); // Remove test executable name

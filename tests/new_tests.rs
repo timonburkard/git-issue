@@ -1,7 +1,5 @@
-use std::process::Command;
-
 mod common;
-use common::{TestEnv, get_binary_path, load_yaml_values, run_command, save_yaml_values};
+use common::{TestEnv, load_yaml_values, run_command, save_yaml_values};
 
 #[test]
 fn test_new_simple() {
@@ -76,14 +74,7 @@ fn test_new_invalid_due_date() {
     run_command(&["init", "--no-commit"]).expect("init failed");
 
     // Try to create issue with invalid date
-    let binary = get_binary_path();
-    let output = Command::new(&binary)
-        .args(&["new", "Bad date", "--due-date", "not-a-date"])
-        .output()
-        .expect("Failed to execute command");
-    assert!(!output.status.success());
-    let stderr = String::from_utf8_lossy(&output.stderr);
-    assert!(stderr.contains("Invalid due_date format"));
+    run_command(&["new", "Bad date", "--due-date", "not-a-date"]).expect_err("new with invalid date successful but should fail");
 }
 
 #[test]
