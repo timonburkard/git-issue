@@ -155,12 +155,10 @@ pub fn run(
         if let Some(value) = labels.as_ref()
             && updated_meta.labels != *value
         {
-            if value == &vec![""] {
-                updated_meta.labels = Vec::new();
-            } else {
-                updated_meta.labels = value.clone();
-            }
+            let mut labels_val = value.clone();
+            labels_val.retain(|label| !label.is_empty());
 
+            updated_meta.labels = labels_val;
             fields.push("labels");
         }
 

@@ -74,9 +74,7 @@ pub fn run(
     }
 
     let mut labels_val = labels.unwrap_or_default();
-    if labels_val == vec![""] {
-        labels_val.clear();
-    }
+    labels_val.retain(|label| !label.is_empty());
 
     // Step 4: Create meta fields and validate
     let timestamp = current_timestamp();
