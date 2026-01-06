@@ -80,3 +80,8 @@ pub fn load_yaml_values(path: &str) -> Value {
     let content = fs::read_to_string(path).expect(&format!("Failed to read {path}"));
     serde_yaml::from_str::<Value>(&content).expect("Failed to parse meta.yaml")
 }
+
+pub fn save_yaml_values(path: &str, value: &Value) {
+    let content = serde_yaml::to_string(value).expect(&format!("Failed to serialize {path}"));
+    fs::write(path, content).expect(&format!("Failed to write {path}"));
+}
