@@ -84,16 +84,4 @@ fn test_new_invalid_due_date() {
     assert!(!output.status.success());
     let stderr = String::from_utf8_lossy(&output.stderr);
     assert!(stderr.contains("Invalid due_date format"));
-
-    // Create valid issue first
-    run_command(&["new", "Valid issue"]).expect("new failed");
-
-    // Try to set invalid date
-    let output = Command::new(&binary)
-        .args(&["set", "1", "--due-date", "invalid-date"])
-        .output()
-        .expect("Failed to execute command");
-    assert!(!output.status.success());
-    let stderr = String::from_utf8_lossy(&output.stderr);
-    assert!(stderr.contains("Invalid due_date format"));
 }

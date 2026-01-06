@@ -1,5 +1,7 @@
+use std::process::Command;
+
 mod common;
-use common::{TestEnv, load_yaml_values, run_command};
+use common::{TestEnv, get_binary_path, load_yaml_values, run_command};
 
 #[test]
 fn test_set_labels() {
@@ -352,4 +354,24 @@ fn test_set_priority() {
     assert!(stdout.contains("priority"));
     assert!(!stdout.contains("P0"));
     assert!(stdout.contains("-"));
+}
+
+#[test]
+fn test_set_due_date() {
+    let _env = TestEnv::new();
+
+    run_command(&["init", "--no-commit"]).expect("init failed");
+
+    // Create valid issue first
+    run_command(&["new", "Valid issue"]).expect("new failed");
+
+    // Try to set invalid date
+    let binary = get_binary_path();
+    let output = Command::new(&binary)
+        .args(&["set", "1", "--due-date", "invalid-date"])
+        .output()
+        .expect("Failed to execute command");
+    assert!(!output.status.success());
+    let stderr = String::from_utf8_lossy(&output.stderr);
+    assert!(stderr.contains("Invalid due_date format"));
 }
