@@ -48,6 +48,9 @@ fn test_list_basic() {
     assert!(stdout.contains("labels"));
     assert!(stdout.contains("type"));
     assert!(stdout.contains("due_date"));
+    assert!(stdout.contains("related"));
+    assert!(stdout.contains("child"));
+    assert!(stdout.contains("parent"));
     assert!(stdout.contains("created"));
     assert!(stdout.contains("updated"));
     assert!(stdout.contains("Issue 1"));
