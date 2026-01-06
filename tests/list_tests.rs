@@ -340,7 +340,7 @@ fn test_list_filter() {
     assert!(stdout.contains("id"));
     assert!(stdout.contains("1"));
     assert!(!stdout.contains("2"));
-    assert!(!stdout.contains("3"));
+    assert!(stdout.contains("3")); // empty is considered smallest
 
     // List with filter '<' on due_date
     // In CLI this corresponds to due_date\<2027

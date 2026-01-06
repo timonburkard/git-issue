@@ -29,9 +29,9 @@ pub enum Priority {
 }
 
 impl Priority {
-    pub fn as_int(&self) -> u8 {
+    pub fn as_int(&self) -> i8 {
         match self {
-            Priority::Empty => 255,
+            Priority::Empty => -1,
             Priority::P0 => 0,
             Priority::P1 => 1,
             Priority::P2 => 2,
