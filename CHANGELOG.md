@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [unreleased]
 
+### Added
+
+    - [test] added more automated tests for `new`, `set` and `list` commands
+
 ### Changed
 
     - [config] changed default user in `settings.yaml` to empty
