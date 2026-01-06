@@ -1,5 +1,5 @@
 mod common;
-use common::{TestEnv, load_yaml_values, run_command};
+use common::{TestEnv, load_yaml_values, run_command, save_yaml_values};
 
 #[test]
 fn test_set_labels() {
@@ -431,4 +431,55 @@ fn test_set_due_date() {
     assert!(stdout.contains("due_date"));
     assert!(stdout.contains("-"));
     assert!(!stdout.contains("2026-01-15"));
+}
+
+#[test]
+fn test_set_me() {
+    let _env = TestEnv::new();
+
+    run_command(&["init", "--no-commit"]).expect("init failed");
+
+    // Create an issue
+    run_command(&["new", "Issue 1", "--reporter", "alice", "--assignee", "alice"]).expect("new 1 failed");
+
+    // List to check that reporter and assignee are 'alice'
+    let output = run_command(&["list", "--columns", "title,reporter,assignee"]).expect("list with reporter/assignee failed");
+    let stdout = String::from_utf8_lossy(&output.stdout);
+    assert!(stdout.contains("title"));
+    assert!(stdout.contains("Issue 1"));
+    assert!(stdout.contains("reporter"));
+    assert!(stdout.contains("assignee"));
+    assert!(stdout.contains("alice"));
+
+    // Set reporter and assignee with 'me' to empty (default user)
+    run_command(&["set", "1", "--reporter", "me", "--assignee", "me"]).expect("set reporter/assignee failed");
+
+    // List to check that reporter and assignee were set to empty (default user)
+    let output = run_command(&["list", "--columns", "title,reporter,assignee"]).expect("list with reporter/assignee failed");
+    let stdout = String::from_utf8_lossy(&output.stdout);
+    assert!(stdout.contains("title"));
+    assert!(stdout.contains("Issue 1"));
+    assert!(stdout.contains("reporter"));
+    assert!(stdout.contains("assignee"));
+    assert!(stdout.contains("-"));
+    assert!(!stdout.contains("alice"));
+
+    // Change default user in settings
+    let settings_path = ".gitissues/settings.yaml";
+    let mut settings = load_yaml_values(settings_path);
+    settings["user"] = serde_yaml::Value::String("bob".to_string());
+    save_yaml_values(settings_path, &settings);
+
+    // Set reporter and assignee with 'me' to 'bob'
+    run_command(&["set", "1", "--reporter", "me", "--assignee", "me"]).expect("set reporter/assignee failed");
+
+    // List to check that reporter and assignee were set to 'bob'
+    let output = run_command(&["list", "--columns", "title,reporter,assignee"]).expect("list with reporter/assignee failed");
+    let stdout = String::from_utf8_lossy(&output.stdout);
+    assert!(stdout.contains("title"));
+    assert!(stdout.contains("Issue 1"));
+    assert!(stdout.contains("reporter"));
+    assert!(stdout.contains("assignee"));
+    assert!(stdout.contains("bob"));
+    assert!(!stdout.contains("-"));
 }

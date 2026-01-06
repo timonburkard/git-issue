@@ -218,3 +218,42 @@ fn test_new_invalid_metadata() {
     // Try to create issue with invalid due_date
     run_command(&["new", "Title", "--due-date", "2026-02-30"]).expect_err("new with invalid due_date successful but should fail");
 }
+
+#[test]
+fn test_new_me() {
+    let _env = TestEnv::new();
+
+    run_command(&["init", "--no-commit"]).expect("init failed");
+
+    // Create an issue with reporter and assignee as 'me', which is empty by default
+    run_command(&["new", "Issue 1", "--reporter", "me", "--assignee", "me"]).expect("new 1 failed");
+
+    // List to check that reporter and assignee are empty (default user)
+    let output = run_command(&["list", "--columns", "title,reporter,assignee"]).expect("list with reporter/assignee failed");
+    let stdout = String::from_utf8_lossy(&output.stdout);
+    assert!(stdout.contains("title"));
+    assert!(stdout.contains("Issue 1"));
+    assert!(stdout.contains("reporter"));
+    assert!(stdout.contains("assignee"));
+    assert!(stdout.contains("-"));
+
+    // Change default user in settings
+    let settings_path = ".gitissues/settings.yaml";
+    let mut settings = load_yaml_values(settings_path);
+    settings["user"] = serde_yaml::Value::String("bob".to_string());
+    save_yaml_values(settings_path, &settings);
+
+    // Create another issue with reporter and assignee as 'me', which is now 'bob'
+    run_command(&["new", "Issue 2", "--reporter", "me", "--assignee", "me"]).expect("new 1 failed");
+
+    // List to check that reporter and assignee are 'bob' (default user)
+    let output =
+        run_command(&["list", "--filter", "id=2", "--columns", "title,reporter,assignee"]).expect("list with reporter/assignee failed");
+    let stdout = String::from_utf8_lossy(&output.stdout);
+    assert!(stdout.contains("title"));
+    assert!(stdout.contains("Issue 2"));
+    assert!(stdout.contains("reporter"));
+    assert!(stdout.contains("assignee"));
+    assert!(stdout.contains("bob"));
+    assert!(!stdout.contains("-"));
+}
