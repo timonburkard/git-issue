@@ -4,4 +4,5 @@ editor: git
 
 # User name
 # Used as default reporter for new issues
-user: alice
+# Must be in users.yaml:users:id or ''
+user: ''

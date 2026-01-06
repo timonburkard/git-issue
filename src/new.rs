@@ -73,6 +73,9 @@ pub fn run(
         Err(e) => return Err(format!("Error: {e}")),
     }
 
+    let mut labels_val = labels.unwrap_or_default();
+    labels_val.retain(|label| !label.is_empty());
+
     // Step 4: Create meta fields and validate
     let timestamp = current_timestamp();
 
@@ -81,7 +84,7 @@ pub fn run(
         title: title.clone(),
         state: config.states.first().cloned().unwrap_or_else(|| "new".to_string()),
         type_: type_val,
-        labels: labels.unwrap_or_default(),
+        labels: labels_val,
         reporter: reporter_val,
         assignee: assignee_val,
         priority: priority.unwrap_or(config.priority_default),

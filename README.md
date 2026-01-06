@@ -281,6 +281,7 @@ editor: git
 
 # User name
 # Used as default reporter for new issues
+# Must be in users.yaml:users:id or ''
 user: alice
 ```
 

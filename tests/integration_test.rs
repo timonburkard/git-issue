@@ -128,7 +128,7 @@ fn test_basic_workflow() {
     assert_eq!(meta1["title"].as_str().unwrap(), "First issue");
     assert_eq!(meta1["state"].as_str().unwrap(), "new"); // default
     assert_eq!(meta1["type"].as_str().unwrap(), "");
-    assert_eq!(meta1["reporter"].as_str().unwrap(), "alice");
+    assert_eq!(meta1["reporter"].as_str().unwrap(), ""); // default
     assert_eq!(meta1["assignee"].as_str().unwrap(), "");
     assert_eq!(meta1["priority"].as_str().unwrap(), ""); // default
     assert_eq!(meta1["due_date"].as_str().unwrap(), "");
@@ -454,13 +454,13 @@ fn test_set_reporter() {
     // Create an issue
     run_command(&["new", "Issue 1"]).expect("new 1 failed");
 
-    // List to check that reporter is alice
+    // List to check that reporter is empty
     let output = run_command(&["list", "--columns", "title,reporter"]).expect("list with reporter failed");
     let stdout = String::from_utf8_lossy(&output.stdout);
     assert!(stdout.contains("title"));
     assert!(stdout.contains("Issue 1"));
     assert!(stdout.contains("reporter"));
-    assert!(stdout.contains("alice"));
+    assert!(stdout.contains("-"));
 
     // Set valid reporter
     run_command(&["set", "1", "--reporter", "bob"]).expect("set reporter failed");
