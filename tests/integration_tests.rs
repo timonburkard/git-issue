@@ -5,7 +5,7 @@ use std::thread;
 use std::time::Duration;
 
 mod common;
-use common::{TestEnv, load_meta_value, run_command};
+use common::{TestEnv, load_yaml_values, run_command};
 
 #[test]
 fn test_integration_basic_workflow() {
@@ -48,7 +48,7 @@ fn test_integration_basic_workflow() {
     assert!(content.contains("# Description"));
 
     // Step 3: Verify issue metadata
-    let meta1 = load_meta_value(".gitissues/issues/0000000001/meta.yaml");
+    let meta1 = load_yaml_values(".gitissues/issues/0000000001/meta.yaml");
     assert_eq!(meta1["id"].as_i64().unwrap(), 1);
     assert_eq!(meta1["title"].as_str().unwrap(), "First issue");
     assert_eq!(meta1["state"].as_str().unwrap(), "new"); // default
@@ -71,11 +71,11 @@ fn test_integration_basic_workflow() {
         created
     );
 
-    let meta2 = load_meta_value(".gitissues/issues/0000000002/meta.yaml");
+    let meta2 = load_yaml_values(".gitissues/issues/0000000002/meta.yaml");
     assert_eq!(meta2["id"].as_i64().unwrap(), 2);
     assert_eq!(meta2["title"].as_str().unwrap(), "Second issue");
 
-    let meta3 = load_meta_value(".gitissues/issues/0000000003/meta.yaml");
+    let meta3 = load_yaml_values(".gitissues/issues/0000000003/meta.yaml");
     assert_eq!(meta3["id"].as_i64().unwrap(), 3);
     assert_eq!(meta3["title"].as_str().unwrap(), "Third issue");
 
@@ -105,7 +105,7 @@ fn test_integration_basic_workflow() {
 
     // Step 5: Verify changes
     let prev_updated = meta2["updated"].as_str().unwrap().to_string();
-    let meta2_updated = load_meta_value(".gitissues/issues/0000000002/meta.yaml");
+    let meta2_updated = load_yaml_values(".gitissues/issues/0000000002/meta.yaml");
     assert_eq!(meta2_updated["state"].as_str().unwrap(), "active");
     assert_eq!(meta2_updated["type"].as_str().unwrap(), "bug");
     let labels: Vec<String> = meta2_updated["labels"]

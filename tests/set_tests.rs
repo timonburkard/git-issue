@@ -1,5 +1,5 @@
 mod common;
-use common::{TestEnv, load_meta_value, run_command};
+use common::{TestEnv, load_yaml_values, run_command};
 
 #[test]
 fn test_set_labels() {
@@ -11,7 +11,7 @@ fn test_set_labels() {
     // Add labels
     run_command(&["set", "1", "--labels-add", "cli,critical"]).expect("set labels_add failed");
 
-    let meta = load_meta_value(".gitissues/issues/0000000001/meta.yaml");
+    let meta = load_yaml_values(".gitissues/issues/0000000001/meta.yaml");
     let labels: Vec<String> = meta["labels"]
         .as_sequence()
         .unwrap()
@@ -23,7 +23,7 @@ fn test_set_labels() {
     // Add more labels
     run_command(&["set", "1", "--labels-add", "ui"]).expect("set labels_add 2 failed");
 
-    let meta = load_meta_value(".gitissues/issues/0000000001/meta.yaml");
+    let meta = load_yaml_values(".gitissues/issues/0000000001/meta.yaml");
     let labels: Vec<String> = meta["labels"]
         .as_sequence()
         .unwrap()
@@ -35,7 +35,7 @@ fn test_set_labels() {
     // Remove a label
     run_command(&["set", "1", "--labels-remove", "critical"]).expect("set labels_remove failed");
 
-    let meta = load_meta_value(".gitissues/issues/0000000001/meta.yaml");
+    let meta = load_yaml_values(".gitissues/issues/0000000001/meta.yaml");
     let labels: Vec<String> = meta["labels"]
         .as_sequence()
         .unwrap()
@@ -47,7 +47,7 @@ fn test_set_labels() {
     // Overwrite all labels
     run_command(&["set", "1", "--labels", "new-label"]).expect("set labels (overwrite) failed");
 
-    let meta = load_meta_value(".gitissues/issues/0000000001/meta.yaml");
+    let meta = load_yaml_values(".gitissues/issues/0000000001/meta.yaml");
     let labels: Vec<String> = meta["labels"]
         .as_sequence()
         .unwrap()
@@ -59,7 +59,7 @@ fn test_set_labels() {
     // Clear all labels
     run_command(&["set", "1", "--labels", ""]).expect("set labels clear failed");
 
-    let meta = load_meta_value(".gitissues/issues/0000000001/meta.yaml");
+    let meta = load_yaml_values(".gitissues/issues/0000000001/meta.yaml");
     let labels: Vec<String> = meta["labels"]
         .as_sequence()
         .unwrap_or(&vec![])

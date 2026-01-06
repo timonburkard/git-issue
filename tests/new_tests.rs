@@ -1,7 +1,7 @@
 use std::process::Command;
 
 mod common;
-use common::{TestEnv, get_binary_path, load_meta_value, run_command};
+use common::{TestEnv, get_binary_path, load_yaml_values, run_command, save_yaml_values};
 
 #[test]
 fn test_new() {
@@ -13,7 +13,7 @@ fn test_new() {
     run_command(&["new", "Simple issue"]).expect("new failed");
 
     // Verify metadata
-    let meta = load_meta_value(".gitissues/issues/0000000001/meta.yaml");
+    let meta = load_yaml_values(".gitissues/issues/0000000001/meta.yaml");
     assert_eq!(meta["id"].as_i64().unwrap(), 1);
     assert_eq!(meta["title"].as_str().unwrap(), "Simple issue");
     assert_eq!(meta["type"].as_str().unwrap(), "");
@@ -51,7 +51,7 @@ fn test_new_initial_metadata() {
     .expect("new with metadata failed");
 
     // Verify metadata
-    let meta = load_meta_value(".gitissues/issues/0000000001/meta.yaml");
+    let meta = load_yaml_values(".gitissues/issues/0000000001/meta.yaml");
     assert_eq!(meta["id"].as_i64().unwrap(), 1);
     assert_eq!(meta["title"].as_str().unwrap(), "Complex issue");
     assert_eq!(meta["type"].as_str().unwrap(), "feature");

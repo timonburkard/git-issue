@@ -76,7 +76,7 @@ pub fn run_command(args: &[&str]) -> Result<std::process::Output, String> {
     Ok(output)
 }
 
-pub fn load_meta_value(path: &str) -> Value {
-    let content = fs::read_to_string(path).expect("Failed to read meta.yaml");
+pub fn load_yaml_values(path: &str) -> Value {
+    let content = fs::read_to_string(path).expect(&format!("Failed to read {path}"));
     serde_yaml::from_str::<Value>(&content).expect("Failed to parse meta.yaml")
 }
