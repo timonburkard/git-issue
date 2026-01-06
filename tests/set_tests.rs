@@ -1,7 +1,5 @@
-use std::process::Command;
-
 mod common;
-use common::{TestEnv, get_binary_path, load_yaml_values, run_command};
+use common::{TestEnv, load_yaml_values, run_command};
 
 #[test]
 fn test_set_labels() {
@@ -362,16 +360,75 @@ fn test_set_due_date() {
 
     run_command(&["init", "--no-commit"]).expect("init failed");
 
-    // Create valid issue first
-    run_command(&["new", "Valid issue"]).expect("new failed");
+    // Create an issue
+    run_command(&["new", "Issue 1"]).expect("new 1 failed");
 
-    // Try to set invalid date
-    let binary = get_binary_path();
-    let output = Command::new(&binary)
-        .args(&["set", "1", "--due-date", "invalid-date"])
-        .output()
-        .expect("Failed to execute command");
-    assert!(!output.status.success());
-    let stderr = String::from_utf8_lossy(&output.stderr);
-    assert!(stderr.contains("Invalid due_date format"));
+    // List to check that due_date is empty
+    let output = run_command(&["list", "--columns", "title,due_date"]).expect("list with due_date failed");
+    let stdout = String::from_utf8_lossy(&output.stdout);
+    assert!(stdout.contains("title"));
+    assert!(stdout.contains("Issue 1"));
+    assert!(stdout.contains("due_date"));
+    assert!(stdout.contains("-"));
+
+    // Set valid due_date
+    run_command(&["set", "1", "--due-date", "2026-01-15"]).expect("set due_date failed");
+    // List to check that due_date was set
+    let output = run_command(&["list", "--columns", "title,due_date"]).expect("list with due_date failed");
+    let stdout = String::from_utf8_lossy(&output.stdout);
+    assert!(stdout.contains("title"));
+    assert!(stdout.contains("Issue 1"));
+    assert!(stdout.contains("due_date"));
+    assert!(stdout.contains("2026-01-15"));
+
+    // Set invalid due_date
+    run_command(&["set", "1", "--due-date", "not-a-date"]).expect_err("set due_date successful but should fail");
+
+    // List to check that non-existing due_date was not set
+    let output = run_command(&["list", "--columns", "title,due_date"]).expect("list with due_date failed");
+    let stdout = String::from_utf8_lossy(&output.stdout);
+    assert!(stdout.contains("title"));
+    assert!(stdout.contains("Issue 1"));
+    assert!(stdout.contains("due_date"));
+    assert!(stdout.contains("-"));
+    assert!(stdout.contains("2026-01-15"));
+    assert!(!stdout.contains("not-a-date"));
+
+    // Set invalid due_date format
+    run_command(&["set", "1", "--due-date", "15.01.2026"]).expect_err("set due_date successful but should fail");
+
+    // List to check that non-existing due_date was not set
+    let output = run_command(&["list", "--columns", "title,due_date"]).expect("list with due_date failed");
+    let stdout = String::from_utf8_lossy(&output.stdout);
+    assert!(stdout.contains("title"));
+    assert!(stdout.contains("Issue 1"));
+    assert!(stdout.contains("due_date"));
+    assert!(stdout.contains("-"));
+    assert!(stdout.contains("2026-01-15"));
+    assert!(!stdout.contains("15.01.2026"));
+
+    // Set invalid due_date date
+    run_command(&["set", "1", "--due-date", "2026-02-30"]).expect_err("set due_date successful but should fail");
+
+    // List to check that non-existing due_date was not set
+    let output = run_command(&["list", "--columns", "title,due_date"]).expect("list with due_date failed");
+    let stdout = String::from_utf8_lossy(&output.stdout);
+    assert!(stdout.contains("title"));
+    assert!(stdout.contains("Issue 1"));
+    assert!(stdout.contains("due_date"));
+    assert!(stdout.contains("-"));
+    assert!(stdout.contains("2026-01-15"));
+    assert!(!stdout.contains("2026-02-30"));
+
+    // Remove due_date
+    run_command(&["set", "1", "--due-date", ""]).expect("remove due_date failed");
+
+    // List to check that due_date was removed
+    let output = run_command(&["list", "--columns", "title,due_date"]).expect("list with due_date failed");
+    let stdout = String::from_utf8_lossy(&output.stdout);
+    assert!(stdout.contains("title"));
+    assert!(stdout.contains("Issue 1"));
+    assert!(stdout.contains("due_date"));
+    assert!(stdout.contains("-"));
+    assert!(!stdout.contains("2026-01-15"));
 }
