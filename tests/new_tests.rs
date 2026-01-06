@@ -68,16 +68,6 @@ fn test_new_initial_metadata() {
 }
 
 #[test]
-fn test_new_invalid_due_date() {
-    let _env = TestEnv::new();
-
-    run_command(&["init", "--no-commit"]).expect("init failed");
-
-    // Try to create issue with invalid date
-    run_command(&["new", "Bad date", "--due-date", "not-a-date"]).expect_err("new with invalid date successful but should fail");
-}
-
-#[test]
 fn test_new_empty_metadata() {
     let _env = TestEnv::new();
 
@@ -202,4 +192,29 @@ fn test_new_changed_default_priority() {
     assert_eq!(meta["due_date"].as_str().unwrap(), "");
     assert_eq!(meta["labels"].as_sequence().unwrap().len(), 0);
     assert_eq!(meta["state"].as_str().unwrap(), "new");
+}
+
+#[test]
+fn test_new_invalid_metadata() {
+    let _env = TestEnv::new();
+
+    run_command(&["init", "--no-commit"]).expect("init failed");
+
+    // Try to create issue with invalid state
+    run_command(&["new", "Title", "--state", "unknown"]).expect_err("new with invalid state successful but should fail");
+
+    // Try to create issue with invalid type
+    run_command(&["new", "Title", "--type", "unknown"]).expect_err("new with invalid type successful but should fail");
+
+    // Try to create issue with invalid priority
+    run_command(&["new", "Title", "--priority", "P5"]).expect_err("new with invalid priority successful but should fail");
+
+    // Try to create issue with invalid reporter
+    run_command(&["new", "Title", "--reporter", "unknown_user"]).expect_err("new with invalid reporter successful but should fail");
+
+    // Try to create issue with invalid assignee
+    run_command(&["new", "Title", "--assignee", "unknown_user"]).expect_err("new with invalid assignee successful but should fail");
+
+    // Try to create issue with invalid due_date
+    run_command(&["new", "Title", "--due-date", "2026-02-30"]).expect_err("new with invalid due_date successful but should fail");
 }
