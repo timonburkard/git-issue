@@ -39,17 +39,10 @@ jobs:
 
   create-release:
     runs-on: ubuntu-latest
-    outputs:
-      upload_url: ${{ steps.create_release.outputs.upload_url }}
     steps:
       - name: Create Release
-        id: create_release
-        uses: actions/create-release@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        uses: softprops/action-gh-release@v1
         with:
-          tag_name: ${{ github.ref }}
-          release_name: Release ${{ github.ref }}
           body: |
             See CHANGELOG.md for details.
           draft: false
@@ -92,15 +85,18 @@ jobs:
       - name: Build
         run: cargo build --release --target ${{ matrix.target }}
 
+      - name: Rename artifact (Unix)
+        if: runner.os != 'Windows'
+        run: mv ./target/${{ matrix.target }}/release/${{ matrix.artifact_name }} ./target/${{ matrix.target }}/release/${{ matrix.asset_name }}
+
+      - name: Rename artifact (Windows)
+        if: runner.os == 'Windows'
+        run: Move-Item -Path ./target/${{ matrix.target }}/release/${{ matrix.artifact_name }} -Destination ./target/${{ matrix.target }}/release/${{ matrix.asset_name }}
+
       - name: Upload Release Asset
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        uses: softprops/action-gh-release@v1
         with:
-          upload_url: ${{ needs.create-release.outputs.upload_url }}
-          asset_path: ./target/${{ matrix.target }}/release/${{ matrix.artifact_name }}
-          asset_name: ${{ matrix.asset_name }}
-          asset_content_type: application/octet-stream
+          files: ./target/${{ matrix.target }}/release/${{ matrix.asset_name }}
 
   publish:
     name: Publish to crates.io

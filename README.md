@@ -1,5 +1,10 @@
 # git-issue 🗂️
 
+[![CI/CD](https://github.com/timonburkard/git-issue/actions/workflows/pr.yml/badge.svg)](https://github.com/timonburkard/git-issue/actions)
+[![CI/CD](https://github.com/timonburkard/git-issue/actions/workflows/release.yml/badge.svg)](https://github.com/timonburkard/git-issue/actions)
+[![Crates.io](https://img.shields.io/crates/v/git-issue.svg)](https://crates.io/crates/git-issue)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
+
 A Git-native, file-backed issue tracker.
 
 Issues live alongside your code inside `.gitissues/`, making them platform-independent, version-controlled, branchable, mergeable, reviewable and offline-friendly.
