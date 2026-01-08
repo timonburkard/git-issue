@@ -9,7 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-    - [issue] started issue-tracking for this repo with `git-issue` instead of GitHub Issues
+    - [issue] eat your own dog food: started issue-tracking for this repo with `git-issue` instead of GitHub Issues
     - [cargo] MSRV v1.88
     - [test]  added automated tests for `link` command
     - [test]  added automated tests for `set` bulk operations
