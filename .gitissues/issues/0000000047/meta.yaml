@@ -1,0 +1,12 @@
+id: 47
+title: '[test] add automated tests for git commit'
+state: new
+type: task
+labels: []
+reporter: t.burkard
+assignee: ''
+priority: ''
+due_date: ''
+relationships: {}
+created: 2026-01-08T22:10:41Z
+updated: 2026-01-08T22:10:41Z
