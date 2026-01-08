@@ -11,6 +11,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
     - [cmd/list] harmonized sorting of empty values: First for asc, last for desc (GitHub Issue #95)
 
+### Fixed
+
+    - [cmd/list] fix: OR filter for `id` and `priority` did not work (GitHub Issue #97)
+
 ## [v0.6.2] - 2026-01-06
 
 ### Added
