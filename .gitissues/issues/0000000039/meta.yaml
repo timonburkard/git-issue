@@ -1,0 +1,14 @@
+id: 39
+title: '[cmd/list] clarify OR/AND filter options for multi-value fields'
+state: resolved
+type: feature
+labels: []
+reporter: t.burkard
+assignee: t.burkard
+priority: ''
+due_date: ''
+relationships:
+  related:
+  - 38
+created: 2026-01-04T14:17:29Z
+updated: 2026-01-04T16:21:34Z

@@ -1,0 +1,12 @@
+id: 34
+title: '[cmd/list] possibility to filter for `>` and `<`, not just `=`'
+state: resolved
+type: feature
+labels: []
+reporter: t.burkard
+assignee: t.burkard
+priority: ''
+due_date: ''
+relationships: {}
+created: 2025-12-29T00:06:56Z
+updated: 2025-12-29T00:23:51Z

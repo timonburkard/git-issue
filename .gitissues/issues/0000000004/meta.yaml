@@ -1,0 +1,12 @@
+id: 4
+title: '[cmd/list] add possibility to sort issues'
+state: resolved
+type: feature
+labels: []
+reporter: t.burkard
+assignee: t.burkard
+priority: ''
+due_date: ''
+relationships: {}
+created: 2025-12-22T12:48:28Z
+updated: 2025-12-27T16:00:42Z

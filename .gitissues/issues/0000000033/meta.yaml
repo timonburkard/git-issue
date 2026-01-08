@@ -1,0 +1,12 @@
+id: 33
+title: '[cmd/list] filter for empty `labels` does not work'
+state: resolved
+type: bug
+labels: []
+reporter: t.burkard
+assignee: t.burkard
+priority: ''
+due_date: ''
+relationships: {}
+created: 2025-12-28T21:53:12Z
+updated: 2025-12-28T22:23:25Z

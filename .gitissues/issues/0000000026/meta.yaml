@@ -1,0 +1,12 @@
+id: 26
+title: '[cmd/new] option to provide initial values for meta fields'
+state: resolved
+type: feature
+labels: []
+reporter: t.burkard
+assignee: t.burkard
+priority: ''
+due_date: ''
+relationships: {}
+created: 2025-12-23T20:23:02Z
+updated: 2025-12-23T21:23:37Z

@@ -1,0 +1,14 @@
+id: 38
+title: '[cmd/list] add possibility of OR filter options for single-value fields'
+state: resolved
+type: feature
+labels: []
+reporter: t.burkard
+assignee: t.burkard
+priority: ''
+due_date: ''
+relationships:
+  related:
+  - 39
+created: 2026-01-04T14:13:03Z
+updated: 2026-01-04T16:21:34Z

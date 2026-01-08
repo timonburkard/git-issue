@@ -1,5 +1,7 @@
-
-
-# Added by cargo
-
+.vscode/
 /target
+
+# .gitissues
+.gitissues/.tmp/
+.gitissues/exports/
+.gitissues/settings.yaml

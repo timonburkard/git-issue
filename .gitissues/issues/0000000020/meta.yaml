@@ -1,0 +1,12 @@
+id: 20
+title: '[meta] add `due_date` meta field'
+state: resolved
+type: feature
+labels: []
+reporter: t.burkard
+assignee: t.burkard
+priority: ''
+due_date: ''
+relationships: {}
+created: 2025-12-23T10:37:16Z
+updated: 2025-12-23T20:38:50Z

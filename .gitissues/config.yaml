@@ -1,0 +1,57 @@
+# Automatically create a git commit after mutating commands
+commit_auto: true
+
+# Commit message template
+# Available placeholders: {action}, {id}, {title}
+commit_message: '[issue] {action} #{id} -- {title}'
+
+# Default columns to display in `issue list`
+# ['*'] can be used to include all available columns
+list_columns:
+  - id
+  - state
+  - assignee
+  - title
+
+# Available issue states
+# First state in the list is the initial state for new issues
+states:
+  - new
+  - active
+  - resolved
+  - closed
+  - deleted
+
+# Available issue types
+# Per default the type is empty for new issues
+types:
+  - bug
+  - feature
+  - task
+
+# Available relationships between issues
+# link: specifies the name of the reciprocal relationship
+#  - same name:      bidirectional, symmetric
+#  - different name: bidirectional, asymmetric
+#  - null:           unidirectional
+relationships:
+  related:
+    link: related
+  parent:
+    link: child
+  child:
+    link: parent
+
+# Separator used when exporting to CSV
+export_csv_separator: ','
+
+# ID generation strategy (always u32)
+# Options:
+#  - sequential: Sequential numbers (1, 2, 3, ...)
+#  - timestamp:  Timestamps in seconds since 2025-01-01
+#                (in teams this reduces the chance of merge conflicts)
+id_generation: sequential
+
+# Default priority for new issues
+# Options: '', P0, P1, P2, P3, P4
+priority_default: ''

@@ -1,0 +1,13 @@
+id: 1
+title: '[meta] add field `assignee`'
+state: resolved
+type: feature
+labels: []
+reporter: t.burkard
+assignee: t.burkard
+priority: ''
+due_date: ''
+relationships:
+  related: []
+created: 2025-12-22T12:43:37Z
+updated: 2025-12-22T14:23:47Z
