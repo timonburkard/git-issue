@@ -3,8 +3,12 @@ name: PR
 on:
   push:
     branches: [main, master]
+    paths-ignore:
+      - '.gitissues/**'
   pull_request:
     branches: [main, master]
+    paths-ignore:
+      - '.gitissues/**'
 
 jobs:
   test:
