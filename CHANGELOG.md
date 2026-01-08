@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
     - [cargo] MSRV v1.88
+    - [test]  added automated tests for `link` command
     - [test]  added automated tests for `set` bulk operations
 
 ### Changed

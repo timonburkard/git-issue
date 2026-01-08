@@ -234,6 +234,14 @@ fn test_list_filter() {
     assert!(stdout.contains("2"));
     assert!(!stdout.contains("3"));
 
+    // List with filter '=' on ID (OR)
+    let output = run_command(&["list", "--columns", "id", "--filter", "id=1,3"]).expect("list with filter on ID failed");
+    let stdout = String::from_utf8_lossy(&output.stdout);
+    assert!(stdout.contains("id"));
+    assert!(stdout.contains("1"));
+    assert!(!stdout.contains("2"));
+    assert!(stdout.contains("3"));
+
     // List with filter '=' on assignee
     let output = run_command(&["list", "--columns", "id", "--filter", "assignee=alice"]).expect("list with filter on assignee failed");
     let stdout = String::from_utf8_lossy(&output.stdout);
@@ -350,6 +358,14 @@ fn test_list_filter() {
     assert!(stdout.contains("1"));
     assert!(!stdout.contains("2"));
     assert!(stdout.contains("3"));
+
+    // List with two filters (AND)
+    let output = run_command(&["list", "--columns", "id", "--filter", "labels=ui", "reporter=carol"]).expect("list with and filter failed");
+    let stdout = String::from_utf8_lossy(&output.stdout);
+    assert!(stdout.contains("id"));
+    assert!(!stdout.contains("1"));
+    assert!(stdout.contains("2"));
+    assert!(!stdout.contains("3"));
 }
 
 #[test]
