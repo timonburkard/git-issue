@@ -171,7 +171,10 @@ git issue edit 1234
 
 ### 2.4) Example
 
-Dummy example project to see how `git-issue` is used in a repo: [Example Project](https://github.com/timonburkard/example-project)
+Example projects to see how `git-issue` is used in a repo:
+
+- Dummy: [Example Project](https://github.com/timonburkard/example-project)
+- Real: The current repo
 
 ## 3.) Configuration
 
