@@ -18,6 +18,7 @@ list_columns:
 states:
   - new
   - active
+  - resolved
   - closed
   - deleted
 
