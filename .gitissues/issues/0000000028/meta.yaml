@@ -1,0 +1,12 @@
+id: 28
+title: '[cmd/list] add possibility to export to csv'
+state: resolved
+type: feature
+labels: []
+reporter: t.burkard
+assignee: t.burkard
+priority: ''
+due_date: ''
+relationships: {}
+created: 2025-12-26T14:18:49Z
+updated: 2025-12-26T23:47:27Z

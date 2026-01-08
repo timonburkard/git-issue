@@ -1,0 +1,12 @@
+id: 43
+title: '[cmd/list] harmonize sorting of empty values'
+state: resolved
+type: feature
+labels: []
+reporter: t.burkard
+assignee: t.burkard
+priority: ''
+due_date: ''
+relationships: {}
+created: 2026-01-06T22:57:50Z
+updated: 2026-01-06T23:19:04Z

@@ -1,0 +1,12 @@
+id: 44
+title: '[cmd/list] bug: OR filter for `id` and `priority` does not work'
+state: resolved
+type: bug
+labels: []
+reporter: t.burkard
+assignee: t.burkard
+priority: ''
+due_date: ''
+relationships: {}
+created: 2026-01-08T07:07:56Z
+updated: 2026-01-08T18:33:52Z

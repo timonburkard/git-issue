@@ -1,0 +1,12 @@
+id: 5
+title: '[cmd/edit] add `edit` command'
+state: resolved
+type: feature
+labels: []
+reporter: t.burkard
+assignee: t.burkard
+priority: ''
+due_date: ''
+relationships: {}
+created: 2025-12-22T12:49:43Z
+updated: 2025-12-22T18:48:32Z

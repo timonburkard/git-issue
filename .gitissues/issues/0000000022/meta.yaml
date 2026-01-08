@@ -1,0 +1,12 @@
+id: 22
+title: '[cmd/new] automatically create `attachments/` directory'
+state: resolved
+type: feature
+labels: []
+reporter: t.burkard
+assignee: t.burkard
+priority: ''
+due_date: ''
+relationships: {}
+created: 2025-12-23T10:48:39Z
+updated: 2025-12-23T18:35:00Z

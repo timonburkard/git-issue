@@ -1,0 +1,12 @@
+id: 32
+title: '[cmd/set] shurtcut to set `reporter` or `assignee` to `settings.yaml:user`'
+state: resolved
+type: feature
+labels: []
+reporter: t.burkard
+assignee: t.burkard
+priority: ''
+due_date: ''
+relationships: {}
+created: 2025-12-27T15:12:48Z
+updated: 2025-12-27T15:58:49Z

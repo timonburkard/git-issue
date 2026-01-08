@@ -1,0 +1,12 @@
+id: 37
+title: '[cli] improve error messages for invalid options'
+state: new
+type: feature
+labels: []
+reporter: t.burkard
+assignee: ''
+priority: ''
+due_date: ''
+relationships: {}
+created: 2026-01-04T14:00:39Z
+updated: 2026-01-04T15:40:13Z

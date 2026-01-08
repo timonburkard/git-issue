@@ -1,0 +1,12 @@
+id: 8
+title: '[cmd/list] option to select which columns should be shown'
+state: resolved
+type: feature
+labels: []
+reporter: t.burkard
+assignee: t.burkard
+priority: ''
+due_date: ''
+relationships: {}
+created: 2025-12-22T15:20:42Z
+updated: 2025-12-22T15:31:11Z

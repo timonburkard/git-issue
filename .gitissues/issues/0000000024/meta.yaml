@@ -1,0 +1,12 @@
+id: 24
+title: '[meta] add priority/severity field(s)'
+state: resolved
+type: feature
+labels: []
+reporter: t.burkard
+assignee: t.burkard
+priority: ''
+due_date: ''
+relationships: {}
+created: 2025-12-23T11:00:43Z
+updated: 2025-12-23T19:33:22Z

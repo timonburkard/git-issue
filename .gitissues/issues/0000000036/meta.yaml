@@ -1,0 +1,12 @@
+id: 36
+title: '[cmd/set] add possibility for bulk operations'
+state: resolved
+type: feature
+labels: []
+reporter: t.burkard
+assignee: t.burkard
+priority: ''
+due_date: ''
+relationships: {}
+created: 2026-01-04T13:37:16Z
+updated: 2026-01-05T23:31:14Z

@@ -1,0 +1,14 @@
+id: 29
+title: '[cmd/list] add support for relationships'
+state: resolved
+type: feature
+labels: []
+reporter: t.burkard
+assignee: t.burkard
+priority: ''
+due_date: ''
+relationships:
+  related:
+  - 18
+created: 2025-12-26T19:55:38Z
+updated: 2025-12-28T16:20:35Z

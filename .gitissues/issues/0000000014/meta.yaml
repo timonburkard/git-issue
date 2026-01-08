@@ -1,0 +1,12 @@
+id: 14
+title: '[cmd/init] should `init` command create a git commit?'
+state: resolved
+type: feature
+labels: []
+reporter: t.burkard
+assignee: t.burkard
+priority: ''
+due_date: ''
+relationships: {}
+created: 2025-12-22T22:10:20Z
+updated: 2025-12-23T12:55:37Z

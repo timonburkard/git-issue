@@ -1,0 +1,12 @@
+id: 7
+title: '[meta] add field `labels`'
+state: resolved
+type: feature
+labels: []
+reporter: t.burkard
+assignee: t.burkard
+priority: ''
+due_date: ''
+relationships: {}
+created: 2025-12-22T13:20:48Z
+updated: 2025-12-22T14:23:48Z

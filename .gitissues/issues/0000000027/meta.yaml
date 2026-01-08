@@ -1,0 +1,12 @@
+id: 27
+title: '[yaml] add `version` field to the yamls'
+state: new
+type: feature
+labels: []
+reporter: t.burkard
+assignee: ''
+priority: ''
+due_date: ''
+relationships: {}
+created: 2025-12-25T11:21:30Z
+updated: 2025-12-26T20:09:24Z
