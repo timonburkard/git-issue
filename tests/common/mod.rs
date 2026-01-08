@@ -76,6 +76,41 @@ pub fn run_command(args: &[&str]) -> Result<std::process::Output, String> {
     Ok(output)
 }
 
+/// Run a git-issue command with stdin input and return the result
+pub fn run_command_with_stdin(args: &[&str], stdin_input: &str) -> Result<std::process::Output, String> {
+    use std::io::Write;
+    use std::process::Stdio;
+
+    let binary = get_binary_path();
+    let mut child = Command::new(&binary)
+        .args(args)
+        .stdin(Stdio::piped())
+        .stdout(Stdio::piped())
+        .stderr(Stdio::piped())
+        .spawn()
+        .map_err(|e| format!("Failed to spawn command: {}", e))?;
+
+    // Write to stdin
+    if let Some(mut stdin) = child.stdin.take() {
+        stdin
+            .write_all(stdin_input.as_bytes())
+            .map_err(|e| format!("Failed to write to stdin: {}", e))?;
+    }
+
+    let output = child.wait_with_output().map_err(|e| format!("Failed to wait for command: {}", e))?;
+
+    if !output.status.success() {
+        return Err(format!(
+            "Command failed with exit code {:?}\nstdout: {}\nstderr: {}",
+            output.status.code(),
+            String::from_utf8_lossy(&output.stdout),
+            String::from_utf8_lossy(&output.stderr)
+        ));
+    }
+
+    Ok(output)
+}
+
 pub fn load_yaml_values(path: &str) -> Value {
     let content = fs::read_to_string(path).unwrap_or_else(|_| panic!("Failed to read {path}"));
     serde_yaml::from_str::<Value>(&content).expect("Failed to parse meta.yaml")
