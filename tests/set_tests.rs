@@ -1,5 +1,5 @@
 mod common;
-use common::{TestEnv, load_yaml_values, run_command, save_yaml_values};
+use common::{TestEnv, load_yaml_values, run_command, run_command_with_stdin, save_yaml_values};
 
 #[test]
 fn test_set_labels() {
@@ -482,4 +482,149 @@ fn test_set_me() {
     assert!(stdout.contains("assignee"));
     assert!(stdout.contains("bob"));
     assert!(!stdout.contains("-"));
+}
+
+#[test]
+fn test_set_bulk() {
+    let _env = TestEnv::new();
+
+    run_command(&["init", "--no-commit"]).expect("init failed");
+
+    // Create some issues
+    run_command(&["new", "Issue 1", "--assignee", "alice"]).expect("new 1 failed");
+    run_command(&["new", "Issue 2", "--assignee", "alice"]).expect("new 2 failed");
+    run_command(&["new", "Issue 3", "--assignee", "alice"]).expect("new 3 failed");
+    run_command(&["new", "Issue 4", "--assignee", "alice"]).expect("new 4 failed");
+
+    // Bulk set valid state
+    run_command(&["set", "1,2,3", "--state", "active"]).expect("bulk set state failed");
+
+    // List to check that state was changed for ID 1,2 and 3
+    let output = run_command(&["list", "--columns", "title,state", "--filter", "id=1,2,3"]).expect("list with state failed");
+    let stdout = String::from_utf8_lossy(&output.stdout);
+    assert!(stdout.contains("title"));
+    assert!(stdout.contains("Issue 1"));
+    assert!(stdout.contains("Issue 2"));
+    assert!(stdout.contains("Issue 3"));
+    assert!(!stdout.contains("Issue 4"));
+    assert!(stdout.contains("state"));
+    assert!(stdout.contains("active"));
+    assert!(!stdout.contains("new"));
+
+    // List to check that state was not changed for ID 4
+    let output = run_command(&["list", "--columns", "title,state", "--filter", "id=4"]).expect("list with state failed");
+    let stdout = String::from_utf8_lossy(&output.stdout);
+    assert!(stdout.contains("title"));
+    assert!(!stdout.contains("Issue 1"));
+    assert!(!stdout.contains("Issue 2"));
+    assert!(!stdout.contains("Issue 3"));
+    assert!(stdout.contains("Issue 4"));
+    assert!(stdout.contains("state"));
+    assert!(!stdout.contains("active"));
+    assert!(stdout.contains("new"));
+
+    // Bulk set invalid state
+    run_command(&["set", "1,2,3", "--state", "perfect"]).expect_err("bulk set state successful but should fail");
+
+    // List to check that invalid state was not set
+    let output = run_command(&["list", "--columns", "title,state", "--filter", "id=1,2,3"]).expect("list with state failed");
+    let stdout = String::from_utf8_lossy(&output.stdout);
+    assert!(stdout.contains("title"));
+    assert!(stdout.contains("Issue 1"));
+    assert!(stdout.contains("Issue 2"));
+    assert!(stdout.contains("Issue 3"));
+    assert!(stdout.contains("state"));
+    assert!(stdout.contains("active"));
+    assert!(!stdout.contains("perfect"));
+
+    // Bulk set empty assignee for ID 1,2 and 3
+    run_command(&["set", "1,2,3", "--assignee", ""]).expect("bulk set assignee failed");
+
+    // List to check that assignee is empty for ID 1,2 and 3
+    let output = run_command(&["list", "--columns", "title,assignee", "--filter", "id=1,2,3"]).expect("list with assignee failed");
+    let stdout = String::from_utf8_lossy(&output.stdout);
+    assert!(stdout.contains("title"));
+    assert!(stdout.contains("Issue 1"));
+    assert!(stdout.contains("Issue 2"));
+    assert!(stdout.contains("Issue 3"));
+    assert!(stdout.contains("assignee"));
+    assert!(stdout.contains("-"));
+    assert!(!stdout.contains("alice"));
+
+    // List to check that assignee is unchanged for ID 4
+    let output = run_command(&["list", "--columns", "title,assignee", "--filter", "id=4"]).expect("list with assignee failed");
+    let stdout = String::from_utf8_lossy(&output.stdout);
+    assert!(stdout.contains("title"));
+    assert!(stdout.contains("Issue 4"));
+    assert!(stdout.contains("assignee"));
+    assert!(!stdout.contains("-"));
+    assert!(stdout.contains("alice"));
+}
+
+#[test]
+fn test_set_bulk_wildcard() {
+    let _env = TestEnv::new();
+
+    run_command(&["init", "--no-commit"]).expect("init failed");
+
+    // Create some issues
+    run_command(&["new", "Issue 1", "--assignee", "alice"]).expect("new 1 failed");
+    run_command(&["new", "Issue 2", "--assignee", "bob"]).expect("new 2 failed");
+    run_command(&["new", "Issue 3", "--assignee", "alice"]).expect("new 3 failed");
+
+    run_command(&["set", "*", "--assignee", "charlie"]).expect_err("bulk set with wildcard should fail but succeeded");
+
+    // List to enable wildcard selection
+    let output = run_command(&["list", "--columns", "title,assignee", "--filter", "assignee=alice"]).expect("list with filter failed");
+    let stdout = String::from_utf8_lossy(&output.stdout);
+    assert!(stdout.contains("title"));
+    assert!(stdout.contains("Issue 1"));
+    assert!(!stdout.contains("Issue 2"));
+    assert!(stdout.contains("Issue 3"));
+    assert!(stdout.contains("assignee"));
+    assert!(stdout.contains("alice"));
+    assert!(!stdout.contains("bob"));
+
+    // Bulk set with wildcard: change all issues assigned to 'alice' to 'carol'
+    run_command_with_stdin(&["set", "*", "--assignee", "carol"], "y\n").expect("bulk set with wildcard failed");
+
+    // List to check bulk set with wildcard
+    let output = run_command(&["list", "--columns", "title,assignee"]).expect("list with filter failed");
+    let stdout = String::from_utf8_lossy(&output.stdout);
+    assert!(stdout.contains("title"));
+    assert!(stdout.contains("Issue 1"));
+    assert!(stdout.contains("Issue 2"));
+    assert!(stdout.contains("Issue 3"));
+    assert!(stdout.contains("assignee"));
+    assert!(!stdout.contains("alice"));
+    assert!(stdout.contains("bob"));
+    assert!(stdout.contains("carol"));
+
+    // List to enable wildcard selection
+    let output = run_command(&["list", "--columns", "title,assignee", "--filter", "assignee=carol"]).expect("list with filter failed");
+    let stdout = String::from_utf8_lossy(&output.stdout);
+    assert!(stdout.contains("title"));
+    assert!(stdout.contains("Issue 1"));
+    assert!(!stdout.contains("Issue 2"));
+    assert!(stdout.contains("Issue 3"));
+    assert!(stdout.contains("assignee"));
+    assert!(!stdout.contains("alice"));
+    assert!(!stdout.contains("bob"));
+    assert!(stdout.contains("carol"));
+
+    // Bulk set with wildcard: don't change all issues assigned to 'carol' to 'alice'
+    run_command_with_stdin(&["set", "*", "--assignee", "alice"], "n\n")
+        .expect_err("bulk set with wildcard and 'n' reply succeeded but should fail");
+
+    // List to check bulk set with wildcard and 'no' reply did not succeed
+    let output = run_command(&["list", "--columns", "title,assignee"]).expect("list with filter failed");
+    let stdout = String::from_utf8_lossy(&output.stdout);
+    assert!(stdout.contains("title"));
+    assert!(stdout.contains("Issue 1"));
+    assert!(stdout.contains("Issue 2"));
+    assert!(stdout.contains("Issue 3"));
+    assert!(stdout.contains("assignee"));
+    assert!(!stdout.contains("alice"));
+    assert!(stdout.contains("bob"));
+    assert!(stdout.contains("carol"));
 }
