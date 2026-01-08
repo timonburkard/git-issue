@@ -5,11 +5,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [unreleased]
+## [v0.6.3] - 2026-01-08
 
 ### Added
 
-    - [issue] started issue-tracking for this repo with `git-issue` instead of GitHub Issues
+    - [issue] eat your own dog food: started issue-tracking for this repo with `git-issue` instead of GitHub Issues
     - [cargo] MSRV v1.88
     - [test]  added automated tests for `link` command
     - [test]  added automated tests for `set` bulk operations
