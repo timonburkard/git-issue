@@ -275,13 +275,17 @@ fn validate_filters(filters: &[Filter]) -> Result<(), String> {
     for filter in filters {
         match filter.field.as_str() {
             "id" => {
-                if filter.value.parse::<u32>().is_err() {
-                    return Err("ID must be an integer".to_string());
+                for id in filter.value.split(',') {
+                    if id.parse::<u32>().is_err() {
+                        return Err("ID must be an integer".to_string());
+                    }
                 }
             }
             "priority" => {
-                if Priority::from_str(&filter.value).is_err() {
-                    return Err("Invalid priority value".to_string());
+                for priority in filter.value.split(',') {
+                    if Priority::from_str(priority).is_err() {
+                        return Err("Invalid priority value".to_string());
+                    }
                 }
             }
             _ => {}
@@ -307,7 +311,7 @@ fn filter_eq(filter: &Filter, meta: &Meta) -> bool {
         "labels" => is_in_str_list(&meta.labels, &filter.value),
         "reporter" => do_strings_match(&meta.reporter, &filter.value),
         "assignee" => do_strings_match(&meta.assignee, &filter.value),
-        "priority" => meta.priority == Priority::from_str(&filter.value).unwrap_or(Priority::Empty),
+        "priority" => do_strings_match(&format!("{:?}", meta.priority).replace("-", ""), &filter.value),
         "due_date" => do_strings_match(&meta.due_date, &filter.value),
         "created" => do_strings_match(&meta.created, &filter.value),
         "updated" => do_strings_match(&meta.updated, &filter.value),
