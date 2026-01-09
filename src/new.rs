@@ -9,7 +9,7 @@ use indexmap::IndexMap;
 
 use crate::model::{
     IdGeneration, Meta, Priority, current_timestamp, git_commit, gitissues_base, is_valid_iso_date, is_valid_type, is_valid_user,
-    issue_attachments_dir, issue_desc_path, issue_dir, issue_meta_path, load_config, load_settings, padded_id, user_handle_me,
+    issue_attachments_dir, issue_desc_path, issue_dir, issue_meta_path, load_config, load_settings, load_users, padded_id, user_handle_me,
 };
 
 pub fn run(
@@ -26,6 +26,8 @@ pub fn run(
 
     // Step 2: Read config
     let config = load_config()?;
+    let settings = load_settings()?;
+    let users = load_users()?;
 
     if config.states.is_empty() {
         return Err("No states defined in config.yaml.".to_string());
@@ -33,38 +35,36 @@ pub fn run(
 
     // Step 3: Validate user inputs
     let type_val = type_.unwrap_or_default();
-    match is_valid_type(&type_val) {
-        Ok(true) => { /* valid, continue */ }
-        Ok(false) => return Err("Invalid type: Check config.yaml:types".to_string()),
-        Err(e) => return Err(format!("Config error: {e}")),
+    if !is_valid_type(&config, &type_val) {
+        return Err("Invalid type: Check config.yaml:types".to_string());
     }
 
     let mut reporter_val = match reporter {
-        Some(value) => match is_valid_user(&value) {
-            Ok(true) => value,
-            Ok(false) => return Err("Invalid reporter: Check users.yaml:users:id or ''".to_string()),
-            Err(e) => return Err(format!("Config error: {e}")),
-        },
+        Some(value) => {
+            if !is_valid_user(&users, &value) {
+                return Err("Invalid reporter: Check users.yaml:users:id or ''".to_string());
+            } else {
+                value
+            }
+        }
         None => {
             let settings = load_settings()?;
-            match is_valid_user(&settings.user) {
-                Ok(true) => settings.user,
-                Ok(false) => return Err("Invalid user: settings.yaml::user must be part of users.yaml:users:id or ''".to_string()),
-                Err(e) => return Err(format!("Config error: {e}")),
+            if !is_valid_user(&users, &settings.user) {
+                return Err("Invalid user: settings.yaml::user must be part of users.yaml:users:id or ''".to_string());
+            } else {
+                settings.user
             }
         }
     };
 
-    user_handle_me(&mut reporter_val)?;
+    user_handle_me(&users, &settings, &mut reporter_val)?;
 
     let mut assignee_val = assignee.unwrap_or_default();
-    match is_valid_user(&assignee_val) {
-        Ok(true) => { /* valid, continue */ }
-        Ok(false) => return Err("Invalid assignee: Check users.yaml:users:id or ''".to_string()),
-        Err(e) => return Err(format!("Config error: {e}")),
+    if !is_valid_user(&users, &assignee_val) {
+        return Err("Invalid assignee: Check users.yaml:users:id or ''".to_string());
     }
 
-    user_handle_me(&mut assignee_val)?;
+    user_handle_me(&users, &settings, &mut assignee_val)?;
 
     let due_date_val = due_date.clone().unwrap_or_default();
     match is_valid_iso_date(&due_date_val) {

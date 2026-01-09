@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+    - [cmd/list] formatting: added support for colored output (#48)
     - [cmd/list] formatting: bold headers (#49)
     - [cmd/list] formatting: added dashed line between headers and values (#50)
 

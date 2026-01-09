@@ -3,8 +3,8 @@ use std::io::{self, Write};
 use std::time::Duration;
 
 use crate::model::{
-    Priority, cache_path, current_timestamp, git_commit, is_valid_iso_date, is_valid_state, is_valid_type, issue_dir, issue_meta_path,
-    load_meta, user_handle_me,
+    Priority, cache_path, current_timestamp, git_commit, is_valid_iso_date, is_valid_state, is_valid_type, is_valid_user, issue_dir,
+    issue_meta_path, load_config, load_meta, load_settings, load_users, user_handle_me,
 };
 
 #[allow(clippy::too_many_arguments)]
@@ -21,6 +21,10 @@ pub fn run(
     labels_add: Option<Vec<String>>,
     labels_remove: Option<Vec<String>>,
 ) -> Result<(), String> {
+    let config = load_config()?;
+    let settings = load_settings()?;
+    let users = load_users()?;
+
     let using_wildcard = ids.len() == 1 && ids[0] == "*";
 
     let ids: Vec<u32> = if using_wildcard {
@@ -71,10 +75,8 @@ pub fn run(
         if let Some(value) = state.as_deref()
             && updated_meta.state != value
         {
-            match is_valid_state(value) {
-                Ok(true) => { /* valid, continue */ }
-                Ok(false) => return Err("Invalid state: Check config.yaml:states".to_string()),
-                Err(e) => return Err(format!("Config error: {e}")),
+            if !is_valid_state(&config, value) {
+                return Err("Invalid state: Check config.yaml:states".to_string());
             }
 
             updated_meta.state = value.to_string();
@@ -84,10 +86,8 @@ pub fn run(
         if let Some(value) = type_.as_deref()
             && updated_meta.type_ != value
         {
-            match is_valid_type(value) {
-                Ok(true) => { /* valid, continue */ }
-                Ok(false) => return Err("Invalid type: Check config.yaml:types".to_string()),
-                Err(e) => return Err(format!("Config error: {e}")),
+            if !is_valid_type(&config, value) {
+                return Err("Invalid type: Check config.yaml:types".to_string());
             }
 
             updated_meta.type_ = value.to_string();
@@ -97,15 +97,13 @@ pub fn run(
         if let Some(value) = reporter.as_ref()
             && updated_meta.reporter != *value
         {
-            match crate::model::is_valid_user(value) {
-                Ok(true) => { /* valid, continue */ }
-                Ok(false) => return Err("Invalid reporter: Check users.yaml:users:id, 'me' or ''".to_string()),
-                Err(e) => return Err(format!("Config error: {e}")),
+            if !is_valid_user(&users, value) {
+                return Err("Invalid reporter: Check users.yaml:users:id, 'me' or ''".to_string());
             }
 
             let mut value = value.clone();
 
-            user_handle_me(&mut value)?;
+            user_handle_me(&users, &settings, &mut value)?;
 
             if updated_meta.reporter != *value {
                 updated_meta.reporter = value.to_string();
@@ -116,15 +114,13 @@ pub fn run(
         if let Some(value) = assignee.as_ref()
             && updated_meta.assignee != *value
         {
-            match crate::model::is_valid_user(value) {
-                Ok(true) => { /* valid, continue */ }
-                Ok(false) => return Err("Invalid assignee: Check users.yaml:users:id, 'me' or ''".to_string()),
-                Err(e) => return Err(format!("Config error: {e}")),
+            if !is_valid_user(&users, value) {
+                return Err("Invalid assignee: Check users.yaml:users:id, 'me' or ''".to_string());
             }
 
             let mut value = value.clone();
 
-            user_handle_me(&mut value)?;
+            user_handle_me(&users, &settings, &mut value)?;
 
             if updated_meta.assignee != value {
                 updated_meta.assignee = value;

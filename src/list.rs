@@ -1,30 +1,40 @@
 use std::cmp::Ordering;
 use std::cmp::Reverse;
+use std::collections::HashMap;
 use std::fs;
+use std::io::IsTerminal;
 use std::path::Path;
 
-use anstyle::{Effects, Reset, Style};
+use anstyle::{AnsiColor, Effects, Reset, Style};
+use chrono::Utc;
 use regex::Regex;
 
 use crate::model::{
-    Filter, Meta, Operator, Priority, Sorting, cache_path, current_timestamp, dash_if_empty, gitissues_base, issue_exports_dir,
-    load_config, load_meta,
+    Config, Filter, Meta, NamedColor, Operator, Priority, Settings, Sorting, cache_path, current_timestamp, dash_if_empty, gitissues_base,
+    issue_exports_dir, load_config, load_meta, load_settings,
 };
 
-pub fn run(columns: Option<Vec<String>>, filter: Option<Vec<Filter>>, sort: Option<Vec<Sorting>>, print_csv: bool) -> Result<(), String> {
+pub fn run(
+    columns: Option<Vec<String>>,
+    filter: Option<Vec<Filter>>,
+    sort: Option<Vec<Sorting>>,
+    print_csv: bool,
+    no_color: bool,
+) -> Result<(), String> {
+    let config = load_config()?;
     let mut issues = get_issues_metadata()?;
 
-    sort_issues(&mut issues, sort)?;
+    sort_issues(&config, &mut issues, sort)?;
 
-    filter_issues(&mut issues, filter)?;
+    filter_issues(&config, &mut issues, filter)?;
 
     // Print
     match columns {
         None => {
-            print_list(&issues, None, print_csv)?;
+            print_list(&config, &issues, None, print_csv, no_color)?;
         }
         Some(cols) => {
-            print_list(&issues, Some(cols), print_csv)?;
+            print_list(&config, &issues, Some(cols), print_csv, no_color)?;
         }
     }
 
@@ -64,9 +74,7 @@ fn get_issues_metadata() -> Result<Vec<Meta>, String> {
     Ok(issues)
 }
 
-fn get_all_column_names() -> Result<Vec<String>, String> {
-    let config = load_config()?;
-
+fn get_all_column_names(config: &Config) -> Vec<String> {
     let mut columns = vec![
         "id".to_string(),
         "title".to_string(),
@@ -83,17 +91,17 @@ fn get_all_column_names() -> Result<Vec<String>, String> {
 
     columns.extend(vec!["created".to_string(), "updated".to_string()]);
 
-    Ok(columns)
+    columns
 }
 
-fn validate_column_names(columns: &mut [String], context: &str) -> Result<(), String> {
+fn validate_column_names(config: &Config, columns: &mut [String], context: &str) -> Result<(), String> {
     for col in columns.iter_mut() {
         // normalize aliases
         if col == "due-date" {
             *col = "due_date".to_string();
         }
 
-        let valid_columns = get_all_column_names()?;
+        let valid_columns = get_all_column_names(config);
 
         if !valid_columns.contains(col) {
             return Err(format!("Invalid column name in {}: {}", context, col));
@@ -119,20 +127,140 @@ fn apply_style(text: &str, style: Style) -> String {
     format!("{style}{text}{reset}", reset = Reset)
 }
 
-fn bold(text: &str) -> String {
-    apply_style(text, Style::new().effects(Effects::BOLD))
+fn fg(color: AnsiColor) -> Style {
+    Style::new().fg_color(Some(color.into()))
+}
+
+fn named_color_to_style(color: NamedColor) -> Style {
+    match color {
+        NamedColor::White => fg(AnsiColor::White),
+        NamedColor::BrightWhite => fg(AnsiColor::BrightWhite),
+        NamedColor::Black => fg(AnsiColor::Black),
+        NamedColor::BrightBlack => fg(AnsiColor::BrightBlack),
+        NamedColor::Red => fg(AnsiColor::Red),
+        NamedColor::BrightRed => fg(AnsiColor::BrightRed),
+        NamedColor::Green => fg(AnsiColor::Green),
+        NamedColor::BrightGreen => fg(AnsiColor::BrightGreen),
+        NamedColor::Yellow => fg(AnsiColor::Yellow),
+        NamedColor::BrightYellow => fg(AnsiColor::BrightYellow),
+        NamedColor::Blue => fg(AnsiColor::Blue),
+        NamedColor::BrightBlue => fg(AnsiColor::BrightBlue),
+        NamedColor::Magenta => fg(AnsiColor::Magenta),
+        NamedColor::BrightMagenta => fg(AnsiColor::BrightMagenta),
+        NamedColor::Cyan => fg(AnsiColor::Cyan),
+        NamedColor::BrightCyan => fg(AnsiColor::BrightCyan),
+        NamedColor::Bold => Style::new().effects(Effects::BOLD),
+    }
+}
+
+fn colorize_state(settings: &Settings, state: &str) -> String {
+    let color = settings
+        .list_formatting
+        .colors
+        .state
+        .get(state)
+        .cloned()
+        .unwrap_or(NamedColor::White);
+
+    apply_style(state, named_color_to_style(color))
+}
+
+fn colorize_priority(settings: &Settings, priority: &str) -> String {
+    let color = settings
+        .list_formatting
+        .colors
+        .priority
+        .get(priority)
+        .cloned()
+        .unwrap_or(NamedColor::White);
+
+    apply_style(priority, named_color_to_style(color))
+}
+
+fn colorize_type(settings: &Settings, type_: &str) -> String {
+    let color = settings
+        .list_formatting
+        .colors
+        .type_
+        .get(type_)
+        .cloned()
+        .unwrap_or(NamedColor::White);
+
+    apply_style(type_, named_color_to_style(color))
+}
+
+fn colorize_value(settings: &Settings, col: &str, value: &str) -> String {
+    match col {
+        "state" => colorize_state(settings, value),
+        "priority" => colorize_priority(settings, value),
+        "type" => colorize_type(settings, value),
+        "assignee" | "reporter" => colorize_me(settings, value),
+        "due_date" => colorize_due_date(settings, value),
+        _ => value.to_string(),
+    }
+}
+
+fn colorize_header(settings: &Settings, header: &str) -> String {
+    let color = settings.list_formatting.colors.header;
+
+    apply_style(header, named_color_to_style(color))
+}
+
+fn colorize_me(settings: &Settings, user: &str) -> String {
+    let me = settings.user.clone();
+
+    if user != me {
+        return user.to_string();
+    }
+
+    let color = settings.list_formatting.colors.me;
+
+    apply_style(user, named_color_to_style(color))
+}
+
+fn colorize_due_date(settings: &Settings, due_date: &str) -> String {
+    let today = Utc::now().naive_utc().date();
+
+    match chrono::NaiveDate::parse_from_str(due_date, "%Y-%m-%d") {
+        Ok(due_date_date) => {
+            if due_date_date >= today {
+                return due_date.to_string();
+            }
+
+            let color = settings.list_formatting.colors.due_date_overdue;
+            apply_style(due_date, named_color_to_style(color))
+        }
+        Err(_) => due_date.to_string(),
+    }
+}
+
+fn print_header_separator(settings: &Settings, cols: &[String], column_widths: &HashMap<String, usize>) {
+    let header_separator = settings.list_formatting.header_separator;
+
+    if !header_separator {
+        return;
+    }
+
+    // Print separator line
+    for col in cols {
+        let width = *column_widths.get(col).unwrap_or(&22);
+        print!("{}", "-".repeat(width));
+    }
+    println!();
 }
 
 /// print list
+/// - config: loaded configuration
 /// - issues: list of issue metadata
 /// - columns: list of columns to print (None means default from config)
 /// - print_csv: whether to print as CSV
-fn print_list(issues: &Vec<Meta>, columns: Option<Vec<String>>, print_csv: bool) -> Result<(), String> {
-    let config = load_config()?;
+/// - no_color: whether to disable color output
+fn print_list(config: &Config, issues: &Vec<Meta>, columns: Option<Vec<String>>, print_csv: bool, no_color: bool) -> Result<(), String> {
+    let settings = load_settings()?;
 
     let mut cols = match &columns {
         Some(value) => value.clone(),
-        None => config.list_columns,
+        None => config.list_columns.clone(),
     };
 
     let context = if columns.is_some() {
@@ -141,14 +269,17 @@ fn print_list(issues: &Vec<Meta>, columns: Option<Vec<String>>, print_csv: bool)
         "config.yaml:list_columns"
     };
 
-    wildcard_expansion(&mut cols)?;
+    wildcard_expansion(config, &mut cols);
 
-    validate_column_names(&mut cols, context)?;
+    validate_column_names(config, &mut cols, context)?;
 
     let column_widths = calculate_column_widths(issues, &cols)?;
 
     let mut csv_content = String::new();
     let csv_separator = config.export_csv_separator;
+
+    // Enable colors only for interactive terminals and when NO_COLOR is not set
+    let color_enabled = std::env::var("NO_COLOR").is_err() && std::io::stdout().is_terminal() && !no_color;
 
     // Print header
     for col in &cols {
@@ -156,7 +287,11 @@ fn print_list(issues: &Vec<Meta>, columns: Option<Vec<String>>, print_csv: bool)
             csv_content.push_str(&to_csv_field(col, csv_separator));
         } else {
             let width = *column_widths.get(col).unwrap_or(&22);
-            let styled = bold(col);
+            let styled = if color_enabled {
+                colorize_header(&settings, col)
+            } else {
+                col.to_string()
+            };
             let padding = width.saturating_sub(col.len());
             print!("{}{}", styled, " ".repeat(padding));
         }
@@ -165,12 +300,7 @@ fn print_list(issues: &Vec<Meta>, columns: Option<Vec<String>>, print_csv: bool)
     print_ln(print_csv, &mut csv_content);
 
     if !print_csv {
-        // Print separator line
-        for col in &cols {
-            let width = *column_widths.get(col).unwrap_or(&22);
-            print!("{}", "-".repeat(width));
-        }
-        println!();
+        print_header_separator(&settings, &cols, &column_widths);
     }
 
     // Print rows
@@ -182,7 +312,13 @@ fn print_list(issues: &Vec<Meta>, columns: Option<Vec<String>>, print_csv: bool)
                 csv_content.push_str(&to_csv_field(&value.to_string(), csv_separator));
             } else {
                 let width = *column_widths.get(col).unwrap_or(&22);
-                print!("{:<width$}", value, width = width);
+                let colored_value = if color_enabled {
+                    colorize_value(&settings, col, &value)
+                } else {
+                    value.clone()
+                };
+                let padding = width.saturating_sub(value.len());
+                print!("{}{}", colored_value, " ".repeat(padding));
             }
         }
 
@@ -204,12 +340,10 @@ fn print_list(issues: &Vec<Meta>, columns: Option<Vec<String>>, print_csv: bool)
     Ok(())
 }
 
-fn wildcard_expansion(columns: &mut Vec<String>) -> Result<(), String> {
+fn wildcard_expansion(config: &Config, columns: &mut Vec<String>) {
     if columns.contains(&"*".to_string()) {
-        *columns = get_all_column_names()?;
+        *columns = get_all_column_names(config);
     }
-
-    Ok(())
 }
 
 fn get_relationship_value(col: &str, meta: &Meta) -> String {
@@ -265,11 +399,11 @@ fn calculate_column_widths(issues: &[Meta], columns: &[String]) -> Result<std::c
     Ok(widths)
 }
 
-fn filter_issues(issues: &mut Vec<Meta>, filters: Option<Vec<Filter>>) -> Result<(), String> {
+fn filter_issues(config: &Config, issues: &mut Vec<Meta>, filters: Option<Vec<Filter>>) -> Result<(), String> {
     if let Some(mut filters) = filters {
         // Validate all filter fields
         let mut filter_fields: Vec<String> = filters.iter().map(|f| f.field.clone()).collect();
-        validate_column_names(&mut filter_fields, "--filter")?;
+        validate_column_names(config, &mut filter_fields, "--filter")?;
 
         // Update the actual filter struct with normalized field names
         for (filter, normalized) in filters.iter_mut().zip(filter_fields) {
@@ -419,11 +553,11 @@ fn is_in_u32_list(list: &[u32], pattern: &str) -> bool {
     list.iter().any(|id| do_strings_match(&id.to_string(), pattern))
 }
 
-fn sort_issues(issues: &mut [Meta], sorts: Option<Vec<Sorting>>) -> Result<(), String> {
+fn sort_issues(config: &Config, issues: &mut [Meta], sorts: Option<Vec<Sorting>>) -> Result<(), String> {
     if let Some(mut sorts) = sorts {
         // Validate all sort fields
         let mut sort_fields: Vec<String> = sorts.iter().map(|s| s.field.clone()).collect();
-        validate_column_names(&mut sort_fields, "--sort")?;
+        validate_column_names(config, &mut sort_fields, "--sort")?;
 
         // Update the actual sort struct with normalized field names
         for (sort, normalized) in sorts.iter_mut().zip(sort_fields) {
