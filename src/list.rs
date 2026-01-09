@@ -3,6 +3,7 @@ use std::cmp::Reverse;
 use std::fs;
 use std::path::Path;
 
+use anstyle::{Effects, Reset, Style};
 use regex::Regex;
 
 use crate::model::{
@@ -114,6 +115,14 @@ fn to_csv_field(value: &str, separator: char) -> String {
     format!("\"{value}\"{separator}")
 }
 
+fn apply_style(text: &str, style: Style) -> String {
+    format!("{style}{text}{reset}", reset = Reset)
+}
+
+fn bold(text: &str) -> String {
+    apply_style(text, Style::new().effects(Effects::BOLD))
+}
+
 /// print list
 /// - issues: list of issue metadata
 /// - columns: list of columns to print (None means default from config)
@@ -147,11 +156,22 @@ fn print_list(issues: &Vec<Meta>, columns: Option<Vec<String>>, print_csv: bool)
             csv_content.push_str(&to_csv_field(col, csv_separator));
         } else {
             let width = *column_widths.get(col).unwrap_or(&22);
-            print!("{:<width$}", col, width = width);
+            let styled = bold(col);
+            let padding = width.saturating_sub(col.len());
+            print!("{}{}", styled, " ".repeat(padding));
         }
     }
 
     print_ln(print_csv, &mut csv_content);
+
+    if !print_csv {
+        // Print separator line
+        for col in &cols {
+            let width = *column_widths.get(col).unwrap_or(&22);
+            print!("{}", "-".repeat(width));
+        }
+        println!();
+    }
 
     // Print rows
     for meta in issues {

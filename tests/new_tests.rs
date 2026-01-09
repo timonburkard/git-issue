@@ -235,7 +235,7 @@ fn test_new_me() {
     assert!(stdout.contains("Issue 1"));
     assert!(stdout.contains("reporter"));
     assert!(stdout.contains("assignee"));
-    assert!(stdout.contains("-"));
+    assert!(stdout.contains(" -"));
 
     // Change default user in settings
     let settings_path = ".gitissues/settings.yaml";
@@ -255,5 +255,5 @@ fn test_new_me() {
     assert!(stdout.contains("reporter"));
     assert!(stdout.contains("assignee"));
     assert!(stdout.contains("bob"));
-    assert!(!stdout.contains("-"));
+    assert!(!stdout.contains(" -"));
 }
