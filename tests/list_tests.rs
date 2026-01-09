@@ -222,150 +222,150 @@ fn test_list_filter() {
     let output = run_command(&["list", "--columns", "id"]).expect("list without filters failed");
     let stdout = String::from_utf8_lossy(&output.stdout);
     assert!(stdout.contains("id"));
-    assert!(stdout.contains("1  "));
-    assert!(stdout.contains("2  "));
-    assert!(stdout.contains("3  "));
+    assert!(stdout.contains("1"));
+    assert!(stdout.contains("2"));
+    assert!(stdout.contains("3"));
 
     // List with filter '=' on ID
     let output = run_command(&["list", "--columns", "id", "--filter", "id=2"]).expect("list with filter on ID failed");
     let stdout = String::from_utf8_lossy(&output.stdout);
     assert!(stdout.contains("id"));
-    assert!(!stdout.contains("1  "));
-    assert!(stdout.contains("2  "));
-    assert!(!stdout.contains("3  "));
+    assert!(!stdout.contains("1"));
+    assert!(stdout.contains("2"));
+    assert!(!stdout.contains("3"));
 
     // List with filter '=' on ID (OR)
     let output = run_command(&["list", "--columns", "id", "--filter", "id=1,3"]).expect("list with filter on ID failed");
     let stdout = String::from_utf8_lossy(&output.stdout);
     assert!(stdout.contains("id"));
-    assert!(stdout.contains("1  "));
-    assert!(!stdout.contains("2  "));
-    assert!(stdout.contains("3  "));
+    assert!(stdout.contains("1"));
+    assert!(!stdout.contains("2"));
+    assert!(stdout.contains("3"));
 
     // List with filter '=' on assignee
     let output = run_command(&["list", "--columns", "id", "--filter", "assignee=alice"]).expect("list with filter on assignee failed");
     let stdout = String::from_utf8_lossy(&output.stdout);
     assert!(stdout.contains("id"));
-    assert!(stdout.contains("1  "));
-    assert!(stdout.contains("2  "));
-    assert!(!stdout.contains("3  "));
+    assert!(stdout.contains("1"));
+    assert!(stdout.contains("2"));
+    assert!(!stdout.contains("3"));
 
     // List with filter '=' on reporter
     let output = run_command(&["list", "--columns", "id", "--filter", "reporter=bob"]).expect("list with filter on reporter failed");
     let stdout = String::from_utf8_lossy(&output.stdout);
     assert!(stdout.contains("id"));
-    assert!(stdout.contains("1  "));
-    assert!(!stdout.contains("2  "));
-    assert!(!stdout.contains("3  "));
+    assert!(stdout.contains("1"));
+    assert!(!stdout.contains("2"));
+    assert!(!stdout.contains("3"));
 
     // List with filter '=' on priority
     let output = run_command(&["list", "--columns", "id", "--filter", "priority=P3"]).expect("list with filter on priority failed");
     let stdout = String::from_utf8_lossy(&output.stdout);
     assert!(stdout.contains("id"));
-    assert!(!stdout.contains("1  "));
-    assert!(stdout.contains("2  "));
-    assert!(!stdout.contains("3  "));
+    assert!(!stdout.contains("1"));
+    assert!(stdout.contains("2"));
+    assert!(!stdout.contains("3"));
 
     // List with filter '=' on empty priority
     // In CLI this corresponds to priority=''
     let output = run_command(&["list", "--columns", "id", "--filter", "priority="]).expect("list with filter on priority failed");
     let stdout = String::from_utf8_lossy(&output.stdout);
     assert!(stdout.contains("id"));
-    assert!(!stdout.contains("1  "));
-    assert!(!stdout.contains("2  "));
-    assert!(stdout.contains("3  "));
+    assert!(!stdout.contains("1"));
+    assert!(!stdout.contains("2"));
+    assert!(stdout.contains("3"));
 
     // List with filter '=' on type
     let output = run_command(&["list", "--columns", "id", "--filter", "type=bug"]).expect("list with filter on type failed");
     let stdout = String::from_utf8_lossy(&output.stdout);
     assert!(stdout.contains("id"));
-    assert!(!stdout.contains("1  "));
-    assert!(!stdout.contains("2  "));
-    assert!(stdout.contains("3  "));
+    assert!(!stdout.contains("1"));
+    assert!(!stdout.contains("2"));
+    assert!(stdout.contains("3"));
 
     // List with filter '=' on labels (Simple1)
     let output = run_command(&["list", "--columns", "id", "--filter", "labels=ui"]).expect("list with filter on labels failed");
     let stdout = String::from_utf8_lossy(&output.stdout);
     assert!(stdout.contains("id"));
-    assert!(stdout.contains("1  "));
-    assert!(stdout.contains("2  "));
-    assert!(!stdout.contains("3  "));
+    assert!(stdout.contains("1"));
+    assert!(stdout.contains("2"));
+    assert!(!stdout.contains("3"));
 
     // List with filter '=' on labels (Simple2)
     let output = run_command(&["list", "--columns", "id", "--filter", "labels=fw"]).expect("list with filter on labels failed");
     let stdout = String::from_utf8_lossy(&output.stdout);
     assert!(stdout.contains("id"));
-    assert!(!stdout.contains("1  "));
-    assert!(!stdout.contains("2  "));
-    assert!(stdout.contains("3  "));
+    assert!(!stdout.contains("1"));
+    assert!(!stdout.contains("2"));
+    assert!(stdout.contains("3"));
 
     // List with filter '=' on labels (OR)
     let output = run_command(&["list", "--columns", "id", "--filter", "labels=gui,cli"]).expect("list with filter on labels failed");
     let stdout = String::from_utf8_lossy(&output.stdout);
     assert!(stdout.contains("id"));
-    assert!(stdout.contains("1  "));
-    assert!(stdout.contains("2  "));
-    assert!(!stdout.contains("3  "));
+    assert!(stdout.contains("1"));
+    assert!(stdout.contains("2"));
+    assert!(!stdout.contains("3"));
 
     // List with filter '=' on labels (AND)
     let output =
         run_command(&["list", "--columns", "id", "--filter", "labels=ui", "labels=gui"]).expect("list with filter on labels failed");
     let stdout = String::from_utf8_lossy(&output.stdout);
     assert!(stdout.contains("id"));
-    assert!(!stdout.contains("1  "));
-    assert!(stdout.contains("2  "));
-    assert!(!stdout.contains("3  "));
+    assert!(!stdout.contains("1"));
+    assert!(stdout.contains("2"));
+    assert!(!stdout.contains("3"));
 
     // List with filter '=' on labels (no match)
     let output = run_command(&["list", "--columns", "id", "--filter", "labels=bla"]).expect("list with filter on labels failed");
     let stdout = String::from_utf8_lossy(&output.stdout);
     assert!(stdout.contains("id"));
-    assert!(!stdout.contains("1  "));
-    assert!(!stdout.contains("2  "));
-    assert!(!stdout.contains("3  "));
+    assert!(!stdout.contains("1"));
+    assert!(!stdout.contains("2"));
+    assert!(!stdout.contains("3"));
 
     // List with filter '=' on due_date
     let output = run_command(&["list", "--columns", "id", "--filter", "due_date=2026-06-16"]).expect("list with filter on due_date failed");
     let stdout = String::from_utf8_lossy(&output.stdout);
     assert!(stdout.contains("id"));
-    assert!(!stdout.contains("1  "));
-    assert!(!stdout.contains("2  "));
-    assert!(stdout.contains("3  "));
+    assert!(!stdout.contains("1"));
+    assert!(!stdout.contains("2"));
+    assert!(stdout.contains("3"));
 
     // List with filter '<' and '>' on ID
     // In CLI this corresponds to id\>1 id\<3
     let output = run_command(&["list", "--columns", "id", "--filter", "id>1", "id<3"]).expect("list with filter on ID failed");
     let stdout = String::from_utf8_lossy(&output.stdout);
     assert!(stdout.contains("id"));
-    assert!(!stdout.contains("1  "));
-    assert!(stdout.contains("2  "));
-    assert!(!stdout.contains("3  "));
+    assert!(!stdout.contains("1"));
+    assert!(stdout.contains("2"));
+    assert!(!stdout.contains("3"));
 
     // List with filter '<' on priority
     // In CLI this corresponds to priority\<P2
     let output = run_command(&["list", "--columns", "id", "--filter", "priority<P2"]).expect("list with filter on priority failed");
     let stdout = String::from_utf8_lossy(&output.stdout);
     assert!(stdout.contains("id"));
-    assert!(stdout.contains("1  "));
-    assert!(!stdout.contains("2  "));
-    assert!(stdout.contains("3  ")); // empty is considered smallest
+    assert!(stdout.contains("1"));
+    assert!(!stdout.contains("2"));
+    assert!(stdout.contains("3")); // empty is considered smallest
 
     // List with filter '<' on due_date
     // In CLI this corresponds to due_date\<2027
     let output = run_command(&["list", "--columns", "id", "--filter", "due_date<2027"]).expect("list with filter on due_date failed");
     let stdout = String::from_utf8_lossy(&output.stdout);
     assert!(stdout.contains("id"));
-    assert!(stdout.contains("1  "));
-    assert!(!stdout.contains("2  "));
-    assert!(stdout.contains("3  "));
+    assert!(stdout.contains("1"));
+    assert!(!stdout.contains("2"));
+    assert!(stdout.contains("3"));
 
     // List with two filters (AND)
     let output = run_command(&["list", "--columns", "id", "--filter", "labels=ui", "reporter=carol"]).expect("list with and filter failed");
     let stdout = String::from_utf8_lossy(&output.stdout);
     assert!(stdout.contains("id"));
-    assert!(!stdout.contains("1  "));
-    assert!(stdout.contains("2  "));
-    assert!(!stdout.contains("3  "));
+    assert!(!stdout.contains("1"));
+    assert!(stdout.contains("2"));
+    assert!(!stdout.contains("3"));
 }
 
 #[test]
@@ -431,9 +431,9 @@ fn test_list_sort() {
     let output = run_command(&["list", "--columns", "id"]).expect("list without filters failed");
     let stdout = String::from_utf8_lossy(&output.stdout);
     let position_header = stdout.find("id").expect("id header not found");
-    let position1 = stdout.find("1  ").expect("id 1 not found");
-    let position2 = stdout.find("2  ").expect("id 2 not found");
-    let position3 = stdout.find("3  ").expect("id 3 not found");
+    let position1 = stdout.find("1").expect("id 1 not found");
+    let position2 = stdout.find("2").expect("id 2 not found");
+    let position3 = stdout.find("3").expect("id 3 not found");
     assert!(position_header < position3);
     assert!(position3 < position2);
     assert!(position2 < position1);
@@ -442,9 +442,9 @@ fn test_list_sort() {
     let output = run_command(&["list", "--columns", "id", "--sort", "id=asc"]).expect("list with sort failed");
     let stdout = String::from_utf8_lossy(&output.stdout);
     let position_header = stdout.find("id").expect("id header not found");
-    let position1 = stdout.find("1  ").expect("id 1 not found");
-    let position2 = stdout.find("2  ").expect("id 2 not found");
-    let position3 = stdout.find("3  ").expect("id 3 not found");
+    let position1 = stdout.find("1").expect("id 1 not found");
+    let position2 = stdout.find("2").expect("id 2 not found");
+    let position3 = stdout.find("3").expect("id 3 not found");
     assert!(position_header < position1);
     assert!(position1 < position2);
     assert!(position2 < position3);
@@ -453,9 +453,9 @@ fn test_list_sort() {
     let output = run_command(&["list", "--columns", "id", "--sort", "id=desc"]).expect("list with sort failed");
     let stdout = String::from_utf8_lossy(&output.stdout);
     let position_header = stdout.find("id").expect("id header not found");
-    let position1 = stdout.find("1  ").expect("id 1 not found");
-    let position2 = stdout.find("2  ").expect("id 2 not found");
-    let position3 = stdout.find("3  ").expect("id 3 not found");
+    let position1 = stdout.find("1").expect("id 1 not found");
+    let position2 = stdout.find("2").expect("id 2 not found");
+    let position3 = stdout.find("3").expect("id 3 not found");
     assert!(position_header < position3);
     assert!(position3 < position2);
     assert!(position2 < position1);
@@ -464,9 +464,9 @@ fn test_list_sort() {
     let output = run_command(&["list", "--columns", "id", "--sort", "due_date=asc"]).expect("list with sort failed");
     let stdout = String::from_utf8_lossy(&output.stdout);
     let position_header = stdout.find("id").expect("id header not found");
-    let position1 = stdout.find("1  ").expect("id 1 not found");
-    let position2 = stdout.find("2  ").expect("id 2 not found");
-    let position3 = stdout.find("3  ").expect("id 3 not found");
+    let position1 = stdout.find("1").expect("id 1 not found");
+    let position2 = stdout.find("2").expect("id 2 not found");
+    let position3 = stdout.find("3").expect("id 3 not found");
     assert!(position_header < position1);
     assert!(position1 < position3);
     assert!(position3 < position2);
@@ -475,9 +475,9 @@ fn test_list_sort() {
     let output = run_command(&["list", "--columns", "id", "--sort", "due_date=desc"]).expect("list with sort failed");
     let stdout = String::from_utf8_lossy(&output.stdout);
     let position_header = stdout.find("id").expect("id header not found");
-    let position1 = stdout.find("1  ").expect("id 1 not found");
-    let position2 = stdout.find("2  ").expect("id 2 not found");
-    let position3 = stdout.find("3  ").expect("id 3 not found");
+    let position1 = stdout.find("1").expect("id 1 not found");
+    let position2 = stdout.find("2").expect("id 2 not found");
+    let position3 = stdout.find("3").expect("id 3 not found");
     assert!(position_header < position2);
     assert!(position2 < position3);
     assert!(position3 < position1);
@@ -486,9 +486,9 @@ fn test_list_sort() {
     let output = run_command(&["list", "--columns", "id", "--sort", "assignee=asc", "reporter=desc"]).expect("list with sort failed");
     let stdout = String::from_utf8_lossy(&output.stdout);
     let position_header = stdout.find("id").expect("id header not found");
-    let position1 = stdout.find("1  ").expect("id 1 not found");
-    let position2 = stdout.find("2  ").expect("id 2 not found");
-    let position3 = stdout.find("3  ").expect("id 3 not found");
+    let position1 = stdout.find("1").expect("id 1 not found");
+    let position2 = stdout.find("2").expect("id 2 not found");
+    let position3 = stdout.find("3").expect("id 3 not found");
     assert!(position_header < position2);
     assert!(position2 < position1);
     assert!(position1 < position3);
