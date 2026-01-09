@@ -1,6 +1,6 @@
 id: 50
 title: '[cmd/list] formatting: dashed line between headers and values'
-state: active
+state: resolved
 type: feature
 labels: []
 reporter: t.burkard
@@ -11,4 +11,4 @@ relationships:
   related:
   - 49
 created: 2026-01-09T16:33:08Z
-updated: 2026-01-09T16:43:43Z
+updated: 2026-01-09T16:53:12Z
