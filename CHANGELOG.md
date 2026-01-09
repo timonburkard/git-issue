@@ -5,6 +5,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [unreleased]
+
+### Added
+
+    - [cmd/list] formatting: bold headers (#49)
+    - [cmd/list] formatting: added dashed line between headers and values (#50)
+
 ## [v0.6.3] - 2026-01-08
 
 ### Added
