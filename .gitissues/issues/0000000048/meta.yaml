@@ -1,6 +1,6 @@
 id: 48
 title: '[cmd/list] formatting: colorized output'
-state: active
+state: resolved
 type: feature
 labels: []
 reporter: t.burkard
@@ -12,4 +12,4 @@ relationships:
   - 49
   - 50
 created: 2026-01-09T16:24:40Z
-updated: 2026-01-09T21:30:44Z
+updated: 2026-01-09T21:31:12Z
