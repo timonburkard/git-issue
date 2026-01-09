@@ -10,8 +10,8 @@ use chrono::Utc;
 use regex::Regex;
 
 use crate::model::{
-    Filter, Meta, NamedColor, Operator, Priority, Sorting, cache_path, current_timestamp, dash_if_empty, gitissues_base, issue_exports_dir,
-    load_config, load_meta, load_settings,
+    Filter, Meta, NamedColor, Operator, Priority, Settings, Sorting, cache_path, current_timestamp, dash_if_empty, gitissues_base,
+    issue_exports_dir, load_config, load_meta, load_settings,
 };
 
 pub fn run(
@@ -154,9 +154,7 @@ fn named_color_to_style(color: NamedColor) -> Style {
     }
 }
 
-fn colorize_state(state: &str) -> Result<String, String> {
-    let settings = load_settings()?;
-
+fn colorize_state(settings: &Settings, state: &str) -> String {
     let color = settings
         .list_formatting
         .colors
@@ -165,12 +163,10 @@ fn colorize_state(state: &str) -> Result<String, String> {
         .cloned()
         .unwrap_or(NamedColor::White);
 
-    Ok(apply_style(state, named_color_to_style(color)))
+    apply_style(state, named_color_to_style(color))
 }
 
-fn colorize_priority(priority: &str) -> Result<String, String> {
-    let settings = load_settings()?;
-
+fn colorize_priority(settings: &Settings, priority: &str) -> String {
     let color = settings
         .list_formatting
         .colors
@@ -179,12 +175,10 @@ fn colorize_priority(priority: &str) -> Result<String, String> {
         .cloned()
         .unwrap_or(NamedColor::White);
 
-    Ok(apply_style(priority, named_color_to_style(color)))
+    apply_style(priority, named_color_to_style(color))
 }
 
-fn colorize_type(type_: &str) -> Result<String, String> {
-    let settings = load_settings()?;
-
+fn colorize_type(settings: &Settings, type_: &str) -> String {
     let color = settings
         .list_formatting
         .colors
@@ -193,67 +187,60 @@ fn colorize_type(type_: &str) -> Result<String, String> {
         .cloned()
         .unwrap_or(NamedColor::White);
 
-    Ok(apply_style(type_, named_color_to_style(color)))
+    apply_style(type_, named_color_to_style(color))
 }
 
 /// Apply color to a column value based on the column type
-fn colorize_value(col: &str, value: &str) -> Result<String, String> {
+fn colorize_value(settings: &Settings, col: &str, value: &str) -> String {
     match col {
-        "state" => colorize_state(value),
-        "priority" => colorize_priority(value),
-        "type" => colorize_type(value),
-        "assignee" | "reporter" => colorize_me(value),
-        "due_date" => colorize_due_date(value),
-        _ => Ok(value.to_string()),
+        "state" => colorize_state(settings, value),
+        "priority" => colorize_priority(settings, value),
+        "type" => colorize_type(settings, value),
+        "assignee" | "reporter" => colorize_me(settings, value),
+        "due_date" => colorize_due_date(settings, value),
+        _ => value.to_string(),
     }
 }
 
-fn colorize_header(header: &str) -> Result<String, String> {
-    let settings = load_settings()?;
-
+fn colorize_header(settings: &Settings, header: &str) -> String {
     let color = settings.list_formatting.colors.header;
 
-    Ok(apply_style(header, named_color_to_style(color)))
+    apply_style(header, named_color_to_style(color))
 }
 
-fn colorize_me(user: &str) -> Result<String, String> {
-    let settings = load_settings()?;
-
+fn colorize_me(settings: &Settings, user: &str) -> String {
     let me = settings.user.clone();
 
     if user != me {
-        return Ok(user.to_string());
+        return user.to_string();
     }
 
     let color = settings.list_formatting.colors.me;
 
-    Ok(apply_style(user, named_color_to_style(color)))
+    apply_style(user, named_color_to_style(color))
 }
 
-fn colorize_due_date(due_date: &str) -> Result<String, String> {
-    let settings = load_settings()?;
+fn colorize_due_date(settings: &Settings, due_date: &str) -> String {
     let today = Utc::now().naive_utc().date();
 
     match chrono::NaiveDate::parse_from_str(due_date, "%Y-%m-%d") {
         Ok(due_date_date) => {
             if due_date_date >= today {
-                return Ok(due_date.to_string());
+                return due_date.to_string();
             }
 
             let color = settings.list_formatting.colors.due_date_overdue;
-            Ok(apply_style(due_date, named_color_to_style(color)))
+            apply_style(due_date, named_color_to_style(color))
         }
-        Err(_) => Ok(due_date.to_string()),
+        Err(_) => due_date.to_string(),
     }
 }
 
-fn print_header_separator(cols: &[String], column_widths: &HashMap<String, usize>) -> Result<(), String> {
-    let settings = load_settings()?;
-
+fn print_header_separator(settings: &Settings, cols: &[String], column_widths: &HashMap<String, usize>) {
     let header_separator = settings.list_formatting.header_separator;
 
     if !header_separator {
-        return Ok(());
+        return;
     }
 
     // Print separator line
@@ -262,8 +249,6 @@ fn print_header_separator(cols: &[String], column_widths: &HashMap<String, usize
         print!("{}", "-".repeat(width));
     }
     println!();
-
-    Ok(())
 }
 
 /// print list
@@ -272,6 +257,7 @@ fn print_header_separator(cols: &[String], column_widths: &HashMap<String, usize
 /// - print_csv: whether to print as CSV
 fn print_list(issues: &Vec<Meta>, columns: Option<Vec<String>>, print_csv: bool, no_color: bool) -> Result<(), String> {
     let config = load_config()?;
+    let settings = load_settings()?;
 
     let mut cols = match &columns {
         Some(value) => value.clone(),
@@ -302,7 +288,11 @@ fn print_list(issues: &Vec<Meta>, columns: Option<Vec<String>>, print_csv: bool,
             csv_content.push_str(&to_csv_field(col, csv_separator));
         } else {
             let width = *column_widths.get(col).unwrap_or(&22);
-            let styled = if color_enabled { colorize_header(col)? } else { col.to_string() };
+            let styled = if color_enabled {
+                colorize_header(&settings, col)
+            } else {
+                col.to_string()
+            };
             let padding = width.saturating_sub(col.len());
             print!("{}{}", styled, " ".repeat(padding));
         }
@@ -311,7 +301,7 @@ fn print_list(issues: &Vec<Meta>, columns: Option<Vec<String>>, print_csv: bool,
     print_ln(print_csv, &mut csv_content);
 
     if !print_csv {
-        print_header_separator(&cols, &column_widths)?;
+        print_header_separator(&settings, &cols, &column_widths);
     }
 
     // Print rows
@@ -324,7 +314,7 @@ fn print_list(issues: &Vec<Meta>, columns: Option<Vec<String>>, print_csv: bool,
             } else {
                 let width = *column_widths.get(col).unwrap_or(&22);
                 let colored_value = if color_enabled {
-                    colorize_value(col, &value)?
+                    colorize_value(&settings, col, &value)
                 } else {
                     value.clone()
                 };
