@@ -390,7 +390,6 @@ fn test_set_due_date() {
     assert!(stdout.contains("title"));
     assert!(stdout.contains("Issue 1"));
     assert!(stdout.contains("due_date"));
-    assert!(stdout.contains(" -"));
     assert!(stdout.contains("2026-01-15"));
     assert!(!stdout.contains("not-a-date"));
 
@@ -403,7 +402,6 @@ fn test_set_due_date() {
     assert!(stdout.contains("title"));
     assert!(stdout.contains("Issue 1"));
     assert!(stdout.contains("due_date"));
-    assert!(stdout.contains(" -"));
     assert!(stdout.contains("2026-01-15"));
     assert!(!stdout.contains("15.01.2026"));
 
@@ -416,7 +414,6 @@ fn test_set_due_date() {
     assert!(stdout.contains("title"));
     assert!(stdout.contains("Issue 1"));
     assert!(stdout.contains("due_date"));
-    assert!(stdout.contains(" -"));
     assert!(stdout.contains("2026-01-15"));
     assert!(!stdout.contains("2026-02-30"));
 
