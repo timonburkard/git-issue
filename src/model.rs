@@ -299,32 +299,30 @@ pub fn is_valid_iso_date(s: &str) -> Result<bool, String> {
 }
 
 /// Validate if a state is in the list of valid states from config.
-pub fn is_valid_state(s: &str) -> Result<bool, String> {
-    let config = load_config()?;
-    Ok(config.states.contains(&s.to_string()))
+pub fn is_valid_state(config: &Config, s: &str) -> bool {
+    config.states.contains(&s.to_string())
 }
 
 /// Validate if a type is in the list of valid types from config or empty.
-pub fn is_valid_type(s: &str) -> Result<bool, String> {
-    let config = load_config()?;
-    Ok(s.is_empty() || config.types.contains(&s.to_string()))
+pub fn is_valid_type(config: &Config, s: &str) -> bool {
+    s.is_empty() || config.types.contains(&s.to_string())
 }
 
 /// Validate if an user is in the list of valid users:id from users.yaml.
-pub fn is_valid_user(s: &str) -> Result<bool, String> {
-    let users = load_users()?;
-    Ok(s.is_empty() || s == "me" || users.users.iter().any(|u| u.id == s))
+pub fn is_valid_user(users: &Users, s: &str) -> bool {
+    s.is_empty() || s == "me" || users.users.iter().any(|u| u.id == s)
 }
 
-pub fn user_handle_me(value: &mut String) -> Result<(), String> {
-    if *value == "me" {
-        let settings = load_settings()?;
-        *value = match is_valid_user(&settings.user) {
-            Ok(true) => settings.user,
-            Ok(false) => return Err("Invalid user: settings.yaml::user must be part of users.yaml:users:id or ''".to_string()),
-            Err(e) => return Err(format!("Config error: {e}")),
-        }
+pub fn user_handle_me(users: &Users, settings: &Settings, value: &mut String) -> Result<(), String> {
+    if *value != "me" {
+        return Ok(());
     }
+
+    *value = if is_valid_user(users, &settings.user) {
+        settings.user.clone()
+    } else {
+        return Err("Invalid user: settings.yaml::user must be part of users.yaml:users:id or ''".to_string());
+    };
 
     Ok(())
 }
