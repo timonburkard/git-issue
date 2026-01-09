@@ -2,6 +2,7 @@ use std::cmp::Ordering;
 use std::cmp::Reverse;
 use std::collections::HashMap;
 use std::fs;
+use std::io::IsTerminal;
 use std::path::Path;
 
 use anstyle::{AnsiColor, Effects, Reset, Style};
@@ -13,7 +14,13 @@ use crate::model::{
     load_config, load_meta, load_settings,
 };
 
-pub fn run(columns: Option<Vec<String>>, filter: Option<Vec<Filter>>, sort: Option<Vec<Sorting>>, print_csv: bool) -> Result<(), String> {
+pub fn run(
+    columns: Option<Vec<String>>,
+    filter: Option<Vec<Filter>>,
+    sort: Option<Vec<Sorting>>,
+    print_csv: bool,
+    no_color: bool,
+) -> Result<(), String> {
     let mut issues = get_issues_metadata()?;
 
     sort_issues(&mut issues, sort)?;
@@ -23,10 +30,10 @@ pub fn run(columns: Option<Vec<String>>, filter: Option<Vec<Filter>>, sort: Opti
     // Print
     match columns {
         None => {
-            print_list(&issues, None, print_csv)?;
+            print_list(&issues, None, print_csv, no_color)?;
         }
         Some(cols) => {
-            print_list(&issues, Some(cols), print_csv)?;
+            print_list(&issues, Some(cols), print_csv, no_color)?;
         }
     }
 
@@ -263,7 +270,7 @@ fn print_header_separator(cols: &[String], column_widths: &HashMap<String, usize
 /// - issues: list of issue metadata
 /// - columns: list of columns to print (None means default from config)
 /// - print_csv: whether to print as CSV
-fn print_list(issues: &Vec<Meta>, columns: Option<Vec<String>>, print_csv: bool) -> Result<(), String> {
+fn print_list(issues: &Vec<Meta>, columns: Option<Vec<String>>, print_csv: bool, no_color: bool) -> Result<(), String> {
     let config = load_config()?;
 
     let mut cols = match &columns {
@@ -286,13 +293,16 @@ fn print_list(issues: &Vec<Meta>, columns: Option<Vec<String>>, print_csv: bool)
     let mut csv_content = String::new();
     let csv_separator = config.export_csv_separator;
 
+    // Enable colors only for interactive terminals and when NO_COLOR is not set
+    let color_enabled = std::env::var("NO_COLOR").is_err() && std::io::stdout().is_terminal() && !no_color;
+
     // Print header
     for col in &cols {
         if print_csv {
             csv_content.push_str(&to_csv_field(col, csv_separator));
         } else {
             let width = *column_widths.get(col).unwrap_or(&22);
-            let styled = colorize_header(col)?;
+            let styled = if color_enabled { colorize_header(col)? } else { col.to_string() };
             let padding = width.saturating_sub(col.len());
             print!("{}{}", styled, " ".repeat(padding));
         }
@@ -313,7 +323,11 @@ fn print_list(issues: &Vec<Meta>, columns: Option<Vec<String>>, print_csv: bool)
                 csv_content.push_str(&to_csv_field(&value.to_string(), csv_separator));
             } else {
                 let width = *column_widths.get(col).unwrap_or(&22);
-                let colored_value = colorize_value(col, &value)?;
+                let colored_value = if color_enabled {
+                    colorize_value(col, &value)?
+                } else {
+                    value.clone()
+                };
                 let padding = width.saturating_sub(value.len());
                 print!("{}{}", colored_value, " ".repeat(padding));
             }

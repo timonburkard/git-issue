@@ -80,6 +80,10 @@ enum Commands {
         /// Print output to CSV file
         #[arg(long, default_value_t = false)]
         csv: bool,
+
+        /// Don't color the output
+        #[arg(long, default_value_t = false)]
+        no_color: bool,
     },
 
     /// Show issue details
@@ -189,7 +193,8 @@ fn main() {
             filter,
             sort,
             csv,
-        } => list::run(columns, filter, sort, csv),
+            no_color,
+        } => list::run(columns, filter, sort, csv, no_color),
 
         Commands::Show { id } => show::run(id),
 
