@@ -4,6 +4,7 @@ use std::path::Path;
 use std::process::Command;
 use std::str::FromStr;
 
+//use anstyle::{AnsiColor, Effects, Style};
 use chrono::{NaiveDate, Utc};
 use clap::ValueEnum;
 use indexmap::IndexMap;
@@ -215,10 +216,50 @@ pub struct Config {
     pub priority_default: Priority,
 }
 
+#[derive(Debug, Deserialize, Clone, Copy)]
+#[serde(rename_all = "snake_case")]
+pub enum NamedColor {
+    Black,
+    BrightBlack,
+    Red,
+    BrightRed,
+    Green,
+    BrightGreen,
+    Yellow,
+    BrightYellow,
+    Blue,
+    BrightBlue,
+    Magenta,
+    BrightMagenta,
+    Cyan,
+    BrightCyan,
+    White,
+    BrightWhite,
+    Bold,
+}
+
+#[derive(Debug, Deserialize, Clone)]
+pub struct Colors {
+    pub header: NamedColor,
+    pub me: NamedColor,
+    pub due_date_overdue: NamedColor,
+    pub state: IndexMap<String, NamedColor>,
+    pub priority: IndexMap<String, NamedColor>,
+    #[serde(rename = "type")]
+    pub type_: IndexMap<String, NamedColor>,
+}
+
+#[derive(Debug, Deserialize, Clone)]
+pub struct ListFormatting {
+    pub header_separator: bool,
+    pub colors: Colors,
+}
+
 #[derive(Debug, Deserialize)]
 pub struct Settings {
     pub editor: String,
     pub user: String,
+    pub list_formatting: ListFormatting,
 }
 
 #[derive(Debug, Deserialize)]
@@ -241,7 +282,7 @@ pub fn load_users() -> Result<Users, String> {
 
     let users: Users = match serde_yaml::from_str(&users_raw) {
         Ok(m) => m,
-        Err(_) => return Err("users.yaml malformatted.".to_string()),
+        Err(e) => return Err(format!("users.yaml malformatted: {e}")),
     };
 
     Ok(users)
@@ -297,7 +338,7 @@ pub fn load_config() -> Result<Config, String> {
 
     let config: Config = match serde_yaml::from_str(&config_raw) {
         Ok(m) => m,
-        Err(_) => return Err("config.yaml malformatted.".to_string()),
+        Err(e) => return Err(format!("config.yaml malformatted: {e}")),
     };
 
     Ok(config)
@@ -312,7 +353,7 @@ pub fn load_settings() -> Result<Settings, String> {
 
     let settings: Settings = match serde_yaml::from_str(&settings_raw) {
         Ok(m) => m,
-        Err(_) => return Err("settings.yaml malformatted.".to_string()),
+        Err(e) => return Err(format!("settings.yaml malformatted: {e}")),
     };
 
     Ok(settings)
@@ -326,7 +367,7 @@ pub fn load_meta(path: &Path) -> Result<Meta, String> {
 
     let meta: Meta = match serde_yaml::from_str(&meta_raw) {
         Ok(m) => m,
-        Err(_) => return Err(format!("meta.yaml malformatted: {}", path.display())),
+        Err(e) => return Err(format!("meta.yaml malformatted: {}: {e}", path.display())),
     };
 
     Ok(meta)

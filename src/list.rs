@@ -1,14 +1,16 @@
 use std::cmp::Ordering;
 use std::cmp::Reverse;
+use std::collections::HashMap;
 use std::fs;
 use std::path::Path;
 
-use anstyle::{Effects, Reset, Style};
+use anstyle::{AnsiColor, Effects, Reset, Style};
+use chrono::Utc;
 use regex::Regex;
 
 use crate::model::{
-    Filter, Meta, Operator, Priority, Sorting, cache_path, current_timestamp, dash_if_empty, gitissues_base, issue_exports_dir,
-    load_config, load_meta,
+    Filter, Meta, NamedColor, Operator, Priority, Sorting, cache_path, current_timestamp, dash_if_empty, gitissues_base, issue_exports_dir,
+    load_config, load_meta, load_settings,
 };
 
 pub fn run(columns: Option<Vec<String>>, filter: Option<Vec<Filter>>, sort: Option<Vec<Sorting>>, print_csv: bool) -> Result<(), String> {
@@ -119,8 +121,142 @@ fn apply_style(text: &str, style: Style) -> String {
     format!("{style}{text}{reset}", reset = Reset)
 }
 
-fn bold(text: &str) -> String {
-    apply_style(text, Style::new().effects(Effects::BOLD))
+fn fg(color: AnsiColor) -> Style {
+    Style::new().fg_color(Some(color.into()))
+}
+
+fn named_color_to_style(color: NamedColor) -> Style {
+    match color {
+        NamedColor::White => fg(AnsiColor::White),
+        NamedColor::BrightWhite => fg(AnsiColor::BrightWhite),
+        NamedColor::Black => fg(AnsiColor::Black),
+        NamedColor::BrightBlack => fg(AnsiColor::BrightBlack),
+        NamedColor::Red => fg(AnsiColor::Red),
+        NamedColor::BrightRed => fg(AnsiColor::BrightRed),
+        NamedColor::Green => fg(AnsiColor::Green),
+        NamedColor::BrightGreen => fg(AnsiColor::BrightGreen),
+        NamedColor::Yellow => fg(AnsiColor::Yellow),
+        NamedColor::BrightYellow => fg(AnsiColor::BrightYellow),
+        NamedColor::Blue => fg(AnsiColor::Blue),
+        NamedColor::BrightBlue => fg(AnsiColor::BrightBlue),
+        NamedColor::Magenta => fg(AnsiColor::Magenta),
+        NamedColor::BrightMagenta => fg(AnsiColor::BrightMagenta),
+        NamedColor::Cyan => fg(AnsiColor::Cyan),
+        NamedColor::BrightCyan => fg(AnsiColor::BrightCyan),
+        NamedColor::Bold => Style::new().effects(Effects::BOLD),
+    }
+}
+
+fn colorize_state(state: &str) -> Result<String, String> {
+    let settings = load_settings()?;
+
+    let color = settings
+        .list_formatting
+        .colors
+        .state
+        .get(state)
+        .cloned()
+        .unwrap_or(NamedColor::White);
+
+    Ok(apply_style(state, named_color_to_style(color)))
+}
+
+fn colorize_priority(priority: &str) -> Result<String, String> {
+    let settings = load_settings()?;
+
+    let color = settings
+        .list_formatting
+        .colors
+        .priority
+        .get(priority)
+        .cloned()
+        .unwrap_or(NamedColor::White);
+
+    Ok(apply_style(priority, named_color_to_style(color)))
+}
+
+fn colorize_type(type_: &str) -> Result<String, String> {
+    let settings = load_settings()?;
+
+    let color = settings
+        .list_formatting
+        .colors
+        .type_
+        .get(type_)
+        .cloned()
+        .unwrap_or(NamedColor::White);
+
+    Ok(apply_style(type_, named_color_to_style(color)))
+}
+
+/// Apply color to a column value based on the column type
+fn colorize_value(col: &str, value: &str) -> Result<String, String> {
+    match col {
+        "state" => colorize_state(value),
+        "priority" => colorize_priority(value),
+        "type" => colorize_type(value),
+        "assignee" | "reporter" => colorize_me(value),
+        "due_date" => colorize_due_date(value),
+        _ => Ok(value.to_string()),
+    }
+}
+
+fn colorize_header(header: &str) -> Result<String, String> {
+    let settings = load_settings()?;
+
+    let color = settings.list_formatting.colors.header;
+
+    Ok(apply_style(header, named_color_to_style(color)))
+}
+
+fn colorize_me(user: &str) -> Result<String, String> {
+    let settings = load_settings()?;
+
+    let me = settings.user.clone();
+
+    if user != me {
+        return Ok(user.to_string());
+    }
+
+    let color = settings.list_formatting.colors.me;
+
+    Ok(apply_style(user, named_color_to_style(color)))
+}
+
+fn colorize_due_date(due_date: &str) -> Result<String, String> {
+    let settings = load_settings()?;
+    let today = Utc::now().naive_utc().date();
+
+    match chrono::NaiveDate::parse_from_str(due_date, "%Y-%m-%d") {
+        Ok(due_date_date) => {
+            if due_date_date >= today {
+                return Ok(due_date.to_string());
+            }
+
+            let color = settings.list_formatting.colors.due_date_overdue;
+            Ok(apply_style(due_date, named_color_to_style(color)))
+        }
+        Err(_) => Ok(due_date.to_string()),
+    }
+}
+
+fn print_header_separator(cols: &[String], column_widths: &HashMap<String, usize>) -> Result<(), String> {
+    let settings = load_settings()?;
+
+    let header_separator = settings.list_formatting.header_separator;
+
+    if !header_separator {
+        return Ok(());
+    }
+
+    // Print separator line
+    for col in cols {
+        let width = *column_widths.get(col).unwrap_or(&22);
+        print!("{}", "-".repeat(width));
+    }
+    println!();
+
+    Ok(())
 }
 
 /// print list
@@ -156,7 +292,7 @@ fn print_list(issues: &Vec<Meta>, columns: Option<Vec<String>>, print_csv: bool)
             csv_content.push_str(&to_csv_field(col, csv_separator));
         } else {
             let width = *column_widths.get(col).unwrap_or(&22);
-            let styled = bold(col);
+            let styled = colorize_header(col)?;
             let padding = width.saturating_sub(col.len());
             print!("{}{}", styled, " ".repeat(padding));
         }
@@ -165,12 +301,7 @@ fn print_list(issues: &Vec<Meta>, columns: Option<Vec<String>>, print_csv: bool)
     print_ln(print_csv, &mut csv_content);
 
     if !print_csv {
-        // Print separator line
-        for col in &cols {
-            let width = *column_widths.get(col).unwrap_or(&22);
-            print!("{}", "-".repeat(width));
-        }
-        println!();
+        print_header_separator(&cols, &column_widths)?;
     }
 
     // Print rows
@@ -182,7 +313,9 @@ fn print_list(issues: &Vec<Meta>, columns: Option<Vec<String>>, print_csv: bool)
                 csv_content.push_str(&to_csv_field(&value.to_string(), csv_separator));
             } else {
                 let width = *column_widths.get(col).unwrap_or(&22);
-                print!("{:<width$}", value, width = width);
+                let colored_value = colorize_value(col, &value)?;
+                let padding = width.saturating_sub(value.len());
+                print!("{}{}", colored_value, " ".repeat(padding));
             }
         }
 

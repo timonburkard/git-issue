@@ -6,3 +6,39 @@ editor: git
 # Used as default reporter for new issues
 # Must be in users.yaml:users:id or ''
 user: ''
+
+# Formatting options for list command
+# User may change colors
+# User may add/remove keys under state, priority and type
+list_formatting:
+  header_separator: true  # header row separator: dashed line
+  colors:
+    header: bold  # header row
+    me: bold  # when assignee or reporter matches the current user
+    due_date_overdue: bold  # when due_date < current date
+    state:
+      new: red
+      open: red
+      active: yellow
+      in_progress: yellow
+      in-progress: yellow
+      closed: green
+      resolved: green
+      deleted: bright_black
+      junked: bright_black
+    priority:
+      P0: red
+      P1: bright_red
+      P2: yellow
+      P3: bright_yellow
+      P4: green
+    type:
+      bug: red
+      defect: red
+      issue: red
+      feature: green
+      improvement: green
+      enhancement: green
+      task: blue
+      work_item: blue
+      work-item: blue
