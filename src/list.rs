@@ -153,6 +153,15 @@ fn print_list(issues: &Vec<Meta>, columns: Option<Vec<String>>, print_csv: bool)
 
     print_ln(print_csv, &mut csv_content);
 
+    if !print_csv {
+        // Print separator line
+        for col in &cols {
+            let width = *column_widths.get(col).unwrap_or(&22);
+            print!("{}", "-".repeat(width));
+        }
+        println!();
+    }
+
     // Print rows
     for meta in issues {
         for col in &cols {
