@@ -1,14 +1,14 @@
 id: 49
 title: '[cmd/list] formatting: bold headers'
-state: new
+state: active
 type: feature
 labels: []
 reporter: t.burkard
-assignee: ''
+assignee: t.burkard
 priority: ''
 due_date: ''
 relationships:
   related:
   - 50
 created: 2026-01-09T16:28:33Z
-updated: 2026-01-09T16:34:35Z
+updated: 2026-01-09T16:43:42Z
