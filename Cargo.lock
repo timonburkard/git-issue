@@ -213,6 +213,7 @@ dependencies = [
 name = "git-issue"
 version = "0.6.3"
 dependencies = [
+ "anstyle",
  "chrono",
  "clap",
  "indexmap",
