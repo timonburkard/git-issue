@@ -138,6 +138,9 @@ git issue list --filter state=new,active                           # Equal opera
 git issue list --filter labels=ui labels=cli                       # Equal operator with AND: Only issues with both labels 'ui' AND 'cli' are shown
 
 git issue list --sort assignee=asc priority=desc
+
+git issue list --no-color  # disable colored output
+
 git issue list --csv  # export issue list into CSV file (.gitissues/exports/)
 
 # Show all issue information (markdown) -- launches external text editor
@@ -291,12 +294,45 @@ editor: git
 # Used as default reporter for new issues
 # Must be in users.yaml:users:id or ''
 user: alice
+
+# Formatting options for list command
+# User may change colors
+# User may add/remove keys under state, priority and type
+list_formatting:
+  header_separator: true  # header row separator: dashed line
+  colors:
+    header: bold  # header row
+    me: bold  # when assignee or reporter matches the current user
+    due_date_overdue: bold  # when due_date < current date
+    state:
+      new: red
+      active: yellow
+      closed: green
+    priority:
+      P0: red
+      P1: bright_red
+      P2: yellow
+      P3: bright_yellow
+      P4: green
+    type:
+      bug: red
+      feature: green
+      task: blue
 ```
 
 #### 3.3.1) Options
 
 - `editor` (string): External text editor (set `git` to use configured git core.editor)
 - `user` (string): User name, used per default as reporter for new issues (can be '')
+- `list_formatting` (object):
+  - `header_separator` (bool): Whether or not to print a dashed line as header row separator
+  - `colors` (object): available colors: `bold`, `[bright_]white`, `[bright_]black`, `[bright_]red`, `[bright_]green`, `[bright_]yellow`, `[bright_]blue`, `[bright_]magenta`, `[bright_]cyan`
+    - `header` (string): color of header row
+    - `me` (string): color of assignee or reporter when it matches the current user
+    - `due_date_overdue` (string) color of due_date when it is overdue
+    - `state` (object): color of the states (user may add/remove states)
+    - `priority` (object): color of the priorities (user may add/remove states)
+    - `type` (object): color of the types (user may add/remove states)
 
 ### 3.4) description.md
 
@@ -412,3 +448,4 @@ cargo test
 - `shell-words` -- Process command line according to parsing rules of Unix shell
 - `regex`       -- Regular expressions
 - `indexmap`    -- Provides IndexMap datatype
+- `anstyle`     -- Terminal output coloring
