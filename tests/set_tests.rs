@@ -84,7 +84,7 @@ fn test_set_assignee() {
     assert!(stdout.contains("title"));
     assert!(stdout.contains("Issue 1"));
     assert!(stdout.contains("assignee"));
-    assert!(stdout.contains("-"));
+    assert!(stdout.contains(" -"));
 
     // Set valid assignee
     run_command(&["set", "1", "--assignee", "bob"]).expect("set assignee failed");
@@ -119,7 +119,7 @@ fn test_set_assignee() {
     assert!(stdout.contains("Issue 1"));
     assert!(stdout.contains("assignee"));
     assert!(!stdout.contains("bob"));
-    assert!(stdout.contains("-"));
+    assert!(stdout.contains(" -"));
 }
 
 #[test]
@@ -137,7 +137,7 @@ fn test_set_reporter() {
     assert!(stdout.contains("title"));
     assert!(stdout.contains("Issue 1"));
     assert!(stdout.contains("reporter"));
-    assert!(stdout.contains("-"));
+    assert!(stdout.contains(" -"));
 
     // Set valid reporter
     run_command(&["set", "1", "--reporter", "bob"]).expect("set reporter failed");
@@ -172,7 +172,7 @@ fn test_set_reporter() {
     assert!(stdout.contains("Issue 1"));
     assert!(stdout.contains("reporter"));
     assert!(!stdout.contains("bob"));
-    assert!(stdout.contains("-"));
+    assert!(stdout.contains(" -"));
 }
 
 #[test]
@@ -242,7 +242,7 @@ fn test_set_type() {
     assert!(stdout.contains("title"));
     assert!(stdout.contains("Issue 1"));
     assert!(stdout.contains("type"));
-    assert!(stdout.contains("-"));
+    assert!(stdout.contains(" -"));
 
     // Set valid type
     run_command(&["set", "1", "--type", "feature"]).expect("set type failed");
@@ -275,7 +275,7 @@ fn test_set_type() {
     assert!(stdout.contains("title"));
     assert!(stdout.contains("Issue 1"));
     assert!(stdout.contains("type"));
-    assert!(stdout.contains("-"));
+    assert!(stdout.contains(" -"));
 }
 
 #[test]
@@ -293,7 +293,7 @@ fn test_set_priority() {
     assert!(stdout.contains("title"));
     assert!(stdout.contains("Issue 1"));
     assert!(stdout.contains("priority"));
-    assert!(stdout.contains("-"));
+    assert!(stdout.contains(" -"));
 
     // Set valid priority
     run_command(&["set", "1", "--priority", "P1"]).expect("set priority failed");
@@ -351,7 +351,7 @@ fn test_set_priority() {
     assert!(stdout.contains("Issue 1"));
     assert!(stdout.contains("priority"));
     assert!(!stdout.contains("P0"));
-    assert!(stdout.contains("-"));
+    assert!(stdout.contains(" -"));
 }
 
 #[test]
@@ -369,7 +369,7 @@ fn test_set_due_date() {
     assert!(stdout.contains("title"));
     assert!(stdout.contains("Issue 1"));
     assert!(stdout.contains("due_date"));
-    assert!(stdout.contains("-"));
+    assert!(stdout.contains(" -"));
 
     // Set valid due_date
     run_command(&["set", "1", "--due-date", "2026-01-15"]).expect("set due_date failed");
@@ -390,7 +390,7 @@ fn test_set_due_date() {
     assert!(stdout.contains("title"));
     assert!(stdout.contains("Issue 1"));
     assert!(stdout.contains("due_date"));
-    assert!(stdout.contains("-"));
+    assert!(stdout.contains(" -"));
     assert!(stdout.contains("2026-01-15"));
     assert!(!stdout.contains("not-a-date"));
 
@@ -403,7 +403,7 @@ fn test_set_due_date() {
     assert!(stdout.contains("title"));
     assert!(stdout.contains("Issue 1"));
     assert!(stdout.contains("due_date"));
-    assert!(stdout.contains("-"));
+    assert!(stdout.contains(" -"));
     assert!(stdout.contains("2026-01-15"));
     assert!(!stdout.contains("15.01.2026"));
 
@@ -416,7 +416,7 @@ fn test_set_due_date() {
     assert!(stdout.contains("title"));
     assert!(stdout.contains("Issue 1"));
     assert!(stdout.contains("due_date"));
-    assert!(stdout.contains("-"));
+    assert!(stdout.contains(" -"));
     assert!(stdout.contains("2026-01-15"));
     assert!(!stdout.contains("2026-02-30"));
 
@@ -429,7 +429,7 @@ fn test_set_due_date() {
     assert!(stdout.contains("title"));
     assert!(stdout.contains("Issue 1"));
     assert!(stdout.contains("due_date"));
-    assert!(stdout.contains("-"));
+    assert!(stdout.contains(" -"));
     assert!(!stdout.contains("2026-01-15"));
 }
 
@@ -461,7 +461,7 @@ fn test_set_me() {
     assert!(stdout.contains("Issue 1"));
     assert!(stdout.contains("reporter"));
     assert!(stdout.contains("assignee"));
-    assert!(stdout.contains("-"));
+    assert!(stdout.contains(" -"));
     assert!(!stdout.contains("alice"));
 
     // Change default user in settings
@@ -481,7 +481,7 @@ fn test_set_me() {
     assert!(stdout.contains("reporter"));
     assert!(stdout.contains("assignee"));
     assert!(stdout.contains("bob"));
-    assert!(!stdout.contains("-"));
+    assert!(!stdout.contains(" -"));
 }
 
 #[test]
@@ -548,7 +548,7 @@ fn test_set_bulk() {
     assert!(stdout.contains("Issue 2"));
     assert!(stdout.contains("Issue 3"));
     assert!(stdout.contains("assignee"));
-    assert!(stdout.contains("-"));
+    assert!(stdout.contains(" -"));
     assert!(!stdout.contains("alice"));
 
     // List to check that assignee is unchanged for ID 4
@@ -557,7 +557,7 @@ fn test_set_bulk() {
     assert!(stdout.contains("title"));
     assert!(stdout.contains("Issue 4"));
     assert!(stdout.contains("assignee"));
-    assert!(!stdout.contains("-"));
+    assert!(!stdout.contains(" -"));
     assert!(stdout.contains("alice"));
 }
 
