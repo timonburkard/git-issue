@@ -1,6 +1,6 @@
 id: 49
 title: '[cmd/list] formatting: bold headers'
-state: active
+state: resolved
 type: feature
 labels: []
 reporter: t.burkard
@@ -11,4 +11,4 @@ relationships:
   related:
   - 50
 created: 2026-01-09T16:28:33Z
-updated: 2026-01-09T16:43:42Z
+updated: 2026-01-09T16:53:12Z
