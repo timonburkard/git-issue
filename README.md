@@ -285,6 +285,8 @@ users:
 
 This file holds the local user settings. It should **not** be version-controlled.
 
+It is automatically created when `git issue init` is executed or when it is missing.
+
 ```yaml
 # Editor to edit/show issue descriptions
 # git = use the git-configured editor
