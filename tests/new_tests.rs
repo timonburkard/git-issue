@@ -1,11 +1,12 @@
 mod common;
-use common::{TestEnv, load_yaml_values, run_command, save_yaml_values};
+use common::{TestEnv, disable_auto_commit, load_yaml_values, run_command, save_yaml_values};
 
 #[test]
 fn test_new_simple() {
     let _env = TestEnv::new();
 
     run_command(&["init", "--no-commit"]).expect("init failed");
+    disable_auto_commit();
 
     // Create simple issue
     run_command(&["new", "Simple issue"]).expect("new failed");
@@ -28,6 +29,7 @@ fn test_new_initial_metadata() {
     let _env = TestEnv::new();
 
     run_command(&["init", "--no-commit"]).expect("init failed");
+    disable_auto_commit();
 
     // Create issue with all initial metadata
     run_command(&[
@@ -72,6 +74,7 @@ fn test_new_empty_metadata() {
     let _env = TestEnv::new();
 
     run_command(&["init", "--no-commit"]).expect("init failed");
+    disable_auto_commit();
 
     // Create issue with explicit empty initial metadata for all fields
     run_command(&[
@@ -110,6 +113,7 @@ fn test_new_changed_default_reporter() {
     let _env = TestEnv::new();
 
     run_command(&["init", "--no-commit"]).expect("init failed");
+    disable_auto_commit();
 
     // Change default user in settings
     let settings_path = ".gitissues/settings.yaml";
@@ -138,6 +142,7 @@ fn test_new_changed_default_state() {
     let _env = TestEnv::new();
 
     run_command(&["init", "--no-commit"]).expect("init failed");
+    disable_auto_commit();
 
     // Change default state in config
     let config_path = ".gitissues/config.yaml";
@@ -171,6 +176,7 @@ fn test_new_changed_default_priority() {
     let _env = TestEnv::new();
 
     run_command(&["init", "--no-commit"]).expect("init failed");
+    disable_auto_commit();
 
     // Change default state in config
     let config_path = ".gitissues/config.yaml";
@@ -199,6 +205,7 @@ fn test_new_invalid_metadata() {
     let _env = TestEnv::new();
 
     run_command(&["init", "--no-commit"]).expect("init failed");
+    disable_auto_commit();
 
     // Try to create issue with invalid state
     run_command(&["new", "Title", "--state", "unknown"]).expect_err("new with invalid state successful but should fail");
@@ -224,6 +231,7 @@ fn test_new_me() {
     let _env = TestEnv::new();
 
     run_command(&["init", "--no-commit"]).expect("init failed");
+    disable_auto_commit();
 
     // Create an issue with reporter and assignee as 'me', which is empty by default
     run_command(&["new", "Issue 1", "--reporter", "me", "--assignee", "me"]).expect("new 1 failed");

@@ -5,7 +5,7 @@ use std::thread;
 use std::time::Duration;
 
 mod common;
-use common::{TestEnv, load_yaml_values, run_command};
+use common::{TestEnv, disable_auto_commit, load_yaml_values, run_command};
 
 #[test]
 fn test_integration_basic_workflow() {
@@ -13,6 +13,7 @@ fn test_integration_basic_workflow() {
 
     // Step 1: Initialize without git commit
     run_command(&["init", "--no-commit"]).expect("init failed");
+    disable_auto_commit();
 
     // Verify .gitissues structure
     assert!(PathBuf::from(".gitissues").exists());
