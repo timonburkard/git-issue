@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+    - [cli] improved error message for invalid options (#37)
     - [cli] enabled commands to be executed from subdirectories (#51)
 
 ### Fixed

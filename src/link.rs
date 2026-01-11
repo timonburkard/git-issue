@@ -65,8 +65,9 @@ fn validate_relationships(id: u32, relationships: &[RelationshipLink], config: &
 fn check_relationship(relationship: &str, config: &Config) -> Result<(), String> {
     if !config.relationships.contains_key(relationship) {
         return Err(format!(
-            "Invalid relationship: '{}' not defined in config.yaml:relationships",
-            relationship
+            "Invalid relationship: \"{}\". Valid options: {:?} | Configurable in config.yaml:relationships",
+            relationship,
+            config.relationships.keys()
         ));
     }
 

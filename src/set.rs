@@ -76,7 +76,10 @@ pub fn run(
             && updated_meta.state != value
         {
             if !is_valid_state(&config, value) {
-                return Err("Invalid state: Check config.yaml:states".to_string());
+                return Err(format!(
+                    "Invalid state \"{value}\". Valid options: {:?} | Configurable in config.yaml:states",
+                    config.states
+                ));
             }
 
             updated_meta.state = value.to_string();
@@ -87,7 +90,10 @@ pub fn run(
             && updated_meta.type_ != value
         {
             if !is_valid_type(&config, value) {
-                return Err("Invalid type: Check config.yaml:types".to_string());
+                return Err(format!(
+                    "Invalid type \"{value}\". Valid options: {:?} | Configurable in config.yaml:types",
+                    config.types
+                ));
             }
 
             updated_meta.type_ = value.to_string();
@@ -98,7 +104,10 @@ pub fn run(
             && updated_meta.reporter != *value
         {
             if !is_valid_user(&users, value) {
-                return Err("Invalid reporter: Check users.yaml:users:id, 'me' or ''".to_string());
+                return Err(format!(
+                    "Invalid reporter \"{value}\". Valid options: {:?} | Configurable in users.yaml:users",
+                    users.users.iter().map(|u| u.id.as_str()).chain(["me", ""]).collect::<Vec<_>>()
+                ));
             }
 
             let mut value = value.clone();
@@ -106,7 +115,7 @@ pub fn run(
             user_handle_me(&users, &settings, &mut value)?;
 
             if updated_meta.reporter != *value {
-                updated_meta.reporter = value.to_string();
+                updated_meta.reporter = value;
                 fields.push("reporter");
             }
         }
@@ -115,7 +124,10 @@ pub fn run(
             && updated_meta.assignee != *value
         {
             if !is_valid_user(&users, value) {
-                return Err("Invalid assignee: Check users.yaml:users:id, 'me' or ''".to_string());
+                return Err(format!(
+                    "Invalid assignee \"{value}\". Valid options: {:?} | Configurable in users.yaml:users",
+                    users.users.iter().map(|u| u.id.as_str()).chain(["me", ""]).collect::<Vec<_>>()
+                ));
             }
 
             let mut value = value.clone();

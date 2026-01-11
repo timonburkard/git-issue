@@ -322,7 +322,7 @@ pub fn user_handle_me(users: &Users, settings: &Settings, value: &mut String) ->
     *value = if is_valid_user(users, &settings.user) {
         settings.user.clone()
     } else {
-        return Err("Invalid user: settings.yaml::user must be part of users.yaml:users:id or ''".to_string());
+        return Err("Invalid user: settings.yaml::user must be part of users.yaml:users or ''".to_string());
     };
 
     Ok(())

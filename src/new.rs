@@ -35,14 +35,21 @@ pub fn run(
 
     // Step 3: Validate user inputs
     let type_val = type_.unwrap_or_default();
+
     if !is_valid_type(&config, &type_val) {
-        return Err("Invalid type: Check config.yaml:types".to_string());
+        return Err(format!(
+            "Invalid type \"{type_val}\". Valid options: {:?} | Configurable in config.yaml:types",
+            config.types
+        ));
     }
 
     let mut reporter_val = match reporter {
         Some(value) => {
             if !is_valid_user(&users, &value) {
-                return Err("Invalid reporter: Check users.yaml:users:id or ''".to_string());
+                return Err(format!(
+                    "Invalid reporter \"{value}\". Valid options: {:?} | Configurable in users.yaml:users",
+                    users.users.iter().map(|u| u.id.as_str()).chain(["me", ""]).collect::<Vec<_>>()
+                ));
             } else {
                 value
             }
@@ -50,7 +57,10 @@ pub fn run(
         None => {
             let settings = load_settings()?;
             if !is_valid_user(&users, &settings.user) {
-                return Err("Invalid user: settings.yaml::user must be part of users.yaml:users:id or ''".to_string());
+                return Err(format!(
+                    "Invalid reporter \"{}\": settings.yaml::user must be part of users.yaml:users or ''",
+                    settings.user
+                ));
             } else {
                 settings.user
             }
@@ -61,7 +71,10 @@ pub fn run(
 
     let mut assignee_val = assignee.unwrap_or_default();
     if !is_valid_user(&users, &assignee_val) {
-        return Err("Invalid assignee: Check users.yaml:users:id or ''".to_string());
+        return Err(format!(
+            "Invalid assignee \"{assignee_val}\". Valid options: {:?} | Configurable in users.yaml:users",
+            users.users.iter().map(|u| u.id.as_str()).chain(["me", ""]).collect::<Vec<_>>()
+        ));
     }
 
     user_handle_me(&users, &settings, &mut assignee_val)?;
