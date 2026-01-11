@@ -163,6 +163,7 @@ enum Commands {
 fn main() {
     let args = Args::parse();
 
+    // Clear cache
     match &args.command {
         Commands::List { .. } | Commands::Set { .. } => { /* keep cache for list/set */ }
         _ => match cache_path() {
@@ -173,9 +174,7 @@ fn main() {
                     eprintln!("Error: failed to clear cache {}: {e}", cache_file.display());
                 }
             }
-            Err(e) => {
-                eprintln!("Error: failed to clear cache: {e}");
-            }
+            Err(_) => { /* cache does not exist, so we don't need to clear it */ }
         },
     }
 
