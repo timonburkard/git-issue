@@ -115,7 +115,7 @@ pub fn run(
             user_handle_me(&users, &settings, &mut value)?;
 
             if updated_meta.reporter != *value {
-                updated_meta.reporter = value.to_string();
+                updated_meta.reporter = value;
                 fields.push("reporter");
             }
         }
