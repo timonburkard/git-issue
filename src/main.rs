@@ -165,14 +165,18 @@ fn main() {
 
     match &args.command {
         Commands::List { .. } | Commands::Set { .. } => { /* keep cache for list/set */ }
-        _ => {
-            let cache_file = cache_path();
-            if let Err(e) = fs::remove_file(&cache_file)
-                && e.kind() != ErrorKind::NotFound
-            {
-                eprintln!("Warning: failed to clear cache {}: {e}", cache_file.display());
+        _ => match cache_path() {
+            Ok(cache_file) => {
+                if let Err(e) = fs::remove_file(&cache_file)
+                    && e.kind() != ErrorKind::NotFound
+                {
+                    eprintln!("Error: failed to clear cache {}: {e}", cache_file.display());
+                }
             }
-        }
+            Err(e) => {
+                eprintln!("Error: failed to clear cache: {e}");
+            }
+        },
     }
 
     let result = match args.command {

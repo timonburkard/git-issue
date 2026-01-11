@@ -45,7 +45,7 @@ pub fn run(
 
     // Precondition: .gitissues/issues/ID must exist
     for id in &ids {
-        let dir = issue_dir(*id);
+        let dir = issue_dir(*id)?;
         let path = dir.as_path();
 
         if !path.exists() {
@@ -57,7 +57,7 @@ pub fn run(
 
     for id in ids {
         // Load meta.yaml
-        let meta_path = issue_meta_path(id);
+        let meta_path = issue_meta_path(id)?;
         let meta = load_meta(&meta_path)?;
 
         // Update meta fields
@@ -207,7 +207,7 @@ pub fn run(
 }
 
 fn read_cached_issue_ids() -> Result<Vec<u32>, String> {
-    let cache_file = cache_path();
+    let cache_file = cache_path()?;
 
     // ensure cache file is not too old
     let metadata = fs::metadata(&cache_file).map_err(|_| "Cached ID list is empty; run 'git issue list' first.".to_string())?;

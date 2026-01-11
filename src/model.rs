@@ -1,6 +1,7 @@
 use std::fmt;
 use std::fs;
 use std::path::Path;
+use std::path::PathBuf;
 use std::process::Command;
 use std::str::FromStr;
 
@@ -274,7 +275,7 @@ pub struct Users {
 
 /// Load users.yaml
 pub fn load_users() -> Result<Users, String> {
-    let users_path = users_path();
+    let users_path = users_path()?;
     let users_raw = match fs::read_to_string(&users_path) {
         Ok(s) => s,
         Err(_) => return Err("users.yaml not found.".to_string()),
@@ -328,7 +329,7 @@ pub fn user_handle_me(users: &Users, settings: &Settings, value: &mut String) ->
 }
 
 pub fn load_config() -> Result<Config, String> {
-    let config_path = config_path();
+    let config_path = config_path()?;
     let config_raw = match fs::read_to_string(&config_path) {
         Ok(s) => s,
         Err(_) => return Err("config.yaml not found.".to_string()),
@@ -343,7 +344,7 @@ pub fn load_config() -> Result<Config, String> {
 }
 
 pub fn load_settings() -> Result<Settings, String> {
-    let settings_path = settings_path();
+    let settings_path = settings_path()?;
 
     create_settings_if_missing(true)?;
 
@@ -381,7 +382,7 @@ pub fn load_description(path: &Path) -> Result<String, String> {
 
 pub fn create_settings_if_missing(print: bool) -> Result<(), String> {
     const DEFAULT_SETTINGS: &str = include_str!("../config/settings-default.yaml");
-    let settings_dst = settings_path();
+    let settings_dst = settings_path()?;
 
     if let Ok(true) = fs::exists(&settings_dst) {
         return Ok(());
@@ -398,7 +399,7 @@ pub fn create_settings_if_missing(print: bool) -> Result<(), String> {
 }
 
 pub fn issue_title(id: u32) -> Result<String, String> {
-    let meta_path = issue_meta_path(id);
+    let meta_path = issue_meta_path(id)?;
     let meta = load_meta(&meta_path)?;
     Ok(meta.title)
 }
@@ -408,56 +409,69 @@ pub fn padded_id(id: u32) -> String {
 }
 
 /// Returns the path to the .gitissues base directory.
-pub fn gitissues_base() -> &'static str {
-    ".gitissues"
+pub fn gitissues_base() -> Result<PathBuf, String> {
+    let mut current_dir = std::env::current_dir().map_err(|e| format!("Failed to get current directory: {e}"))?;
+
+    loop {
+        let gitissues_root = current_dir.join(".gitissues");
+
+        if let Ok(true) = fs::exists(&gitissues_root) {
+            return Ok(gitissues_root);
+        }
+
+        match current_dir.parent() {
+            Some(parent) => current_dir = parent.to_path_buf(),
+            None => return Err(".gitissues not found: Run `git issue init` first".to_string()),
+        };
+    }
 }
 
 /// Returns the path to the config.yaml file.
-pub fn config_path() -> std::path::PathBuf {
-    Path::new(gitissues_base()).join("config.yaml")
+pub fn config_path() -> Result<std::path::PathBuf, String> {
+    Ok(gitissues_base()?.join("config.yaml"))
 }
 
 /// Returns the path to the settings.yaml file.
-pub fn settings_path() -> std::path::PathBuf {
-    Path::new(gitissues_base()).join("settings.yaml")
+pub fn settings_path() -> Result<std::path::PathBuf, String> {
+    Ok(gitissues_base()?.join("settings.yaml"))
 }
 
 /// Returns the path to the users.yaml file.
-pub fn users_path() -> std::path::PathBuf {
-    Path::new(gitissues_base()).join("users.yaml")
+pub fn users_path() -> Result<std::path::PathBuf, String> {
+    Ok(gitissues_base()?.join("users.yaml"))
 }
 
-pub fn issue_dir(id: u32) -> std::path::PathBuf {
-    Path::new(gitissues_base()).join("issues").join(padded_id(id))
+pub fn issue_dir(id: u32) -> Result<std::path::PathBuf, String> {
+    Ok(gitissues_base()?.join("issues").join(padded_id(id)))
 }
 
-pub fn issue_meta_path(id: u32) -> std::path::PathBuf {
-    issue_dir(id).join("meta.yaml")
+pub fn issue_meta_path(id: u32) -> Result<std::path::PathBuf, String> {
+    Ok(issue_dir(id)?.join("meta.yaml"))
 }
 
-pub fn issue_desc_path(id: u32) -> std::path::PathBuf {
-    issue_dir(id).join("description.md")
+pub fn issue_desc_path(id: u32) -> Result<std::path::PathBuf, String> {
+    Ok(issue_dir(id)?.join("description.md"))
 }
 
-pub fn issue_attachments_dir(id: u32) -> std::path::PathBuf {
-    issue_dir(id).join("attachments")
+pub fn issue_attachments_dir(id: u32) -> Result<std::path::PathBuf, String> {
+    Ok(issue_dir(id)?.join("attachments"))
 }
 
-pub fn issue_tmp_dir() -> std::path::PathBuf {
-    Path::new(gitissues_base()).join(".tmp")
+pub fn issue_tmp_dir() -> Result<std::path::PathBuf, String> {
+    Ok(gitissues_base()?.join(".tmp"))
 }
 
-pub fn issue_tmp_show_dir(id: u32) -> std::path::PathBuf {
-    issue_tmp_dir().join(format!("show-{id}"))
+pub fn issue_tmp_show_dir(id: u32) -> Result<std::path::PathBuf, String> {
+    Ok(issue_tmp_dir()?.join(format!("show-{id}")))
 }
 
 /// Returns the path to the cache.txt file.
-pub fn cache_path() -> std::path::PathBuf {
-    issue_tmp_dir().join("cache.txt")
+pub fn cache_path() -> Result<std::path::PathBuf, String> {
+    Ok(issue_tmp_dir()?.join("cache.txt"))
 }
 
-pub fn issue_exports_dir() -> std::path::PathBuf {
-    Path::new(gitissues_base()).join("exports")
+pub fn issue_exports_dir() -> Result<std::path::PathBuf, String> {
+    Ok(gitissues_base()?.join("exports"))
 }
 
 /// git commit based on template from config
@@ -480,7 +494,9 @@ pub fn git_commit(id: u32, title: String, action: &str) -> Result<(), String> {
         .replace("{title}", &title);
 
     // Execute git add
-    let add_result = Command::new("git").args(["add", gitissues_base()]).output();
+    let add_result = Command::new("git")
+        .args(["add", gitissues_base()?.to_string_lossy().as_ref()])
+        .output();
     if let Err(e) = add_result {
         return Err(format!("Failed to stage .gitissues: {e}"));
     }
@@ -502,7 +518,9 @@ pub fn git_commit_non_templated(msg: &str) -> Result<(), String> {
     let commit_message = format!("[issue] {msg}");
 
     // Execute git add
-    let add_result = Command::new("git").args(["add", gitissues_base()]).output();
+    let add_result = Command::new("git")
+        .args(["add", gitissues_base()?.to_string_lossy().as_ref()])
+        .output();
     if let Err(e) = add_result {
         return Err(format!("Failed to stage .gitissues: {e}"));
     }
