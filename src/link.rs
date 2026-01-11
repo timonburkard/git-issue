@@ -10,7 +10,7 @@ enum Action {
 }
 
 pub fn run(id: u32, add: Option<Vec<RelationshipLink>>, remove: Option<Vec<RelationshipLink>>) -> Result<(), String> {
-    let dir = issue_dir(id);
+    let dir = issue_dir(id)?;
     let path = dir.as_path();
 
     // Precondition: .gitissues/issues/ID must exist
@@ -75,7 +75,7 @@ fn check_relationship(relationship: &str, config: &Config) -> Result<(), String>
 
 fn check_target_ids(id: u32, target_ids: &Vec<u32>) -> Result<(), String> {
     for target_id in target_ids {
-        let dir = issue_dir(*target_id);
+        let dir = issue_dir(*target_id)?;
         let path = dir.as_path();
 
         if !path.exists() {
@@ -93,7 +93,7 @@ fn check_target_ids(id: u32, target_ids: &Vec<u32>) -> Result<(), String> {
 fn update_relationship(action: Action, id: u32, relationship: &RelationshipLink, config: &Config) -> Result<(), String> {
     let current_timestamp = current_timestamp();
 
-    let meta_path = issue_meta_path(id);
+    let meta_path = issue_meta_path(id)?;
     let meta = load_meta(&meta_path)?;
 
     let mut meta_updated = meta.clone();
@@ -139,7 +139,7 @@ fn update_relationship(action: Action, id: u32, relationship: &RelationshipLink,
         // link is the name of the relationship that needs to be updated for the target IDs
 
         for target_id in &relationship.target_ids {
-            let target_meta_path = issue_meta_path(*target_id);
+            let target_meta_path = issue_meta_path(*target_id)?;
             let target_meta = load_meta(&target_meta_path)?;
 
             let mut target_meta_updated = target_meta.clone();

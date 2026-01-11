@@ -3,7 +3,6 @@ use std::cmp::Reverse;
 use std::collections::HashMap;
 use std::fs;
 use std::io::IsTerminal;
-use std::path::Path;
 
 use anstyle::{AnsiColor, Effects, Reset, Style};
 use chrono::Utc;
@@ -42,7 +41,7 @@ pub fn run(
 }
 
 fn get_issues_metadata() -> Result<Vec<Meta>, String> {
-    let path = Path::new(gitissues_base()).join("issues");
+    let path = gitissues_base()?.join("issues");
     let mut issues: Vec<Meta> = Vec::new();
 
     // Precondition: .gitissues/issues must exist (user must run init first)
@@ -327,7 +326,7 @@ fn print_list(config: &Config, issues: &Vec<Meta>, columns: Option<Vec<String>>,
 
     if print_csv {
         // Create exports directory
-        let export_dir = issue_exports_dir();
+        let export_dir = issue_exports_dir()?;
         fs::create_dir_all(&export_dir).map_err(|e| format!("Failed to create {}: {e}", export_dir.display()))?;
 
         // Write CSV file
@@ -612,7 +611,7 @@ fn sort_issues(config: &Config, issues: &mut [Meta], sorts: Option<Vec<Sorting>>
 fn cache_issue_ids(issues: &[Meta]) -> Result<(), String> {
     let issue_ids: Vec<String> = issues.iter().map(|m| m.id.to_string()).collect();
     let cache_content = issue_ids.join(",");
-    let cache_file = cache_path();
+    let cache_file = cache_path()?;
 
     if let Some(parent) = cache_file.parent() {
         fs::create_dir_all(parent).map_err(|e| format!("Failed to create cache directory: {e}"))?;

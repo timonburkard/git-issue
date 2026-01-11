@@ -95,24 +95,24 @@ pub fn run(
     };
 
     // Step 5: Create the issue directory
-    let dir = issue_dir(issue_id);
+    let dir = issue_dir(issue_id)?;
     fs::create_dir_all(&dir).map_err(|e| format!("Failed to create issue directory: {e}"))?;
 
     // Step 6: Write description.md
-    let desc_path = issue_desc_path(issue_id);
+    let desc_path = issue_desc_path(issue_id)?;
 
-    let template_path = Path::new(gitissues_base()).join("description.md");
+    let template_path = gitissues_base()?.join("description.md");
     fs::copy(&template_path, &desc_path).map_err(|e| format!("Failed to write description.md: {e}"))?;
 
     // Step 7: Create attachments directory
-    let attachment_dir = issue_attachments_dir(issue_id);
+    let attachment_dir = issue_attachments_dir(issue_id)?;
     fs::create_dir_all(&attachment_dir).map_err(|e| format!("Failed to create issue directory: {e}"))?;
 
     // Step 7.1: Add .gitkeep
     fs::write(attachment_dir.join(".gitkeep"), "").map_err(|e| format!("Failed to write .gitkeep: {e}"))?;
 
     // Step 8: Write meta.yaml
-    let meta_yaml_path = issue_meta_path(issue_id);
+    let meta_yaml_path = issue_meta_path(issue_id)?;
 
     let meta_yaml = serde_yaml::to_string(&meta).map_err(|_| "Failed to serialize meta.yaml".to_string())?;
     fs::write(&meta_yaml_path, meta_yaml).map_err(|e| format!("Failed to write meta.yaml: {e}"))?;

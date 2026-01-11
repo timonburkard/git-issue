@@ -1,7 +1,7 @@
 use crate::model::{git_commit, issue_desc_path, issue_title, load_settings, open_editor};
 
 pub fn run(id: u32) -> Result<(), String> {
-    let desc = issue_desc_path(id);
+    let desc = issue_desc_path(id)?;
     let path = desc.as_path();
 
     // Precondition: .gitissues/issues/ID/description.md must exist
