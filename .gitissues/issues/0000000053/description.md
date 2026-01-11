@@ -18,8 +18,16 @@ However, if then the repo gets cloned again, it will not contain the settings.ya
 
 There should be a way to locally initialize a repo, which is already using `git-issue` for issue tracking.
 
-E.g., by a new switch: `git issue init --settings`
+Approach A) by a new switch: `git issue init --settings`
+
+Approach B) Lazy init: Auto-create missing settings.yaml file and print an info message
 
 # System Info
 
 v0.6.4
+
+# Comments
+
+**t.burkard, 2026-01-11T19:02:00Z**
+
+> Lets go with Approach B
