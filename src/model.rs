@@ -496,15 +496,23 @@ pub fn git_commit(id: u32, title: String, action: &str) -> Result<(), String> {
     // Execute git add
     let add_result = Command::new("git")
         .args(["add", gitissues_base()?.to_string_lossy().as_ref()])
-        .output();
-    if let Err(e) = add_result {
-        return Err(format!("Failed to stage .gitissues: {e}"));
+        .output()
+        .map_err(|e| format!("Failed to stage .gitissues: {e}"))?;
+
+    if !add_result.status.success() {
+        let stderr = String::from_utf8_lossy(&add_result.stderr);
+        return Err(format!("Failed to stage .gitissues: {}", stderr.trim()));
     }
 
     // Execute git commit
-    let commit_result = Command::new("git").args(["commit", "-m", &commit_message]).output();
-    if let Err(e) = commit_result {
-        return Err(format!("Failed to commit: {e}"));
+    let commit_result = Command::new("git")
+        .args(["commit", "-m", &commit_message])
+        .output()
+        .map_err(|e| format!("Failed to commit: {e}"))?;
+
+    if !commit_result.status.success() {
+        let stderr = String::from_utf8_lossy(&commit_result.stderr);
+        return Err(format!("Failed to commit: {}", stderr.trim()));
     }
 
     Ok(())
@@ -520,15 +528,23 @@ pub fn git_commit_non_templated(msg: &str) -> Result<(), String> {
     // Execute git add
     let add_result = Command::new("git")
         .args(["add", gitissues_base()?.to_string_lossy().as_ref()])
-        .output();
-    if let Err(e) = add_result {
-        return Err(format!("Failed to stage .gitissues: {e}"));
+        .output()
+        .map_err(|e| format!("Failed to stage .gitissues: {e}"))?;
+
+    if !add_result.status.success() {
+        let stderr = String::from_utf8_lossy(&add_result.stderr);
+        return Err(format!("Failed to stage .gitissues: {}", stderr.trim()));
     }
 
     // Execute git commit
-    let commit_result = Command::new("git").args(["commit", "-m", &commit_message]).output();
-    if let Err(e) = commit_result {
-        return Err(format!("Failed to commit: {e}"));
+    let commit_result = Command::new("git")
+        .args(["commit", "-m", &commit_message])
+        .output()
+        .map_err(|e| format!("Failed to commit: {e}"))?;
+
+    if !commit_result.status.success() {
+        let stderr = String::from_utf8_lossy(&commit_result.stderr);
+        return Err(format!("Failed to commit: {}", stderr.trim()));
     }
 
     Ok(())
