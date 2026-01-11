@@ -344,6 +344,9 @@ pub fn load_config() -> Result<Config, String> {
 
 pub fn load_settings() -> Result<Settings, String> {
     let settings_path = settings_path();
+
+    create_settings_if_missing(true)?;
+
     let settings_raw = match fs::read_to_string(&settings_path) {
         Ok(s) => s,
         Err(_) => return Err("settings.yaml not found.".to_string()),
@@ -374,6 +377,24 @@ pub fn load_meta(path: &Path) -> Result<Meta, String> {
 pub fn load_description(path: &Path) -> Result<String, String> {
     let raw = fs::read_to_string(path).map_err(|_| format!("description.md not found: {}", path.display()))?;
     Ok(raw)
+}
+
+pub fn create_settings_if_missing(print: bool) -> Result<(), String> {
+    const DEFAULT_SETTINGS: &str = include_str!("../config/settings-default.yaml");
+    let settings_dst = settings_path();
+
+    if let Ok(true) = fs::exists(&settings_dst) {
+        return Ok(());
+    }
+
+    fs::write(&settings_dst, DEFAULT_SETTINGS)
+        .map_err(|e| format!("Failed to write default settings to {}: {e}", settings_dst.display()))?;
+
+    if print {
+        println!("Created default local user settings at {}", settings_dst.display());
+    }
+
+    Ok(())
 }
 
 pub fn issue_title(id: u32) -> Result<String, String> {
