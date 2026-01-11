@@ -1,6 +1,6 @@
 id: 51
 title: '[cli] only executable from root'
-state: active
+state: resolved
 type: feature
 labels: []
 reporter: t.burkard
@@ -9,4 +9,4 @@ priority: ''
 due_date: ''
 relationships: {}
 created: 2026-01-09T21:40:31Z
-updated: 2026-01-11T20:35:42Z
+updated: 2026-01-11T20:39:34Z
