@@ -13,6 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+    - [git]    print error if trying to commit when not in a git repository
     - [config] automatically create missing settings.yaml file (#53)
 
 ## [v0.6.4] - 2026-01-09

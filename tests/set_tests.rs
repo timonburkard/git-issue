@@ -1,11 +1,12 @@
 mod common;
-use common::{TestEnv, load_yaml_values, run_command, run_command_with_stdin, save_yaml_values};
+use common::{TestEnv, disable_auto_commit, load_yaml_values, run_command, run_command_with_stdin, save_yaml_values};
 
 #[test]
 fn test_set_labels() {
     let _env = TestEnv::new();
 
     run_command(&["init", "--no-commit"]).expect("init failed");
+    disable_auto_commit();
     run_command(&["new", "Label test"]).expect("new failed");
 
     // Add labels
@@ -74,6 +75,7 @@ fn test_set_assignee() {
     let _env = TestEnv::new();
 
     run_command(&["init", "--no-commit"]).expect("init failed");
+    disable_auto_commit();
 
     // Create an issue
     run_command(&["new", "Issue 1"]).expect("new 1 failed");
@@ -127,6 +129,7 @@ fn test_set_reporter() {
     let _env = TestEnv::new();
 
     run_command(&["init", "--no-commit"]).expect("init failed");
+    disable_auto_commit();
 
     // Create an issue
     run_command(&["new", "Issue 1"]).expect("new 1 failed");
@@ -180,6 +183,7 @@ fn test_set_state() {
     let _env = TestEnv::new();
 
     run_command(&["init", "--no-commit"]).expect("init failed");
+    disable_auto_commit();
 
     // Create an issue
     run_command(&["new", "Issue 1"]).expect("new 1 failed");
@@ -232,6 +236,7 @@ fn test_set_type() {
     let _env = TestEnv::new();
 
     run_command(&["init", "--no-commit"]).expect("init failed");
+    disable_auto_commit();
 
     // Create an issue
     run_command(&["new", "Issue 1"]).expect("new 1 failed");
@@ -283,6 +288,7 @@ fn test_set_priority() {
     let _env = TestEnv::new();
 
     run_command(&["init", "--no-commit"]).expect("init failed");
+    disable_auto_commit();
 
     // Create an issue
     run_command(&["new", "Issue 1"]).expect("new 1 failed");
@@ -359,6 +365,7 @@ fn test_set_due_date() {
     let _env = TestEnv::new();
 
     run_command(&["init", "--no-commit"]).expect("init failed");
+    disable_auto_commit();
 
     // Create an issue
     run_command(&["new", "Issue 1"]).expect("new 1 failed");
@@ -435,6 +442,7 @@ fn test_set_me() {
     let _env = TestEnv::new();
 
     run_command(&["init", "--no-commit"]).expect("init failed");
+    disable_auto_commit();
 
     // Create an issue
     run_command(&["new", "Issue 1", "--reporter", "alice", "--assignee", "alice"]).expect("new 1 failed");
@@ -486,6 +494,7 @@ fn test_set_bulk() {
     let _env = TestEnv::new();
 
     run_command(&["init", "--no-commit"]).expect("init failed");
+    disable_auto_commit();
 
     // Create some issues
     run_command(&["new", "Issue 1", "--assignee", "alice"]).expect("new 1 failed");
@@ -563,6 +572,7 @@ fn test_set_bulk_wildcard() {
     let _env = TestEnv::new();
 
     run_command(&["init", "--no-commit"]).expect("init failed");
+    disable_auto_commit();
 
     // Create some issues
     run_command(&["new", "Issue 1", "--assignee", "alice"]).expect("new 1 failed");

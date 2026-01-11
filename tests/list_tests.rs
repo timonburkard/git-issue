@@ -1,11 +1,12 @@
 mod common;
-use common::{TestEnv, load_yaml_values, run_command, save_yaml_values};
+use common::{TestEnv, disable_auto_commit, load_yaml_values, run_command, save_yaml_values};
 
 #[test]
 fn test_list_columns() {
     let _env = TestEnv::new();
 
     run_command(&["init", "--no-commit"]).expect("init failed");
+    disable_auto_commit();
 
     // Create a few issues
     run_command(&[
@@ -164,6 +165,7 @@ fn test_list_filter() {
     let _env = TestEnv::new();
 
     run_command(&["init", "--no-commit"]).expect("init failed");
+    disable_auto_commit();
 
     // Create a few issues
     run_command(&[
@@ -373,6 +375,7 @@ fn test_list_sort() {
     let _env = TestEnv::new();
 
     run_command(&["init", "--no-commit"]).expect("init failed");
+    disable_auto_commit();
 
     // Create a few issues
     run_command(&[

@@ -1,11 +1,12 @@
 mod common;
-use common::{TestEnv, load_yaml_values, run_command, save_yaml_values};
+use common::{TestEnv, disable_auto_commit, load_yaml_values, run_command, save_yaml_values};
 
 #[test]
 fn test_link_add_bidirectional_symmetric() {
     let _env = TestEnv::new();
 
     run_command(&["init", "--no-commit"]).expect("init failed");
+    disable_auto_commit();
 
     // Create some issues
     run_command(&["new", "Issue 1"]).expect("new failed");
@@ -74,6 +75,7 @@ fn test_link_add_bidirectional_asymmetric() {
     let _env = TestEnv::new();
 
     run_command(&["init", "--no-commit"]).expect("init failed");
+    disable_auto_commit();
 
     // Create some issues
     run_command(&["new", "Issue 1"]).expect("new failed");
@@ -167,6 +169,7 @@ fn test_link_add_unidirectional() {
     let _env = TestEnv::new();
 
     run_command(&["init", "--no-commit"]).expect("init failed");
+    disable_auto_commit();
 
     // Change config: add relationship type "inspired_by" which is unidirectional
     let config_path = ".gitissues/config.yaml";
@@ -202,6 +205,7 @@ fn test_link_add_invalid() {
     let _env = TestEnv::new();
 
     run_command(&["init", "--no-commit"]).expect("init failed");
+    disable_auto_commit();
 
     // Create some issues
     run_command(&["new", "Issue 1"]).expect("new failed");
@@ -226,6 +230,7 @@ fn test_link_remove_bidirectional_symmetric() {
     let _env = TestEnv::new();
 
     run_command(&["init", "--no-commit"]).expect("init failed");
+    disable_auto_commit();
 
     // Create some issues
     run_command(&["new", "Issue 1"]).expect("new failed");
@@ -304,6 +309,7 @@ fn test_link_remove_bidirectional_asymmetric() {
     let _env = TestEnv::new();
 
     run_command(&["init", "--no-commit"]).expect("init failed");
+    disable_auto_commit();
 
     // Create some issues
     run_command(&["new", "Issue 1"]).expect("new failed");

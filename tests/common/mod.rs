@@ -111,6 +111,13 @@ pub fn run_command_with_stdin(args: &[&str], stdin_input: &str) -> Result<std::p
     Ok(output)
 }
 
+pub fn disable_auto_commit() {
+    let config_path = ".gitissues/config.yaml";
+    let mut config = load_yaml_values(config_path);
+    config["commit_auto"] = serde_yaml::Value::Bool(false);
+    save_yaml_values(config_path, &config);
+}
+
 pub fn load_yaml_values(path: &str) -> Value {
     let content = fs::read_to_string(path).unwrap_or_else(|_| panic!("Failed to read {path}"));
     serde_yaml::from_str::<Value>(&content).expect("Failed to parse meta.yaml")
