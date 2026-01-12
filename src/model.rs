@@ -478,10 +478,8 @@ pub fn issue_exports_dir() -> Result<std::path::PathBuf, String> {
     Ok(gitissues_base()?.join("exports"))
 }
 
-/// git commit based on template from config
+/// git commit based on template and config
 pub fn git_commit(id: u32, title: String, action: &str) -> Result<(), String> {
-    use std::process::Command;
-
     let config = load_config()?;
 
     // Check if auto-commit is enabled
@@ -497,59 +495,17 @@ pub fn git_commit(id: u32, title: String, action: &str) -> Result<(), String> {
         .replace("{id}", &format!("{id}"))
         .replace("{title}", &title);
 
-    // Execute git add
-    let add_result = Command::new("git")
-        .args(["add", gitissues_base()?.to_string_lossy().as_ref()])
-        .output()
-        .map_err(|e| format!("Failed to stage .gitissues: {e}"))?;
-
-    if !add_result.status.success() {
-        let stderr = String::from_utf8_lossy(&add_result.stderr);
-        return Err(format!("Failed to stage .gitissues: {}", stderr.trim()));
-    }
-
-    // Execute git commit
-    let commit_result = Command::new("git")
-        .args(["commit", "-m", &commit_message])
-        .output()
-        .map_err(|e| format!("Failed to commit: {e}"))?;
-
-    if !commit_result.status.success() {
-        let stderr = String::from_utf8_lossy(&commit_result.stderr);
-        return Err(format!("Failed to commit: {}", stderr.trim()));
-    }
+    run_git(&commit_message)?;
 
     Ok(())
 }
 
 /// Simple commit message not based on template or config
 pub fn git_commit_non_templated(msg: &str) -> Result<(), String> {
-    use std::process::Command;
-
     // Prepare commit message
     let commit_message = format!("[issue] {msg}");
 
-    // Execute git add
-    let add_result = Command::new("git")
-        .args(["add", gitissues_base()?.to_string_lossy().as_ref()])
-        .output()
-        .map_err(|e| format!("Failed to stage .gitissues: {e}"))?;
-
-    if !add_result.status.success() {
-        let stderr = String::from_utf8_lossy(&add_result.stderr);
-        return Err(format!("Failed to stage .gitissues: {}", stderr.trim()));
-    }
-
-    // Execute git commit
-    let commit_result = Command::new("git")
-        .args(["commit", "-m", &commit_message])
-        .output()
-        .map_err(|e| format!("Failed to commit: {e}"))?;
-
-    if !commit_result.status.success() {
-        let stderr = String::from_utf8_lossy(&commit_result.stderr);
-        return Err(format!("Failed to commit: {}", stderr.trim()));
-    }
+    run_git(&commit_message)?;
 
     Ok(())
 }
@@ -620,4 +576,30 @@ pub fn open_editor(mut editor: String, path: String) -> Result<(), String> {
 
 pub fn dash_if_empty(value: &str) -> String {
     if value.is_empty() { "-".to_string() } else { value.to_string() }
+}
+
+fn run_git(commit_message: &str) -> Result<(), String> {
+    // Execute git add
+    let add_result = Command::new("git")
+        .args(["add", gitissues_base()?.to_string_lossy().as_ref()])
+        .output()
+        .map_err(|e| format!("Failed to stage .gitissues: {e}"))?;
+
+    if !add_result.status.success() {
+        let stderr = String::from_utf8_lossy(&add_result.stderr);
+        return Err(format!("Failed to stage .gitissues: {}", stderr.trim()));
+    }
+
+    // Execute git commit
+    let commit_result = Command::new("git")
+        .args(["commit", "-m", commit_message])
+        .output()
+        .map_err(|e| format!("Failed to commit: {e}"))?;
+
+    if !commit_result.status.success() {
+        let stderr = String::from_utf8_lossy(&commit_result.stderr);
+        return Err(format!("Failed to commit: {}", stderr.trim()));
+    }
+
+    Ok(())
 }
