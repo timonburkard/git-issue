@@ -4,13 +4,12 @@ use std::collections::HashMap;
 use std::fs;
 use std::io::IsTerminal;
 
-use anstyle::{AnsiColor, Effects, Reset, Style};
 use chrono::Utc;
 use regex::Regex;
 
 use crate::model::{
-    Config, Filter, Meta, NamedColor, Operator, Priority, Settings, Sorting, cache_path, current_timestamp, dash_if_empty, issue_desc_path,
-    issue_exports_dir, issues_dir, load_config, load_description, load_meta, load_settings,
+    Config, Filter, Meta, NamedColor, Operator, Priority, Settings, Sorting, apply_style, cache_path, current_timestamp, dash_if_empty,
+    issue_desc_path, issue_exports_dir, issues_dir, load_config, load_description, load_meta, load_settings, named_color_to_style,
 };
 
 pub fn run(
@@ -124,36 +123,6 @@ fn print_ln(print_csv: bool, csv_content: &mut String) {
 
 fn to_csv_field(value: &str, separator: char) -> String {
     format!("\"{value}\"{separator}")
-}
-
-fn apply_style(text: &str, style: Style) -> String {
-    format!("{style}{text}{reset}", reset = Reset)
-}
-
-fn fg(color: AnsiColor) -> Style {
-    Style::new().fg_color(Some(color.into()))
-}
-
-fn named_color_to_style(color: NamedColor) -> Style {
-    match color {
-        NamedColor::White => fg(AnsiColor::White),
-        NamedColor::BrightWhite => fg(AnsiColor::BrightWhite),
-        NamedColor::Black => fg(AnsiColor::Black),
-        NamedColor::BrightBlack => fg(AnsiColor::BrightBlack),
-        NamedColor::Red => fg(AnsiColor::Red),
-        NamedColor::BrightRed => fg(AnsiColor::BrightRed),
-        NamedColor::Green => fg(AnsiColor::Green),
-        NamedColor::BrightGreen => fg(AnsiColor::BrightGreen),
-        NamedColor::Yellow => fg(AnsiColor::Yellow),
-        NamedColor::BrightYellow => fg(AnsiColor::BrightYellow),
-        NamedColor::Blue => fg(AnsiColor::Blue),
-        NamedColor::BrightBlue => fg(AnsiColor::BrightBlue),
-        NamedColor::Magenta => fg(AnsiColor::Magenta),
-        NamedColor::BrightMagenta => fg(AnsiColor::BrightMagenta),
-        NamedColor::Cyan => fg(AnsiColor::Cyan),
-        NamedColor::BrightCyan => fg(AnsiColor::BrightCyan),
-        NamedColor::Bold => Style::new().effects(Effects::BOLD),
-    }
 }
 
 fn colorize_state(settings: &Settings, state: &str) -> String {

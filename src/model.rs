@@ -1,3 +1,4 @@
+use anstyle::{AnsiColor, Effects, Reset, Style};
 use std::fmt;
 use std::fs;
 use std::path::Path;
@@ -240,7 +241,7 @@ pub enum NamedColor {
 }
 
 #[derive(Debug, Deserialize, Clone)]
-pub struct Colors {
+pub struct ListColors {
     pub header: NamedColor,
     pub me: NamedColor,
     pub due_date_overdue: NamedColor,
@@ -251,9 +252,21 @@ pub struct Colors {
 }
 
 #[derive(Debug, Deserialize, Clone)]
+pub struct SearchColors {
+    pub header: NamedColor,
+    pub results: NamedColor,
+}
+
+#[derive(Debug, Deserialize, Clone)]
 pub struct ListFormatting {
     pub header_separator: bool,
-    pub colors: Colors,
+    pub colors: ListColors,
+}
+
+#[derive(Debug, Deserialize, Clone)]
+pub struct SearchFormatting {
+    pub header_separator: bool,
+    pub colors: SearchColors,
 }
 
 #[derive(Debug, Deserialize)]
@@ -261,6 +274,7 @@ pub struct Settings {
     pub editor: String,
     pub user: String,
     pub list_formatting: ListFormatting,
+    pub search_formatting: SearchFormatting,
 }
 
 #[derive(Debug, Deserialize)]
@@ -426,55 +440,55 @@ pub fn gitissues_base() -> Result<PathBuf, String> {
     }
 }
 
-pub fn issues_dir() -> Result<std::path::PathBuf, String> {
+pub fn issues_dir() -> Result<PathBuf, String> {
     Ok(gitissues_base()?.join("issues"))
 }
 
 /// Returns the path to the config.yaml file.
-pub fn config_path() -> Result<std::path::PathBuf, String> {
+pub fn config_path() -> Result<PathBuf, String> {
     Ok(gitissues_base()?.join("config.yaml"))
 }
 
 /// Returns the path to the settings.yaml file.
-pub fn settings_path() -> Result<std::path::PathBuf, String> {
+pub fn settings_path() -> Result<PathBuf, String> {
     Ok(gitissues_base()?.join("settings.yaml"))
 }
 
 /// Returns the path to the users.yaml file.
-pub fn users_path() -> Result<std::path::PathBuf, String> {
+pub fn users_path() -> Result<PathBuf, String> {
     Ok(gitissues_base()?.join("users.yaml"))
 }
 
-pub fn issue_dir(id: u32) -> Result<std::path::PathBuf, String> {
+pub fn issue_dir(id: u32) -> Result<PathBuf, String> {
     Ok(issues_dir()?.join(padded_id(id)))
 }
 
-pub fn issue_meta_path(id: u32) -> Result<std::path::PathBuf, String> {
+pub fn issue_meta_path(id: u32) -> Result<PathBuf, String> {
     Ok(issue_dir(id)?.join("meta.yaml"))
 }
 
-pub fn issue_desc_path(id: u32) -> Result<std::path::PathBuf, String> {
+pub fn issue_desc_path(id: u32) -> Result<PathBuf, String> {
     Ok(issue_dir(id)?.join("description.md"))
 }
 
-pub fn issue_attachments_dir(id: u32) -> Result<std::path::PathBuf, String> {
+pub fn issue_attachments_dir(id: u32) -> Result<PathBuf, String> {
     Ok(issue_dir(id)?.join("attachments"))
 }
 
-pub fn issue_tmp_dir() -> Result<std::path::PathBuf, String> {
+pub fn issue_tmp_dir() -> Result<PathBuf, String> {
     Ok(gitissues_base()?.join(".tmp"))
 }
 
-pub fn issue_tmp_show_dir(id: u32) -> Result<std::path::PathBuf, String> {
+pub fn issue_tmp_show_dir(id: u32) -> Result<PathBuf, String> {
     Ok(issue_tmp_dir()?.join(format!("show-{id}")))
 }
 
 /// Returns the path to the cache.txt file.
-pub fn cache_path() -> Result<std::path::PathBuf, String> {
+pub fn cache_path() -> Result<PathBuf, String> {
     Ok(issue_tmp_dir()?.join("cache.txt"))
 }
 
-pub fn issue_exports_dir() -> Result<std::path::PathBuf, String> {
+pub fn issue_exports_dir() -> Result<PathBuf, String> {
     Ok(gitissues_base()?.join("exports"))
 }
 
@@ -576,6 +590,36 @@ pub fn open_editor(mut editor: String, path: String) -> Result<(), String> {
 
 pub fn dash_if_empty(value: &str) -> String {
     if value.is_empty() { "-".to_string() } else { value.to_string() }
+}
+
+pub fn apply_style(text: &str, style: Style) -> String {
+    format!("{style}{text}{reset}", reset = Reset)
+}
+
+fn fg(color: AnsiColor) -> Style {
+    Style::new().fg_color(Some(color.into()))
+}
+
+pub fn named_color_to_style(color: NamedColor) -> Style {
+    match color {
+        NamedColor::White => fg(AnsiColor::White),
+        NamedColor::BrightWhite => fg(AnsiColor::BrightWhite),
+        NamedColor::Black => fg(AnsiColor::Black),
+        NamedColor::BrightBlack => fg(AnsiColor::BrightBlack),
+        NamedColor::Red => fg(AnsiColor::Red),
+        NamedColor::BrightRed => fg(AnsiColor::BrightRed),
+        NamedColor::Green => fg(AnsiColor::Green),
+        NamedColor::BrightGreen => fg(AnsiColor::BrightGreen),
+        NamedColor::Yellow => fg(AnsiColor::Yellow),
+        NamedColor::BrightYellow => fg(AnsiColor::BrightYellow),
+        NamedColor::Blue => fg(AnsiColor::Blue),
+        NamedColor::BrightBlue => fg(AnsiColor::BrightBlue),
+        NamedColor::Magenta => fg(AnsiColor::Magenta),
+        NamedColor::BrightMagenta => fg(AnsiColor::BrightMagenta),
+        NamedColor::Cyan => fg(AnsiColor::Cyan),
+        NamedColor::BrightCyan => fg(AnsiColor::BrightCyan),
+        NamedColor::Bold => Style::new().effects(Effects::BOLD),
+    }
 }
 
 fn run_git(commit_message: &str) -> Result<(), String> {

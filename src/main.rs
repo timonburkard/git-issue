@@ -12,6 +12,7 @@ mod link;
 mod list;
 mod model;
 mod new;
+mod search;
 mod set;
 mod show;
 
@@ -158,6 +159,11 @@ enum Commands {
         #[arg(long, num_args = 1.., required_unless_present = "add")]
         remove: Option<Vec<RelationshipLink>>,
     },
+
+    Search {
+        /// Search text
+        text: String,
+    },
 }
 
 fn main() {
@@ -230,6 +236,8 @@ fn main() {
         Commands::Edit { id } => edit::run(id),
 
         Commands::Link { id, add, remove } => link::run(id, add, remove),
+
+        Commands::Search { text } => search::run(text),
     };
 
     if let Err(e) = result {

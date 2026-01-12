@@ -42,3 +42,11 @@ list_formatting:
       task: blue
       work_item: blue
       work-item: blue
+
+# Formatting options for search command
+# User may change colors
+search_formatting:
+  header_separator: true  # header row separator: dashed line
+  colors:
+    header: bold  # header row
+    results: green  # matched results
