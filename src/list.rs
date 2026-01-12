@@ -9,8 +9,8 @@ use chrono::Utc;
 use regex::Regex;
 
 use crate::model::{
-    Config, Filter, Meta, NamedColor, Operator, Priority, Settings, Sorting, cache_path, current_timestamp, dash_if_empty, gitissues_base,
-    issue_exports_dir, load_config, load_meta, load_settings,
+    Config, Filter, Meta, NamedColor, Operator, Priority, Settings, Sorting, cache_path, current_timestamp, dash_if_empty,
+    issue_exports_dir, issues_dir, load_config, load_meta, load_settings,
 };
 
 pub fn run(
@@ -41,7 +41,7 @@ pub fn run(
 }
 
 fn get_issues_metadata() -> Result<Vec<Meta>, String> {
-    let path = gitissues_base()?.join("issues");
+    let path = issues_dir()?;
     let mut issues: Vec<Meta> = Vec::new();
 
     // Precondition: .gitissues/issues must exist (user must run init first)

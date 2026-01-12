@@ -9,7 +9,8 @@ use indexmap::IndexMap;
 
 use crate::model::{
     IdGeneration, Meta, Priority, current_timestamp, git_commit, gitissues_base, is_valid_iso_date, is_valid_type, is_valid_user,
-    issue_attachments_dir, issue_desc_path, issue_dir, issue_meta_path, load_config, load_settings, load_users, padded_id, user_handle_me,
+    issue_attachments_dir, issue_desc_path, issue_dir, issue_meta_path, issues_dir, load_config, load_settings, load_users, padded_id,
+    user_handle_me,
 };
 
 pub fn run(
@@ -140,8 +141,7 @@ pub fn run(
 
 /// Generates new ID
 fn generate_id() -> Result<u32, String> {
-    let issues_base = ".gitissues/issues";
-    let path = Path::new(issues_base);
+    let path = issues_dir()?;
 
     // Precondition: .gitissues/issues must exist (user must run init first)
     if !path.exists() {
@@ -151,18 +151,18 @@ fn generate_id() -> Result<u32, String> {
     let config = load_config()?;
 
     let id = match config.id_generation {
-        IdGeneration::Sequential => generate_id_sequential(path)?,
-        IdGeneration::Timestamp => generate_id_timestamp(path)?,
+        IdGeneration::Sequential => generate_id_sequential(&path)?,
+        IdGeneration::Timestamp => generate_id_timestamp(&path)?,
     };
 
     Ok(id)
 }
 
-fn generate_id_sequential(issues_path: &Path) -> Result<u32, String> {
+fn generate_id_sequential(issues_dir: &Path) -> Result<u32, String> {
     let mut max_id = 0u32;
 
     // Read directory entries and find the highest numeric ID
-    for entry in fs::read_dir(issues_path).map_err(|e| format!("Failed to read issues directory: {e}"))? {
+    for entry in fs::read_dir(issues_dir).map_err(|e| format!("Failed to read issues directory: {e}"))? {
         let entry = entry.map_err(|e| format!("Failed to read entry: {e}"))?;
         let file_name = entry.file_name();
         let name_str = file_name.to_string_lossy();
@@ -179,12 +179,12 @@ fn generate_id_sequential(issues_path: &Path) -> Result<u32, String> {
     Ok(max_id + 1)
 }
 
-fn generate_id_timestamp(issues_path: &Path) -> Result<u32, String> {
+fn generate_id_timestamp(issues_dir: &Path) -> Result<u32, String> {
     const START_2025: i64 = 1735689600;
 
     let mut id = (Utc::now().timestamp() - START_2025) as u32;
 
-    let mut issue_dir = issues_path.join(padded_id(id));
+    let mut issue_dir = issues_dir.join(padded_id(id));
 
     if issue_dir.exists() {
         // In the rare case of a collision, wait one second and try again
@@ -192,7 +192,7 @@ fn generate_id_timestamp(issues_path: &Path) -> Result<u32, String> {
 
         id = (Utc::now().timestamp() - START_2025) as u32;
 
-        issue_dir = issues_path.join(padded_id(id));
+        issue_dir = issues_dir.join(padded_id(id));
 
         if issue_dir.exists() {
             return Err("Failed to generate unique ID using timestamp due to collision.".to_string());
