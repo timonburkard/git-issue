@@ -9,7 +9,8 @@ use indexmap::IndexMap;
 
 use crate::model::{
     IdGeneration, Meta, Priority, current_timestamp, git_commit, gitissues_base, is_valid_iso_date, is_valid_type, is_valid_user,
-    issue_attachments_dir, issue_desc_path, issue_dir, issue_meta_path, load_config, load_settings, load_users, padded_id, user_handle_me,
+    issue_attachments_dir, issue_desc_path, issue_dir, issue_meta_path, issues_dir, load_config, load_settings, load_users, padded_id,
+    user_handle_me,
 };
 
 pub fn run(
@@ -140,8 +141,7 @@ pub fn run(
 
 /// Generates new ID
 fn generate_id() -> Result<u32, String> {
-    let issues_base = ".gitissues/issues";
-    let path = Path::new(issues_base);
+    let path = issues_dir()?;
 
     // Precondition: .gitissues/issues must exist (user must run init first)
     if !path.exists() {
@@ -151,8 +151,8 @@ fn generate_id() -> Result<u32, String> {
     let config = load_config()?;
 
     let id = match config.id_generation {
-        IdGeneration::Sequential => generate_id_sequential(path)?,
-        IdGeneration::Timestamp => generate_id_timestamp(path)?,
+        IdGeneration::Sequential => generate_id_sequential(&path)?,
+        IdGeneration::Timestamp => generate_id_timestamp(&path)?,
     };
 
     Ok(id)
