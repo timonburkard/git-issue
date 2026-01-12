@@ -597,8 +597,18 @@ fn run_git(commit_message: &str) -> Result<(), String> {
         .map_err(|e| format!("Failed to commit: {e}"))?;
 
     if !commit_result.status.success() {
+        let stdout = String::from_utf8_lossy(&commit_result.stdout);
         let stderr = String::from_utf8_lossy(&commit_result.stderr);
-        return Err(format!("Failed to commit: {}", stderr.trim()));
+
+        // Check if it's just "nothing to commit" - this is not an error
+        if stdout.contains("nothing to commit") || stdout.contains("no changes added to commit") {
+            println!("Info: Nothing to commit");
+            return Ok(());
+        }
+
+        let error_msg = if !stderr.trim().is_empty() { stderr.trim() } else { stdout.trim() };
+
+        return Err(format!("Failed to commit: {}", error_msg));
     }
 
     Ok(())
