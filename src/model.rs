@@ -426,6 +426,10 @@ pub fn gitissues_base() -> Result<PathBuf, String> {
     }
 }
 
+pub fn issues_dir() -> Result<std::path::PathBuf, String> {
+    Ok(gitissues_base()?.join("issues"))
+}
+
 /// Returns the path to the config.yaml file.
 pub fn config_path() -> Result<std::path::PathBuf, String> {
     Ok(gitissues_base()?.join("config.yaml"))
@@ -442,7 +446,7 @@ pub fn users_path() -> Result<std::path::PathBuf, String> {
 }
 
 pub fn issue_dir(id: u32) -> Result<std::path::PathBuf, String> {
-    Ok(gitissues_base()?.join("issues").join(padded_id(id)))
+    Ok(issues_dir()?.join(padded_id(id)))
 }
 
 pub fn issue_meta_path(id: u32) -> Result<std::path::PathBuf, String> {
