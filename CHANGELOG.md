@@ -13,6 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+    - [git]  made staging more narrow (#21)
     - [yaml] added schema `_version` field to YAMLs (#27)
 
 ## [v0.6.6] - 2026-01-12
