@@ -1,3 +1,4 @@
+use std::collections::HashMap;
 use std::fs;
 use std::path::Path;
 
@@ -53,50 +54,87 @@ pub fn run(id: u32) -> Result<(), String> {
 fn generate_content_metadata(id: u32, meta: &Meta) -> String {
     let mut content = String::new();
 
+    let (width, values) = get_values(meta);
+
     content.push_str("<!-- READ-ONLY VIEW -->\n");
     content.push('\n');
     content.push_str(&format!("# Issue #{} -- {}\n", id, meta.title));
     content.push('\n');
     content.push_str("## Meta Data\n");
     content.push('\n');
-    content.push_str("| **field**         | **value** |\n");
-    content.push_str("| ----------------- | --------- |\n");
-    content.push_str(&format!("| **id**            | {} |\n", meta.id));
-    content.push_str(&format!("| **title**         | {} |\n", meta.title));
-    content.push_str(&format!("| **state**         | {} |\n", meta.state));
-    content.push_str(&format!("| **type**          | {} |\n", dash_if_empty(&meta.type_),));
-    content.push_str(&format!("| **labels**        | {} |\n", dash_if_empty(&meta.labels.join(","))));
-    content.push_str(&format!("| **reporter**      | {} |\n", dash_if_empty(&meta.reporter)));
-    content.push_str(&format!("| **assignee**      | {} |\n", dash_if_empty(&meta.assignee)));
-    content.push_str(&format!("| **priority**      | {:?} |\n", meta.priority));
-    content.push_str(&format!("| **due_date**      | {} |\n", dash_if_empty(&meta.due_date)));
-    content.push_str(content_relationships(&meta.relationships).as_str());
-    content.push_str(&format!("| **created**       | {} |\n", meta.created));
-    content.push_str(&format!("| **updated**       | {} |\n", meta.updated));
+    content.push_str(&format!("| **field**         | {:width$} |\n", "**value**"));
+    content.push_str(&format!("| ----------------- | {} |\n", "-".repeat(width)));
+    content.push_str(&format!("| **id**            | {:width$} |\n", values["id"]));
+    content.push_str(&format!("| **title**         | {:width$} |\n", values["title"]));
+    content.push_str(&format!("| **state**         | {:width$} |\n", values["state"]));
+    content.push_str(&format!("| **type**          | {:width$} |\n", values["type"]));
+    content.push_str(&format!("| **labels**        | {:width$} |\n", values["labels"]));
+    content.push_str(&format!("| **reporter**      | {:width$} |\n", values["reporter"]));
+    content.push_str(&format!("| **assignee**      | {:width$} |\n", values["assignee"]));
+    content.push_str(&format!("| **priority**      | {:width$} |\n", values["priority"]));
+    content.push_str(&format!("| **due_date**      | {:width$} |\n", values["due_date"]));
+    content.push_str(&format!("| **relationships** | {}", values["relationships"]));
+    content.push_str(&format!("| **created**       | {:width$} |\n", values["created"]));
+    content.push_str(&format!("| **updated**       | {:width$} |\n", values["updated"]));
 
     content
 }
 
-fn content_relationships(relationships: &IndexMap<String, Vec<u32>>) -> String {
+fn get_values(meta: &Meta) -> (usize, HashMap<String, String>) {
+    let mut values = HashMap::new();
+
+    values.insert("id".to_string(), meta.id.to_string());
+    values.insert("title".to_string(), meta.title.clone());
+    values.insert("state".to_string(), meta.state.clone());
+    values.insert("type".to_string(), dash_if_empty(&meta.type_));
+    values.insert("labels".to_string(), dash_if_empty(&meta.labels.join(",")));
+    values.insert("reporter".to_string(), dash_if_empty(&meta.reporter));
+    values.insert("assignee".to_string(), dash_if_empty(&meta.assignee));
+    values.insert("priority".to_string(), format!("{:?}", meta.priority));
+    values.insert("due_date".to_string(), dash_if_empty(&meta.due_date));
+    values.insert("created".to_string(), meta.created.clone());
+    values.insert("updated".to_string(), meta.updated.clone());
+
+    let mut max_width = values.values().map(|value| value.len()).max().unwrap_or(0);
+
+    let (relationships_width, relationships_str) = content_relationships(&meta.relationships, max_width);
+
+    values.insert("relationships".to_string(), relationships_str);
+
+    if relationships_width > max_width {
+        max_width = relationships_width;
+    }
+
+    (max_width, values)
+}
+
+fn content_relationships(relationships: &IndexMap<String, Vec<u32>>, min_width: usize) -> (usize, String) {
     let mut content = String::new();
+    let mut max_width = 1;
 
     if relationships.is_empty() {
-        content.push_str("| **relationships** | - |\n");
-        return content;
+        content.push_str(&format!("{:min_width$} |\n", "-"));
+        return (max_width, content);
     }
 
     let mut first = true;
     for (rel_type, ids) in relationships {
         let ids_str = ids.iter().map(|id| id.to_string()).collect::<Vec<String>>().join(", ");
+        let string = format!("{}: {}", rel_type, ids_str);
+
+        if string.len() > max_width {
+            max_width = string.len();
+        }
+
         if first {
-            content.push_str(&format!("| **relationships** | {}: {} |\n", rel_type, ids_str));
+            content.push_str(&format!("{:min_width$} |\n", string));
             first = false;
         } else {
-            content.push_str(&format!("|                   | {}: {} |\n", rel_type, ids_str));
+            content.push_str(&format!("|                   | {:min_width$} |\n", string));
         }
     }
 
-    content
+    (max_width, content)
 }
 
 fn add_content_description(path: &Path, content: &mut String) -> Result<(), String> {
