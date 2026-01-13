@@ -1,3 +1,4 @@
+_version: 1
 id: 1
 title: '[meta] add field `assignee`'
 state: resolved

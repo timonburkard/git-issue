@@ -1,3 +1,4 @@
+_version: 1
 id: 38
 title: '[cmd/list] add possibility of OR filter options for single-value fields'
 state: resolved

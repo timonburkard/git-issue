@@ -1,3 +1,4 @@
+_version: 1
 id: 30
 title: '[meta] add `reporter` field'
 state: resolved

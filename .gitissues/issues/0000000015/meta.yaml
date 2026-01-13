@@ -1,3 +1,4 @@
+_version: 1
 id: 15
 title: '[cmd] modification on meta field `labels` could be harmonized'
 state: resolved

@@ -1,3 +1,4 @@
+_version: 1
 id: 53
 title: '[config] need a way to separately create settings.yaml'
 state: resolved

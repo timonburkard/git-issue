@@ -1,3 +1,4 @@
+_version: 1
 id: 10
 title: '[cmd] add `search` command'
 state: new

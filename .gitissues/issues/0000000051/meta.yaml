@@ -1,3 +1,4 @@
+_version: 1
 id: 51
 title: '[cli] only executable from root'
 state: resolved

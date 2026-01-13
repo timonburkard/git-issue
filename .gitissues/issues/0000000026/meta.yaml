@@ -1,3 +1,4 @@
+_version: 1
 id: 26
 title: '[cmd/new] option to provide initial values for meta fields'
 state: resolved

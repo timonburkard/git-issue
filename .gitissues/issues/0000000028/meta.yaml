@@ -1,3 +1,4 @@
+_version: 1
 id: 28
 title: '[cmd/list] add possibility to export to csv'
 state: resolved

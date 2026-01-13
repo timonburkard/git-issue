@@ -1,3 +1,4 @@
+_version: 1
 id: 46
 title: '[test] add automated tests for show command'
 state: new

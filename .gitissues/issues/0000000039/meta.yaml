@@ -1,3 +1,4 @@
+_version: 1
 id: 39
 title: '[cmd/list] clarify OR/AND filter options for multi-value fields'
 state: resolved

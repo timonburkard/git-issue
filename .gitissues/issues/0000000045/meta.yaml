@@ -1,3 +1,4 @@
+_version: 1
 id: 45
 title: '[test] add automated tests for edit command'
 state: new

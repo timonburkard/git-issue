@@ -1,3 +1,4 @@
+_version: 1
 id: 27
 title: '[yaml] add `version` field to the yamls'
 state: active

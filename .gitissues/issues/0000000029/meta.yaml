@@ -1,3 +1,4 @@
+_version: 1
 id: 29
 title: '[cmd/list] add support for relationships'
 state: resolved

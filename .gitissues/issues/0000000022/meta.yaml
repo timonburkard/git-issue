@@ -1,3 +1,4 @@
+_version: 1
 id: 22
 title: '[cmd/new] automatically create `attachments/` directory'
 state: resolved

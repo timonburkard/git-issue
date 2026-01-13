@@ -1,3 +1,4 @@
+_version: 1
 id: 34
 title: '[cmd/list] possibility to filter for `>` and `<`, not just `=`'
 state: resolved

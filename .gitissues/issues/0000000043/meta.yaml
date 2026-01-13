@@ -1,3 +1,4 @@
+_version: 1
 id: 43
 title: '[cmd/list] harmonize sorting of empty values'
 state: resolved

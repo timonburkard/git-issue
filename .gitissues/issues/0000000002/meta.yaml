@@ -1,3 +1,4 @@
+_version: 1
 id: 2
 title: '[meta] add field `type`'
 state: resolved

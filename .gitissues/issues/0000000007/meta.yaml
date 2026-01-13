@@ -1,3 +1,4 @@
+_version: 1
 id: 7
 title: '[meta] add field `labels`'
 state: resolved
