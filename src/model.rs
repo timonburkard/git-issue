@@ -607,7 +607,10 @@ fn run_git(commit_message: &str, staging_dir: &str) -> Result<(), String> {
         let stderr = String::from_utf8_lossy(&commit_result.stderr);
 
         // Check if it's just "nothing to commit" - this is not an error
-        if stdout.contains("nothing to commit") || stdout.contains("no changes added to commit") {
+        if stdout.contains("nothing to commit")
+            || stdout.contains("no changes added to commit")
+            || stdout.contains("nothing added to commit")
+        {
             println!("Info: Nothing to commit");
             return Ok(());
         }

@@ -16,6 +16,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     - [git]  made staging more narrow (#21)
     - [yaml] added schema `_version` field to YAMLs (#27)
 
+### Fixed
+
+    - [git] catch all cases of empty commit messages to print nice info message
+
 ## [v0.6.6] - 2026-01-12
 
 ### Fixed
