@@ -11,6 +11,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
     - [cmd/list] added support to filter on `description.md` with `--filter description=<pattern>` (#54)
 
+### Changed
+
+    - [yaml] added schema `_version` field to YAMLs (#27)
+
 ## [v0.6.6] - 2026-01-12
 
 ### Fixed
