@@ -1,3 +1,4 @@
+_version: 1
 id: 33
 title: '[cmd/list] filter for empty `labels` does not work'
 state: resolved

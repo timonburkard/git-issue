@@ -1,3 +1,4 @@
+_version: 1
 id: 24
 title: '[meta] add priority/severity field(s)'
 state: resolved

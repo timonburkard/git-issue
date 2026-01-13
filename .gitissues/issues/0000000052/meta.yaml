@@ -1,3 +1,4 @@
+_version: 1
 id: 52
 title: '[test] add automated tests for id generation'
 state: new

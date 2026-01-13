@@ -1,3 +1,4 @@
+_version: 1
 id: 20
 title: '[meta] add `due_date` meta field'
 state: resolved

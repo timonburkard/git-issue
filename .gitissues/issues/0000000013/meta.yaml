@@ -1,3 +1,4 @@
+_version: 1
 id: 13
 title: '[cmd] add a command to remove label'
 state: resolved

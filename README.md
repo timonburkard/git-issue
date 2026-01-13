@@ -195,6 +195,9 @@ These files can be edited by the user.
 This file holds the project configuration. It should be version-controlled.
 
 ```yaml
+# YAML schema version: Don't change manually!
+_version: 1
+
 # Automatically create a git commit after mutating commands
 commit_auto: true
 
@@ -275,6 +278,12 @@ priority_default: ''
 This file holds the available users in the project. It should be version-controlled.
 
 ```yaml
+# YAML schema version: Don't change manually!
+_version: 1
+
+# List of valid users
+# For new issues, per default the assignee is empty
+# For new issues, per default the reporter is `settings.yaml:user`
 users:
   - id: alice
   - id: bob
@@ -288,6 +297,9 @@ This file holds the local user settings. It should **not** be version-controlled
 It is automatically created when `git issue init` is executed or when it is missing.
 
 ```yaml
+# YAML schema version: Don't change manually!
+_version: 1
+
 # Editor to edit/show issue descriptions
 # git = use the git-configured editor
 editor: git
@@ -378,6 +390,7 @@ This is the directory structure of `.gitissues/`:
 ### 4.1) meta.yaml Format
 
 ```yaml
+_version: 1                    # YAML schema version
 id: 1234                       # (Integer) Identifier
 title: Login screen is broken  # (String) Title
 state: new                     # (String) E.g.: new, active, resolved, junked

@@ -1,3 +1,4 @@
+_version: 1
 id: 6
 title: '[id] add possibility to change how ID numbers are generated'
 state: resolved

@@ -1,3 +1,6 @@
+# YAML schema version: Don't change manually!
+_version: 1
+
 # List of valid users
 # For new issues, per default the assignee is empty
 # For new issues, per default the reporter is `settings.yaml:user`

@@ -1,3 +1,4 @@
+_version: 1
 id: 14
 title: '[cmd/init] should `init` command create a git commit?'
 state: resolved

@@ -1,3 +1,4 @@
+_version: 1
 id: 42
 title: '[cmd/new] bug: explicitly empty labels not handled correctly'
 state: resolved

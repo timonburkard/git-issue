@@ -1,3 +1,4 @@
+_version: 1
 id: 11
 title: '[cmd] add commands to edit meta fields `title`, `type` `labels`, `assignee`'
 state: resolved

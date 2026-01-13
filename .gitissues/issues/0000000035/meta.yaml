@@ -1,3 +1,4 @@
+_version: 1
 id: 35
 title: '[meta] possibility for empty priority'
 state: resolved

@@ -1,3 +1,4 @@
+_version: 1
 id: 48
 title: '[cmd/list] formatting: colorized output'
 state: resolved

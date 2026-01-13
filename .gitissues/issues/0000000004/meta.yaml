@@ -1,3 +1,4 @@
+_version: 1
 id: 4
 title: '[cmd/list] add possibility to sort issues'
 state: resolved

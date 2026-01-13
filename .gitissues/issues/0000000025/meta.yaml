@@ -1,3 +1,4 @@
+_version: 1
 id: 25
 title: '[meta] list of allowed options for `state`, `type`, `assignee`'
 state: resolved

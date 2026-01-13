@@ -1,3 +1,4 @@
+_version: 1
 id: 32
 title: '[cmd/set] shurtcut to set `reporter` or `assignee` to `settings.yaml:user`'
 state: resolved

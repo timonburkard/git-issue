@@ -1,3 +1,4 @@
+_version: 1
 id: 50
 title: '[cmd/list] formatting: dashed line between headers and values'
 state: resolved

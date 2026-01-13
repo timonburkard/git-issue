@@ -94,6 +94,7 @@ pub fn run(
     let timestamp = current_timestamp();
 
     let meta = Meta {
+        _version: 1,
         id: issue_id,
         title: title.clone(),
         state: config.states.first().cloned().unwrap_or_else(|| "new".to_string()),

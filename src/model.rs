@@ -177,6 +177,7 @@ impl FromStr for Sorting {
 
 #[derive(Debug, Serialize, Deserialize, Clone, PartialEq, Eq)]
 pub struct Meta {
+    pub _version: u32,
     pub id: u32,
     pub title: String,
     pub state: String,
@@ -206,6 +207,7 @@ pub enum IdGeneration {
 
 #[derive(Debug, Deserialize)]
 pub struct Config {
+    pub _version: u32,
     pub commit_auto: bool,
     pub commit_message: String,
     pub list_columns: Vec<String>,
@@ -258,6 +260,7 @@ pub struct ListFormatting {
 
 #[derive(Debug, Deserialize)]
 pub struct Settings {
+    pub _version: u32,
     pub editor: String,
     pub user: String,
     pub list_formatting: ListFormatting,
@@ -270,6 +273,7 @@ pub struct User {
 
 #[derive(Debug, Deserialize)]
 pub struct Users {
+    pub _version: u32,
     pub users: Vec<User>,
 }
 

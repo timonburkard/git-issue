@@ -1,3 +1,4 @@
+_version: 1
 id: 36
 title: '[cmd/set] add possibility for bulk operations'
 state: resolved

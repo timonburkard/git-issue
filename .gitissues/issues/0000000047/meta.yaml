@@ -1,3 +1,4 @@
+_version: 1
 id: 47
 title: '[test] add automated tests for git commit'
 state: new

@@ -1,3 +1,4 @@
+_version: 1
 id: 37
 title: '[cli] improve error messages for invalid options'
 state: resolved

@@ -1,3 +1,4 @@
+_version: 1
 id: 8
 title: '[cmd/list] option to select which columns should be shown'
 state: resolved

@@ -1,3 +1,4 @@
+_version: 1
 id: 5
 title: '[cmd/edit] add `edit` command'
 state: resolved

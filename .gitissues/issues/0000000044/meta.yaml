@@ -1,3 +1,4 @@
+_version: 1
 id: 44
 title: '[cmd/list] bug: OR filter for `id` and `priority` does not work'
 state: resolved
