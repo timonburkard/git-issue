@@ -1,12 +1,12 @@
 id: 54
 title: '[cmd/list] add possibility to filter on description.md'
-state: new
+state: active
 type: feature
 labels: []
 reporter: t.burkard
-assignee: ''
+assignee: t.burkard
 priority: ''
 due_date: ''
 relationships: {}
 created: 2026-01-13T19:58:51Z
-updated: 2026-01-13T19:58:51Z
+updated: 2026-01-13T19:59:03Z
