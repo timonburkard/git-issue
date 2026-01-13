@@ -9,8 +9,8 @@ use chrono::Utc;
 use regex::Regex;
 
 use crate::model::{
-    Config, Filter, Meta, NamedColor, Operator, Priority, Settings, Sorting, cache_path, current_timestamp, dash_if_empty,
-    issue_exports_dir, issues_dir, load_config, load_meta, load_settings,
+    Config, Filter, Meta, NamedColor, Operator, Priority, Settings, Sorting, cache_path, current_timestamp, dash_if_empty, issue_desc_path,
+    issue_exports_dir, issues_dir, load_config, load_description, load_meta, load_settings,
 };
 
 pub fn run(
@@ -100,7 +100,11 @@ fn validate_column_names(config: &Config, columns: &mut [String], context: &str)
             *col = "due_date".to_string();
         }
 
-        let valid_columns = get_all_column_names(config);
+        let mut valid_columns = get_all_column_names(config);
+
+        if context == "--filter" {
+            valid_columns.push("description".to_string());
+        }
 
         if !valid_columns.contains(col) {
             return Err(format!("Invalid column name in {}: {}", context, col));
@@ -468,6 +472,7 @@ fn filter_eq(filter: &Filter, meta: &Meta) -> bool {
         "due_date" => do_strings_match(&meta.due_date, &filter.value),
         "created" => do_strings_match(&meta.created, &filter.value),
         "updated" => do_strings_match(&meta.updated, &filter.value),
+        "description" => does_description_match(meta.id, &filter.value),
         relationship => {
             if let Some(ids) = meta.relationships.get(relationship) {
                 is_in_u32_list(ids, &filter.value)
@@ -518,7 +523,7 @@ fn do_strings_match(value: &str, pattern: &str) -> bool {
         let regex_pattern = regex::escape(str).replace(r"\*", ".*");
 
         // Add anchors to match the whole string
-        let regex_pattern = format!("^{}$", regex_pattern);
+        let regex_pattern = format!("(?s)^{}$", regex_pattern);
 
         // Compile the regex
         let re = match Regex::new(&regex_pattern) {
@@ -550,6 +555,20 @@ fn is_in_u32_list(list: &[u32], pattern: &str) -> bool {
     }
 
     list.iter().any(|id| do_strings_match(&id.to_string(), pattern))
+}
+
+fn does_description_match(id: u32, pattern: &str) -> bool {
+    let description_path = match issue_desc_path(id) {
+        Ok(value) => value,
+        Err(_) => return false,
+    };
+
+    let description = match load_description(description_path.as_path()) {
+        Ok(value) => value,
+        Err(_) => return false,
+    };
+
+    do_strings_match(&description, pattern)
 }
 
 fn sort_issues(config: &Config, issues: &mut [Meta], sorts: Option<Vec<Sorting>>) -> Result<(), String> {
