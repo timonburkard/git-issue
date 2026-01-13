@@ -1,0 +1,13 @@
+_version: 1
+id: 56
+title: '[cmd/show] empty relationship category shown inconsistently'
+state: new
+type: bug
+labels: []
+reporter: t.burkard
+assignee: ''
+priority: ''
+due_date: ''
+relationships: {}
+created: 2026-01-13T22:50:48Z
+updated: 2026-01-13T22:50:48Z
