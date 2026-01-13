@@ -1,3 +1,6 @@
+# YAML schema version: Don't change manually!
+_version: 1
+
 # Editor to edit/show issue descriptions
 # git = use the git-configured editor
 editor: git

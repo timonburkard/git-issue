@@ -1,3 +1,6 @@
+# YAML schema version: Don't change manually!
+_version: 1
+
 # Automatically create a git commit after mutating commands
 commit_auto: true
 
