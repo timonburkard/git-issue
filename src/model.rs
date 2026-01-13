@@ -482,7 +482,8 @@ pub fn issue_exports_dir() -> Result<std::path::PathBuf, String> {
     Ok(gitissues_base()?.join("exports"))
 }
 
-/// git commit based on template and config
+/// Git commit based on template and config
+/// This commits all issue changes (.gitissues/issues/)
 pub fn git_commit(id: u32, title: String, action: &str) -> Result<(), String> {
     let config = load_config()?;
 
@@ -499,17 +500,18 @@ pub fn git_commit(id: u32, title: String, action: &str) -> Result<(), String> {
         .replace("{id}", &format!("{id}"))
         .replace("{title}", &title);
 
-    run_git(&commit_message)?;
+    run_git(&commit_message, &issues_dir()?.to_string_lossy())?;
 
     Ok(())
 }
 
 /// Simple commit message not based on template or config
+/// This commits all changes (.gitissues/)
 pub fn git_commit_non_templated(msg: &str) -> Result<(), String> {
     // Prepare commit message
     let commit_message = format!("[issue] {msg}");
 
-    run_git(&commit_message)?;
+    run_git(&commit_message, &gitissues_base()?.to_string_lossy())?;
 
     Ok(())
 }
@@ -582,10 +584,10 @@ pub fn dash_if_empty(value: &str) -> String {
     if value.is_empty() { "-".to_string() } else { value.to_string() }
 }
 
-fn run_git(commit_message: &str) -> Result<(), String> {
+fn run_git(commit_message: &str, staging_dir: &str) -> Result<(), String> {
     // Execute git add
     let add_result = Command::new("git")
-        .args(["add", gitissues_base()?.to_string_lossy().as_ref()])
+        .args(["add", staging_dir])
         .output()
         .map_err(|e| format!("Failed to stage .gitissues: {e}"))?;
 
