@@ -1,7 +1,7 @@
 _version: 1
 id: 21
 title: '[git] staging should be more narrow'
-state: active
+state: resolved
 type: feature
 labels: []
 reporter: t.burkard
@@ -10,4 +10,4 @@ priority: ''
 due_date: ''
 relationships: {}
 created: 2025-12-23T10:37:47Z
-updated: 2026-01-13T21:32:34Z
+updated: 2026-01-13T21:44:16Z
