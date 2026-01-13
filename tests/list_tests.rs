@@ -1,3 +1,5 @@
+use std::fs;
+
 mod common;
 use common::{TestEnv, disable_auto_commit, load_yaml_values, run_command, save_yaml_values};
 
@@ -363,6 +365,22 @@ fn test_list_filter() {
 
     // List with two filters (AND)
     let output = run_command(&["list", "--columns", "id", "--filter", "labels=ui", "reporter=carol"]).expect("list with and filter failed");
+    let stdout = String::from_utf8_lossy(&output.stdout);
+    assert!(stdout.contains("id"));
+    assert!(!stdout.contains("1"));
+    assert!(stdout.contains("2"));
+    assert!(!stdout.contains("3"));
+
+    // Add description to issue 2
+    fs::write(
+        ".gitissues/issues/0000000002/description.md",
+        "This is a detailed description about the driver problem in this issue.",
+    )
+    .expect("failed to write description.md");
+
+    // List with filter on description.md
+    let output = run_command(&["list", "--columns", "id", "--filter", "assignee=alice", "description=*driver*"])
+        .expect("list with description filter failed");
     let stdout = String::from_utf8_lossy(&output.stdout);
     assert!(stdout.contains("id"));
     assert!(!stdout.contains("1"));
