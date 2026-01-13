@@ -7,6 +7,8 @@ reporter: t.burkard
 assignee: t.burkard
 priority: ''
 due_date: ''
-relationships: {}
+relationships:
+  related:
+  - 10
 created: 2026-01-13T19:58:51Z
-updated: 2026-01-13T19:59:03Z
+updated: 2026-01-13T19:59:33Z
