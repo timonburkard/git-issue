@@ -1,14 +1,15 @@
 id: 10
 title: '[cmd] add `search` command'
-state: active
+state: new
 type: feature
 labels: []
 reporter: t.burkard
-assignee: t.burkard
+assignee: ''
 priority: ''
 due_date: ''
 relationships:
   related:
   - 3
+  - 54
 created: 2025-12-22T19:15:18Z
-updated: 2026-01-12T20:39:14Z
+updated: 2026-01-13T19:59:33Z

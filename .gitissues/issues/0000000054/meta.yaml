@@ -1,0 +1,14 @@
+id: 54
+title: '[cmd/list] add possibility to filter on description.md'
+state: resolved
+type: feature
+labels: []
+reporter: t.burkard
+assignee: t.burkard
+priority: ''
+due_date: ''
+relationships:
+  related:
+  - 10
+created: 2026-01-13T19:58:51Z
+updated: 2026-01-13T20:06:23Z
