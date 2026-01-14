@@ -1,7 +1,7 @@
 _version: 1
 id: 46
 title: '[test] add automated tests for show command'
-state: active
+state: resolved
 type: task
 labels: []
 reporter: t.burkard
@@ -10,4 +10,4 @@ priority: ''
 due_date: ''
 relationships: {}
 created: 2026-01-08T22:10:36Z
-updated: 2026-01-14T21:44:21Z
+updated: 2026-01-14T21:47:15Z
