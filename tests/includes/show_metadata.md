@@ -17,8 +17,8 @@
 | **due_date**      | 2026-06-24                 |
 | **relationships** | related: 2                 |
 |                   | child: 2, 3                |
-| **created**       | __DATE__       |
-| **updated**       | __DATE__       |
+| **created**       | __CREATED__       |
+| **updated**       | __UPDATED__       |
 
 ## Description
 

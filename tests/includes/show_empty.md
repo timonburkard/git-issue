@@ -16,8 +16,8 @@
 | **priority**      | -                    |
 | **due_date**      | -                    |
 | **relationships** | -                    |
-| **created**       | __DATE__ |
-| **updated**       | __DATE__ |
+| **created**       | __CREATED__ |
+| **updated**       | __UPDATED__ |
 
 ## Description
 

@@ -26,15 +26,20 @@ fn test_show_empty() {
     // Create new issue
     run_command(&["new", "Simple issue"]).expect("new failed");
 
+    // expected
     let expected_template = include_str!("includes/show_empty.md").replace("\r\n", "\n");
-    let expected = expected_template.replace("__DATE__", &now);
-    let expected_plus_1 = expected_template.replace("__DATE__", &now_plus_1s);
+
+    let expected = expected_template.replace("__CREATED__", &now).replace("__UPDATED__", &now);
+    let expected_updated_plus_1 = expected_template.replace("__CREATED__", &now).replace("__UPDATED__", &now_plus_1s);
+    let expected_both_plus_1 = expected_template
+        .replace("__CREATED__", &now_plus_1s)
+        .replace("__UPDATED__", &now_plus_1s);
 
     let output = run_command(&["show", "1"]).expect("show failed");
     let stdout = String::from_utf8_lossy(&output.stdout);
     let stdout_str = stdout.as_ref().replace("\r\n", "\n");
 
-    assert!((stdout_str == expected) || (stdout_str == expected_plus_1));
+    assert!((stdout_str == expected) || (stdout_str == expected_updated_plus_1) || (stdout_str == expected_both_plus_1));
 }
 
 #[test]
@@ -72,13 +77,19 @@ fn test_show_metadata() {
     run_command(&["link", "1", "--add", "related=2"]).expect("set failed");
     run_command(&["link", "1", "--add", "child=2,3"]).expect("set failed");
 
+    // expected
     let expected_template = include_str!("includes/show_metadata.md").replace("\r\n", "\n");
-    let expected = expected_template.replace("__DATE__", &now);
-    let expected_plus_1 = expected_template.replace("__DATE__", &now_plus_1s);
 
+    let expected = expected_template.replace("__CREATED__", &now).replace("__UPDATED__", &now);
+    let expected_updated_plus_1 = expected_template.replace("__CREATED__", &now).replace("__UPDATED__", &now_plus_1s);
+    let expected_both_plus_1 = expected_template
+        .replace("__CREATED__", &now_plus_1s)
+        .replace("__UPDATED__", &now_plus_1s);
+
+    // stdout
     let output = run_command(&["show", "1"]).expect("show failed");
     let stdout = String::from_utf8_lossy(&output.stdout);
     let stdout_str = stdout.as_ref().replace("\r\n", "\n");
 
-    assert!((stdout_str == expected) || (stdout_str == expected_plus_1));
+    assert!((stdout_str == expected) || (stdout_str == expected_updated_plus_1) || (stdout_str == expected_both_plus_1));
 }
