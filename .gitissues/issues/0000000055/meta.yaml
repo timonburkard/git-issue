@@ -1,7 +1,7 @@
 _version: 1
 id: 55
 title: '[cmd/show] prettify formatting of metadata markdown table'
-state: active
+state: resolved
 type: feature
 labels: []
 reporter: t.burkard
@@ -10,4 +10,4 @@ priority: ''
 due_date: ''
 relationships: {}
 created: 2026-01-13T21:21:49Z
-updated: 2026-01-13T22:48:14Z
+updated: 2026-01-14T22:47:26Z
