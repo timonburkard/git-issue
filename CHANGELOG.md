@@ -9,7 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-    - [test] added tests for `show` command (#46)
+    - [cmd/show] prettified output for the metadata markdown table (#55)
+    - [test]     added tests for `show` command (#46)
 
 ## [v0.7.0] - 2026-01-13
 
