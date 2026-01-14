@@ -23,7 +23,6 @@ Issues live alongside your code inside `.gitissues/`, making them platform-indep
 - ✅ Git-integration: auto-commit of changes
 - ✅ Possibility to export issue list into CSV file
 - ✅ Automated integration tests
-- 🚧 `search` command across all issue titles and descriptions
 - 🚧 Comments / discussions
 
 ## 2.) Usage
