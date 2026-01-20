@@ -1,7 +1,7 @@
 _version: 1
 id: 57
 title: '[cmd/list] allow filtering for ''me'' on assignee/reporter'
-state: active
+state: resolved
 type: feature
 labels: []
 reporter: t.burkard
@@ -10,4 +10,4 @@ priority: ''
 due_date: ''
 relationships: {}
 created: 2026-01-14T22:53:37Z
-updated: 2026-01-16T15:05:04Z
+updated: 2026-01-20T19:52:44Z
