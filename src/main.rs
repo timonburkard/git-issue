@@ -69,11 +69,11 @@ enum Commands {
         #[arg(long, value_delimiter = ',')]
         columns: Option<Vec<String>>,
 
-        /// Filter issues by meta fields [<field>{=|>|<}<value>]
+        /// Filter issues by meta fields [field{=|>|<}value]
         #[arg(long, num_args = 1..)]
         filter: Option<Vec<Filter>>,
 
-        /// Sort issues by meta fields [<field>=asc|desc]
+        /// Sort issues by meta fields [field=asc|desc]
         #[arg(long, num_args = 1..)]
         sort: Option<Vec<Sorting>>,
 
