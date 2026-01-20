@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [unreleased]
 
+### Added
+
+    - [cmd/list] enabled 'me' as filter for assignee/reporter (#57)
+
 ### Removed
 
     - [cargo] removed `.gitissues/` directory from crates package

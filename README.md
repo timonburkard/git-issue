@@ -131,7 +131,7 @@ git issue list
 git issue list --columns id,assignee,title
 git issue list --columns '*'
 
-git issue list --filter priority=P2 title='*driver*' assignee='' description='*hardware*'  # Equal operator with support for wildcard and empty
+git issue list --filter priority=P2 title='*driver*' reporter=me assignee='' description='*hardware*'  # Equal operator with support for wildcard, me and empty
 git issue list --filter due_date\>2025-05-31 due_date\<2026-01-01  # Range operator
 git issue list --filter state=new,active                           # Equal operator with OR: All issues with state 'new' OR 'active' are shown
 git issue list --filter labels=ui labels=cli                       # Equal operator with AND: Only issues with both labels 'ui' AND 'cli' are shown

@@ -9,8 +9,8 @@ use chrono::Utc;
 use regex::Regex;
 
 use crate::model::{
-    Config, Filter, Meta, NamedColor, Operator, Priority, Settings, Sorting, cache_path, current_timestamp, dash_if_empty, issue_desc_path,
-    issue_exports_dir, issues_dir, load_config, load_description, load_meta, load_settings,
+    Config, Filter, Meta, NamedColor, Operator, Priority, Settings, Sorting, Users, cache_path, current_timestamp, dash_if_empty,
+    issue_desc_path, issue_exports_dir, issues_dir, load_config, load_description, load_meta, load_settings, load_users, user_handle_me,
 };
 
 pub fn run(
@@ -21,19 +21,21 @@ pub fn run(
     no_color: bool,
 ) -> Result<(), String> {
     let config = load_config()?;
+    let settings = load_settings()?;
+
     let mut issues = get_issues_metadata()?;
 
     sort_issues(&config, &mut issues, sort)?;
 
-    filter_issues(&config, &mut issues, filter)?;
+    filter_issues(&config, &settings, &mut issues, filter)?;
 
     // Print
     match columns {
         None => {
-            print_list(&config, &issues, None, print_csv, no_color)?;
+            print_list(&config, &settings, &issues, None, print_csv, no_color)?;
         }
         Some(cols) => {
-            print_list(&config, &issues, Some(cols), print_csv, no_color)?;
+            print_list(&config, &settings, &issues, Some(cols), print_csv, no_color)?;
         }
     }
 
@@ -258,9 +260,14 @@ fn print_header_separator(settings: &Settings, cols: &[String], column_widths: &
 /// - columns: list of columns to print (None means default from config)
 /// - print_csv: whether to print as CSV
 /// - no_color: whether to disable color output
-fn print_list(config: &Config, issues: &Vec<Meta>, columns: Option<Vec<String>>, print_csv: bool, no_color: bool) -> Result<(), String> {
-    let settings = load_settings()?;
-
+fn print_list(
+    config: &Config,
+    settings: &Settings,
+    issues: &Vec<Meta>,
+    columns: Option<Vec<String>>,
+    print_csv: bool,
+    no_color: bool,
+) -> Result<(), String> {
     let mut cols = match &columns {
         Some(value) => value.clone(),
         None => config.list_columns.clone(),
@@ -291,7 +298,7 @@ fn print_list(config: &Config, issues: &Vec<Meta>, columns: Option<Vec<String>>,
         } else {
             let width = *column_widths.get(col).unwrap_or(&22);
             let styled = if color_enabled {
-                colorize_header(&settings, col)
+                colorize_header(settings, col)
             } else {
                 col.to_string()
             };
@@ -303,7 +310,7 @@ fn print_list(config: &Config, issues: &Vec<Meta>, columns: Option<Vec<String>>,
     print_ln(print_csv, &mut csv_content);
 
     if !print_csv {
-        print_header_separator(&settings, &cols, &column_widths);
+        print_header_separator(settings, &cols, &column_widths);
     }
 
     // Print rows
@@ -316,7 +323,7 @@ fn print_list(config: &Config, issues: &Vec<Meta>, columns: Option<Vec<String>>,
             } else {
                 let width = *column_widths.get(col).unwrap_or(&22);
                 let colored_value = if color_enabled {
-                    colorize_value(&settings, col, &value)
+                    colorize_value(settings, col, &value)
                 } else {
                     value.clone()
                 };
@@ -402,7 +409,7 @@ fn calculate_column_widths(issues: &[Meta], columns: &[String]) -> Result<std::c
     Ok(widths)
 }
 
-fn filter_issues(config: &Config, issues: &mut Vec<Meta>, filters: Option<Vec<Filter>>) -> Result<(), String> {
+fn filter_issues(config: &Config, settings: &Settings, issues: &mut Vec<Meta>, filters: Option<Vec<Filter>>) -> Result<(), String> {
     if let Some(mut filters) = filters {
         // Validate all filter fields
         let mut filter_fields: Vec<String> = filters.iter().map(|f| f.field.clone()).collect();
@@ -415,10 +422,12 @@ fn filter_issues(config: &Config, issues: &mut Vec<Meta>, filters: Option<Vec<Fi
 
         validate_filters(&filters)?;
 
+        let users = load_users()?;
+
         // Apply filters
         issues.retain(|meta| {
             filters.iter().all(|filter| match filter.operator {
-                Operator::Eq => filter_eq(filter, meta),
+                Operator::Eq => filter_eq(filter, meta, settings, &users),
                 Operator::Gt => filter_gt(filter, meta).unwrap_or(false),
                 Operator::Lt => filter_lt(filter, meta).unwrap_or(false),
             })
@@ -459,15 +468,15 @@ fn validate_filters(filters: &[Filter]) -> Result<(), String> {
     Ok(())
 }
 
-fn filter_eq(filter: &Filter, meta: &Meta) -> bool {
+fn filter_eq(filter: &Filter, meta: &Meta, settings: &Settings, users: &Users) -> bool {
     match filter.field.as_str() {
         "id" => do_strings_match(&meta.id.to_string(), &filter.value),
         "title" => do_strings_match(&meta.title, &filter.value),
         "state" => do_strings_match(&meta.state, &filter.value),
         "type" => do_strings_match(&meta.type_, &filter.value),
         "labels" => is_in_str_list(&meta.labels, &filter.value),
-        "reporter" => do_strings_match(&meta.reporter, &filter.value),
-        "assignee" => do_strings_match(&meta.assignee, &filter.value),
+        "assignee" => do_strings_match_with_me(&meta.assignee, &filter.value, settings, users),
+        "reporter" => do_strings_match_with_me(&meta.reporter, &filter.value, settings, users),
         "priority" => do_strings_match(&format!("{:?}", meta.priority).replace("-", ""), &filter.value),
         "due_date" => do_strings_match(&meta.due_date, &filter.value),
         "created" => do_strings_match(&meta.created, &filter.value),
@@ -537,6 +546,22 @@ fn do_strings_match(value: &str, pattern: &str) -> bool {
     }
 
     false
+}
+
+fn do_strings_match_with_me(value: &str, pattern: &str, settings: &Settings, users: &Users) -> bool {
+    let mut pattern_me_replaced = Vec::new();
+
+    for word in pattern.split(',') {
+        let mut word = word.to_string();
+        match user_handle_me(users, settings, &mut word) {
+            Ok(_) => { /* continue */ }
+            Err(_) => return false,
+        }
+
+        pattern_me_replaced.push(word);
+    }
+
+    do_strings_match(value, pattern_me_replaced.join(",").as_str())
 }
 
 /// Check if pattern matches any string in the list
