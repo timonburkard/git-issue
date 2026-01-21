@@ -21,7 +21,7 @@ pub fn new(
     priority: Option<Priority>,
     due_date: Option<String>,
     labels: Option<Vec<String>>,
-) -> Result<u32, String> {
+) -> Result<(u32, Option<String>), String> {
     // Step 1: Allocate the next issue ID
     let issue_id = generate_id()?;
 
@@ -133,11 +133,11 @@ pub fn new(
     fs::write(&meta_yaml_path, meta_yaml).map_err(|e| format!("Failed to write meta.yaml: {e}"))?;
 
     // Step 9: git commit
-    git_commit(issue_id, title, "new")?;
-
-    println!("Created issue #{issue_id}");
-
-    Ok(())
+    match git_commit(issue_id, title, "new") {
+        Ok(None) => Ok((issue_id, None)),
+        Ok(Some(info)) => Ok((issue_id, Some(info))),
+        Err(e) => Err(e),
+    }
 }
 
 /// Generates new ID

@@ -204,7 +204,11 @@ pub fn run(
 
         fs::write(&meta_path, updated_yaml).map_err(|_| "Failed to write meta.yaml".to_string())?;
 
-        git_commit(id, updated_meta.title, &format!("set {}", fields.join(",")))?;
+        match git_commit(id, updated_meta.title, &format!("set {}", fields.join(","))) {
+            Ok(None) => {}
+            Ok(Some(info)) => println!("{}", info),
+            Err(e) => return Err(e),
+        }
 
         num_updated_issues += 1;
     }

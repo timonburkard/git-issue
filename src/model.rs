@@ -488,12 +488,12 @@ pub fn issue_exports_dir() -> Result<std::path::PathBuf, String> {
 
 /// Git commit based on template and config
 /// This commits all issue changes (.gitissues/issues/)
-pub fn git_commit(id: u32, title: String, action: &str) -> Result<(), String> {
+pub fn git_commit(id: u32, title: String, action: &str) -> Result<Option<String>, String> {
     let config = load_config()?;
 
     // Check if auto-commit is enabled
     if !config.commit_auto {
-        return Ok(());
+        return Ok(None);
     }
 
     // Prepare commit message
@@ -504,20 +504,16 @@ pub fn git_commit(id: u32, title: String, action: &str) -> Result<(), String> {
         .replace("{id}", &format!("{id}"))
         .replace("{title}", &title);
 
-    run_git(&commit_message, &issues_dir()?.to_string_lossy())?;
-
-    Ok(())
+    run_git(&commit_message, &issues_dir()?.to_string_lossy())
 }
 
 /// Simple commit message not based on template or config
 /// This commits all changes (.gitissues/)
-pub fn git_commit_non_templated(msg: &str) -> Result<(), String> {
+pub fn git_commit_non_templated(msg: &str) -> Result<Option<String>, String> {
     // Prepare commit message
     let commit_message = format!("[issue] {msg}");
 
-    run_git(&commit_message, &gitissues_base()?.to_string_lossy())?;
-
-    Ok(())
+    run_git(&commit_message, &gitissues_base()?.to_string_lossy())
 }
 
 pub fn open_editor(mut editor: String, path: String) -> Result<(), String> {
@@ -588,7 +584,7 @@ pub fn dash_if_empty(value: &str) -> String {
     if value.is_empty() { "-".to_string() } else { value.to_string() }
 }
 
-fn run_git(commit_message: &str, staging_dir: &str) -> Result<(), String> {
+fn run_git(commit_message: &str, staging_dir: &str) -> Result<Option<String>, String> {
     // Execute git add
     let add_result = Command::new("git")
         .args(["add", staging_dir])
@@ -615,8 +611,7 @@ fn run_git(commit_message: &str, staging_dir: &str) -> Result<(), String> {
             || stdout.contains("no changes added to commit")
             || stdout.contains("nothing added to commit")
         {
-            println!("Info: Nothing to commit");
-            return Ok(());
+            return Ok(Some("Info: Nothing to commit".to_string()));
         }
 
         let error_msg = if !stderr.trim().is_empty() { stderr.trim() } else { stdout.trim() };
@@ -624,5 +619,5 @@ fn run_git(commit_message: &str, staging_dir: &str) -> Result<(), String> {
         return Err(format!("Failed to commit: {}", error_msg));
     }
 
-    Ok(())
+    Ok(None)
 }

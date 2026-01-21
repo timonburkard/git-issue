@@ -46,7 +46,11 @@ pub fn run(id: u32, add: Option<Vec<RelationshipLink>>, remove: Option<Vec<Relat
 
     let title = issue_title(id)?;
 
-    git_commit(id, title, "links updated")?;
+    match git_commit(id, title, "links updated") {
+        Ok(None) => {}
+        Ok(Some(info)) => println!("{}", info),
+        Err(e) => return Err(e),
+    }
 
     println!("Updated issue relationship(s)");
 

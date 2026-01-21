@@ -15,7 +15,11 @@ pub fn run(id: u32) -> Result<(), String> {
 
     let title = issue_title(id)?;
 
-    git_commit(id, title, "edit description")?;
+    match git_commit(id, title, "edit description") {
+        Ok(None) => {}
+        Ok(Some(info)) => println!("{}", info),
+        Err(e) => return Err(e),
+    }
 
     Ok(())
 }
