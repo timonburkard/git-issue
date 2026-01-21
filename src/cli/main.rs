@@ -4,17 +4,9 @@ use std::io::ErrorKind;
 
 use clap::{Parser, Subcommand};
 
-use crate::model::{Filter, Priority, RelationshipLink, Sorting, cache_path};
+use git_issue::cmd::model::{Filter, Priority, RelationshipLink, Sorting, cache_path};
 
 mod cli;
-mod edit;
-mod init;
-mod link;
-mod list;
-mod model;
-mod new;
-mod set;
-mod show;
 
 #[derive(Parser)]
 #[command(name = "git-issue")]

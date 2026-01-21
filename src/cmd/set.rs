@@ -1,6 +1,6 @@
 use std::fs;
 
-use crate::model::{
+use crate::cmd::model::{
     Priority, current_timestamp, git_commit, is_valid_iso_date, is_valid_state, is_valid_type, is_valid_user, issue_dir, issue_meta_path,
     load_config, load_meta, load_settings, load_users, user_handle_me,
 };

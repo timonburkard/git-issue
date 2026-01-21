@@ -1,6 +1,6 @@
 use std::fs;
 
-use crate::model::{
+use crate::cmd::model::{
     Config, RelationshipLink, current_timestamp, git_commit, issue_dir, issue_meta_path, issue_title, load_config, load_meta,
 };
 

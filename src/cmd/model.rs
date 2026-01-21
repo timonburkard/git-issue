@@ -389,7 +389,7 @@ pub fn load_description(path: &Path) -> Result<String, String> {
 }
 
 pub fn create_settings_if_missing(print: bool) -> Result<Option<String>, String> {
-    const DEFAULT_SETTINGS: &str = include_str!("../config/settings-default.yaml");
+    const DEFAULT_SETTINGS: &str = include_str!("../../config/settings-default.yaml");
     let settings_dst = settings_path()?;
 
     if let Ok(true) = fs::exists(&settings_dst) {

@@ -7,17 +7,17 @@ use std::time::Duration;
 use anstyle::{AnsiColor, Effects, Reset, Style};
 use chrono::Utc;
 
-use crate::edit;
-use crate::init;
-use crate::link;
-use crate::list::{self, IssueData};
-use crate::model::{
+use git_issue::cmd::edit;
+use git_issue::cmd::init;
+use git_issue::cmd::link;
+use git_issue::cmd::list::{self, IssueData};
+use git_issue::cmd::model::{
     Config, Filter, NamedColor, Priority, RelationshipLink, Settings, Sorting, cache_path, current_timestamp, issue_exports_dir,
     load_config, load_settings, open_editor,
 };
-use crate::new;
-use crate::set;
-use crate::show;
+use git_issue::cmd::new;
+use git_issue::cmd::set;
+use git_issue::cmd::show;
 
 pub fn init(no_commit: bool) -> Result<(), String> {
     let info = init::init(no_commit)?;

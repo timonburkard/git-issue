@@ -6,7 +6,7 @@ use std::str::FromStr;
 
 use regex::Regex;
 
-use crate::model::{
+use crate::cmd::model::{
     Config, Filter, Meta, Operator, Priority, Settings, Sorting, Users, dash_if_empty, issue_desc_path, issues_dir, load_config,
     load_description, load_meta, load_settings, load_users, user_handle_me,
 };
@@ -366,8 +366,8 @@ fn sort_issues(config: &Config, issues: &mut [Meta], sorts: Option<Vec<Sorting>>
                     }
                 };
                 let ordering = match sort.order {
-                    crate::model::Order::Asc => ordering,
-                    crate::model::Order::Desc => ordering.reverse(),
+                    crate::cmd::model::Order::Asc => ordering,
+                    crate::cmd::model::Order::Desc => ordering.reverse(),
                 };
                 if ordering != Ordering::Equal {
                     return ordering;
