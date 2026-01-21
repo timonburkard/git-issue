@@ -6,6 +6,7 @@ use clap::{Parser, Subcommand};
 
 use crate::model::{Filter, Priority, RelationshipLink, Sorting, cache_path};
 
+mod cli;
 mod edit;
 mod init;
 mod link;
@@ -189,7 +190,7 @@ fn main() {
             priority,
             due_date,
             labels,
-        } => new::run(title, type_, reporter, assignee, priority, due_date, labels),
+        } => cli::new(title, type_, reporter, assignee, priority, due_date, labels),
 
         Commands::List {
             columns,

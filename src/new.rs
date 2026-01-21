@@ -13,7 +13,7 @@ use crate::model::{
     user_handle_me,
 };
 
-pub fn run(
+pub fn new(
     title: String,
     type_: Option<String>,
     reporter: Option<String>,
@@ -21,7 +21,7 @@ pub fn run(
     priority: Option<Priority>,
     due_date: Option<String>,
     labels: Option<Vec<String>>,
-) -> Result<(), String> {
+) -> Result<u32, String> {
     // Step 1: Allocate the next issue ID
     let issue_id = generate_id()?;
 
