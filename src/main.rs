@@ -200,7 +200,7 @@ fn main() {
             no_color,
         } => cli::list(columns, filter, sort, csv, no_color),
 
-        Commands::Show { id } => show::run(id),
+        Commands::Show { id } => cli::show(id),
 
         Commands::Set {
             ids,

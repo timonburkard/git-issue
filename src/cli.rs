@@ -12,10 +12,11 @@ use crate::link;
 use crate::list::{self, IssueData};
 use crate::model::{
     Config, Filter, NamedColor, Priority, RelationshipLink, Settings, Sorting, cache_path, current_timestamp, issue_exports_dir,
-    load_config, load_settings,
+    load_config, load_settings, open_editor,
 };
 use crate::new;
 use crate::set;
+use crate::show;
 
 pub fn init(no_commit: bool) -> Result<(), String> {
     let info = init::init(no_commit)?;
@@ -135,6 +136,16 @@ pub fn list(
     let (issues, columns) = list::list(columns, filter, sort)?;
 
     print_list(&config, &settings, &issues, &columns, print_csv, no_color)?;
+
+    Ok(())
+}
+
+pub fn show(id: u32) -> Result<(), String> {
+    let settings = load_settings()?;
+
+    let tmp_file = show::show(id)?;
+
+    open_editor(settings.editor, tmp_file.to_string_lossy().to_string())?;
 
     Ok(())
 }

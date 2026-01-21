@@ -6,3 +6,4 @@ pub mod list;
 pub mod model;
 pub mod new;
 pub mod set;
+pub mod show;

@@ -1,17 +1,20 @@
 use std::collections::HashMap;
 use std::fs;
-use std::path::Path;
+use std::path::{Path, PathBuf};
 
 use indexmap::IndexMap;
 
 use regex::Regex;
 
 use crate::model::{
-    Meta, dash_if_empty, issue_attachments_dir, issue_dir, issue_meta_path, issue_tmp_show_dir, load_description, load_meta, load_settings,
-    open_editor,
+    Meta, dash_if_empty, issue_attachments_dir, issue_dir, issue_meta_path, issue_tmp_show_dir, load_description, load_meta,
 };
 
-pub fn run(id: u32) -> Result<(), String> {
+/// Show the issue with the given ID by generating a markdown file in a temporary directory
+/// The markdown file contains the issue title, meta data in table format and description
+/// The description attachments are also copied to the temporary directory
+/// Returns the path to the markdown file
+pub fn show(id: u32) -> Result<PathBuf, String> {
     let path = issue_dir(id)?;
 
     // Precondition: .gitissues/issues/ID must exist
@@ -24,6 +27,7 @@ pub fn run(id: u32) -> Result<(), String> {
 
     // Create per-issue tmp directory
     let tmp_issue_path = issue_tmp_show_dir(id)?;
+    let _ = fs::remove_dir_all(&tmp_issue_path);
     fs::create_dir_all(&tmp_issue_path).map_err(|e| format!("Failed to create {}: {e}", tmp_issue_path.display()))?;
 
     // Generate markdown content
@@ -41,14 +45,7 @@ pub fn run(id: u32) -> Result<(), String> {
         copy_dir_recursive(&attachments_src, &tmp_attachments)?;
     }
 
-    let settings = load_settings()?;
-
-    open_editor(settings.editor, tmp_file.to_string_lossy().to_string())?;
-
-    // Clean up entire per-issue tmp directory
-    let _ = fs::remove_dir_all(tmp_issue_path);
-
-    Ok(())
+    Ok(tmp_file)
 }
 
 fn generate_content_metadata(id: u32, meta: &Meta) -> String {
