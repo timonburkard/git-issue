@@ -214,7 +214,7 @@ fn main() {
             labels,
             labels_add,
             labels_remove,
-        } => set::run(
+        } => cli::set(
             ids,
             state,
             title,

@@ -7,8 +7,10 @@ use crate::model::{
     issue_meta_path, load_config, load_meta, load_settings, load_users, user_handle_me,
 };
 
+/// Set metadata fields of issues
+/// Returns number of issues updated and optional info messages
 #[allow(clippy::too_many_arguments)]
-pub fn run(
+pub fn set(
     ids: Vec<String>,
     state: Option<String>,
     title: Option<String>,
@@ -20,7 +22,7 @@ pub fn run(
     labels: Option<Vec<String>>,
     labels_add: Option<Vec<String>>,
     labels_remove: Option<Vec<String>>,
-) -> Result<(), String> {
+) -> Result<(u32, Option<Vec<String>>), String> {
     let config = load_config()?;
     let settings = load_settings()?;
     let users = load_users()?;
@@ -54,6 +56,7 @@ pub fn run(
     }
 
     let mut num_updated_issues = 0;
+    let mut infos = Vec::new();
 
     for id in ids {
         // Load meta.yaml
@@ -206,20 +209,18 @@ pub fn run(
 
         match git_commit(id, updated_meta.title, &format!("set {}", fields.join(","))) {
             Ok(None) => {}
-            Ok(Some(info)) => println!("{}", info),
+            Ok(Some(info)) => infos.push(info),
             Err(e) => return Err(e),
         }
 
         num_updated_issues += 1;
     }
 
-    match num_updated_issues {
-        0 => return Err("No fields changed".to_string()),
-        1 => println!("Updated issue field(s)"),
-        _ => println!("Updated {} issues' field(s)", num_updated_issues),
-    };
-
-    Ok(())
+    if infos.is_empty() {
+        Ok((num_updated_issues, None))
+    } else {
+        Ok((num_updated_issues, Some(infos)))
+    }
 }
 
 fn read_cached_issue_ids() -> Result<Vec<u32>, String> {
