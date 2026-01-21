@@ -2,7 +2,8 @@ use std::fs;
 use std::io::{self, Write};
 use std::time::Duration;
 
-use crate::model::{Priority, cache_path};
+use crate::link;
+use crate::model::{Priority, RelationshipLink, cache_path};
 use crate::new;
 use crate::set;
 
@@ -83,6 +84,18 @@ pub fn set(
         1 => println!("Updated issue field(s)"),
         _ => println!("Updated {} issues' field(s)", num_updated_issues),
     };
+
+    Ok(())
+}
+
+pub fn link(id: u32, add: Option<Vec<RelationshipLink>>, remove: Option<Vec<RelationshipLink>>) -> Result<(), String> {
+    let info = link::link(id, add, remove)?;
+
+    if let Some(info) = info {
+        println!("{}", info);
+    }
+
+    println!("Updated issue relationship(s)");
 
     Ok(())
 }

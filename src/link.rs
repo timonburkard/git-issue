@@ -9,7 +9,7 @@ enum Action {
     Remove,
 }
 
-pub fn run(id: u32, add: Option<Vec<RelationshipLink>>, remove: Option<Vec<RelationshipLink>>) -> Result<(), String> {
+pub fn link(id: u32, add: Option<Vec<RelationshipLink>>, remove: Option<Vec<RelationshipLink>>) -> Result<Option<String>, String> {
     let dir = issue_dir(id)?;
     let path = dir.as_path();
 
@@ -46,15 +46,7 @@ pub fn run(id: u32, add: Option<Vec<RelationshipLink>>, remove: Option<Vec<Relat
 
     let title = issue_title(id)?;
 
-    match git_commit(id, title, "links updated") {
-        Ok(None) => {}
-        Ok(Some(info)) => println!("{}", info),
-        Err(e) => return Err(e),
-    }
-
-    println!("Updated issue relationship(s)");
-
-    Ok(())
+    git_commit(id, title, "links updated")
 }
 
 fn validate_relationships(id: u32, relationships: &[RelationshipLink], config: &Config) -> Result<(), String> {

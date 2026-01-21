@@ -230,7 +230,7 @@ fn main() {
 
         Commands::Edit { id } => edit::run(id),
 
-        Commands::Link { id, add, remove } => link::run(id, add, remove),
+        Commands::Link { id, add, remove } => cli::link(id, add, remove),
     };
 
     if let Err(e) = result {
