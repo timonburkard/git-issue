@@ -198,7 +198,7 @@ fn main() {
             sort,
             csv,
             no_color,
-        } => list::run(columns, filter, sort, csv, no_color),
+        } => cli::list(columns, filter, sort, csv, no_color),
 
         Commands::Show { id } => show::run(id),
 
