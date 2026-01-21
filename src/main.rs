@@ -228,7 +228,7 @@ fn main() {
             labels_remove,
         ),
 
-        Commands::Edit { id } => edit::run(id),
+        Commands::Edit { id } => cli::edit(id),
 
         Commands::Link { id, add, remove } => cli::link(id, add, remove),
     };

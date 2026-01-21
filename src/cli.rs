@@ -7,6 +7,7 @@ use std::time::Duration;
 use anstyle::{AnsiColor, Effects, Reset, Style};
 use chrono::Utc;
 
+use crate::edit;
 use crate::init;
 use crate::link;
 use crate::list::{self, IssueData};
@@ -146,6 +147,22 @@ pub fn show(id: u32) -> Result<(), String> {
     let tmp_file = show::show(id)?;
 
     open_editor(settings.editor, tmp_file.to_string_lossy().to_string())?;
+
+    Ok(())
+}
+
+pub fn edit(id: u32) -> Result<(), String> {
+    let settings = load_settings()?;
+
+    let description = edit::edit_start(id)?;
+
+    open_editor(settings.editor, description.to_string_lossy().to_string())?;
+
+    let info = edit::edit_end(id)?;
+
+    if let Some(info) = info {
+        println!("{}", info);
+    }
 
     Ok(())
 }

@@ -1,5 +1,6 @@
 #![deny(warnings, clippy::unwrap_used, clippy::expect_used)]
 
+pub mod edit;
 pub mod init;
 pub mod link;
 pub mod list;

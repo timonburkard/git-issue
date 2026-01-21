@@ -1,6 +1,10 @@
-use crate::model::{git_commit, issue_desc_path, issue_title, load_settings, open_editor};
+use std::path::PathBuf;
 
-pub fn run(id: u32) -> Result<(), String> {
+use crate::model::{git_commit, issue_desc_path, issue_title};
+
+/// Start editing the description of an issue
+/// Returns the path to the description file
+pub fn edit_start(id: u32) -> Result<PathBuf, String> {
     let desc = issue_desc_path(id)?;
     let path = desc.as_path();
 
@@ -9,17 +13,12 @@ pub fn run(id: u32) -> Result<(), String> {
         return Err("Not available: ID/description.md does not exist.".to_string());
     }
 
-    let settings = load_settings()?;
+    Ok(desc)
+}
 
-    open_editor(settings.editor, desc.to_string_lossy().to_string())?;
-
+/// Finalize editing the description of an issue
+pub fn edit_end(id: u32) -> Result<Option<String>, String> {
     let title = issue_title(id)?;
 
-    match git_commit(id, title, "edit description") {
-        Ok(None) => {}
-        Ok(Some(info)) => println!("{}", info),
-        Err(e) => return Err(e),
-    }
-
-    Ok(())
+    git_commit(id, title, "edit description")
 }
