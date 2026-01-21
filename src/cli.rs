@@ -132,9 +132,17 @@ pub fn list(
     no_color: bool,
 ) -> Result<(), String> {
     let config = load_config()?;
-    let settings = load_settings()?;
+    let (settings, info) = load_settings()?;
 
-    let (issues, columns) = list::list(columns, filter, sort)?;
+    if let Some(info) = info {
+        println!("{}", info);
+    }
+
+    let (issues, columns, info) = list::list(columns, filter, sort)?;
+
+    if let Some(info) = info {
+        println!("{}", info);
+    }
 
     print_list(&config, &settings, &issues, &columns, print_csv, no_color)?;
 
@@ -142,7 +150,11 @@ pub fn list(
 }
 
 pub fn show(id: u32) -> Result<(), String> {
-    let settings = load_settings()?;
+    let (settings, info) = load_settings()?;
+
+    if let Some(info) = info {
+        println!("{}", info);
+    }
 
     let tmp_file = show::show(id)?;
 
@@ -152,7 +164,11 @@ pub fn show(id: u32) -> Result<(), String> {
 }
 
 pub fn edit(id: u32) -> Result<(), String> {
-    let settings = load_settings()?;
+    let (settings, info) = load_settings()?;
+
+    if let Some(info) = info {
+        println!("{}", info);
+    }
 
     let description = edit::edit_start(id)?;
 

@@ -27,7 +27,7 @@ pub fn new(
 
     // Step 2: Read config
     let config = load_config()?;
-    let settings = load_settings()?;
+    let (settings, info_settings) = load_settings()?;
     let users = load_users()?;
 
     if config.states.is_empty() {
@@ -56,14 +56,13 @@ pub fn new(
             }
         }
         None => {
-            let settings = load_settings()?;
             if !is_valid_user(&users, &settings.user) {
                 return Err(format!(
                     "Invalid reporter \"{}\": settings.yaml::user must be part of users.yaml:users or ''",
-                    settings.user
+                    settings.user.clone()
                 ));
             } else {
-                settings.user
+                settings.user.clone()
             }
         }
     };
@@ -134,8 +133,14 @@ pub fn new(
 
     // Step 9: git commit
     match git_commit(issue_id, title, "new") {
-        Ok(None) => Ok((issue_id, None)),
-        Ok(Some(info)) => Ok((issue_id, Some(info))),
+        Ok(None) => Ok((issue_id, info_settings)),
+        Ok(Some(info_commit)) => Ok((
+            issue_id,
+            match info_settings {
+                Some(info_settings) => Some(format!("{info_settings}\n{info_commit}")),
+                None => Some(info_commit),
+            },
+        )),
         Err(e) => Err(e),
     }
 }

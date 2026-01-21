@@ -14,15 +14,13 @@ use crate::model::{
 // (ID, {column: value, ...})
 pub type IssueData = (u32, HashMap<String, String>);
 
+// (Vec<IssueData>, Vec<column_names>, Option<info>)
+pub type ListResult = (Vec<IssueData>, Vec<String>, Option<String>);
+
 /// List issues with optional columns, filters, and sorting
-/// Returns a tuple of (Vec<IssueData>, Vec<column_names>)
-pub fn list(
-    columns: Option<Vec<String>>,
-    filter: Option<Vec<Filter>>,
-    sort: Option<Vec<Sorting>>,
-) -> Result<(Vec<IssueData>, Vec<String>), String> {
+pub fn list(columns: Option<Vec<String>>, filter: Option<Vec<Filter>>, sort: Option<Vec<Sorting>>) -> Result<ListResult, String> {
     let config = load_config()?;
-    let settings = load_settings()?;
+    let (settings, info) = load_settings()?;
 
     let mut issues = get_issues_metadata()?;
 
@@ -58,7 +56,7 @@ pub fn list(
         issues_data.push((meta.id, map));
     }
 
-    Ok((issues_data, cols))
+    Ok((issues_data, cols, info))
 }
 
 fn get_issues_metadata() -> Result<Vec<Meta>, String> {

@@ -351,10 +351,10 @@ pub fn load_config() -> Result<Config, String> {
     Ok(config)
 }
 
-pub fn load_settings() -> Result<Settings, String> {
+pub fn load_settings() -> Result<(Settings, Option<String>), String> {
     let settings_path = settings_path()?;
 
-    create_settings_if_missing(true)?;
+    let info = create_settings_if_missing(true)?;
 
     let settings_raw = match fs::read_to_string(&settings_path) {
         Ok(s) => s,
@@ -366,7 +366,7 @@ pub fn load_settings() -> Result<Settings, String> {
         Err(e) => return Err(format!("settings.yaml malformatted: {e}")),
     };
 
-    Ok(settings)
+    Ok((settings, info))
 }
 
 pub fn load_meta(path: &Path) -> Result<Meta, String> {
@@ -388,22 +388,22 @@ pub fn load_description(path: &Path) -> Result<String, String> {
     Ok(raw)
 }
 
-pub fn create_settings_if_missing(print: bool) -> Result<(), String> {
+pub fn create_settings_if_missing(print: bool) -> Result<Option<String>, String> {
     const DEFAULT_SETTINGS: &str = include_str!("../config/settings-default.yaml");
     let settings_dst = settings_path()?;
 
     if let Ok(true) = fs::exists(&settings_dst) {
-        return Ok(());
+        return Ok(None);
     }
 
     fs::write(&settings_dst, DEFAULT_SETTINGS)
         .map_err(|e| format!("Failed to write default settings to {}: {e}", settings_dst.display()))?;
 
     if print {
-        println!("Created default local user settings at {}", settings_dst.display());
+        return Ok(Some(format!("Created default local user settings at {}", settings_dst.display())));
     }
 
-    Ok(())
+    Ok(None)
 }
 
 pub fn issue_title(id: u32) -> Result<String, String> {

@@ -22,7 +22,7 @@ pub fn set(
     labels_remove: Option<Vec<String>>,
 ) -> Result<(u32, Option<Vec<String>>), String> {
     let config = load_config()?;
-    let settings = load_settings()?;
+    let (settings, info) = load_settings()?;
     let users = load_users()?;
 
     // Precondition: .gitissues/issues/ID must exist
@@ -36,7 +36,11 @@ pub fn set(
     }
 
     let mut num_updated_issues = 0;
-    let mut infos = Vec::new();
+
+    let mut infos = match info {
+        Some(info) => vec![info],
+        None => Vec::new(),
+    };
 
     for id in ids {
         // Load meta.yaml

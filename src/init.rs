@@ -21,7 +21,7 @@ pub fn init(no_commit: bool) -> Result<Option<String>, String> {
     fs::write(&config_dst, DEFAULT_CONFIG).map_err(|e| format!("Failed to write default config to {}: {e}", config_dst.display()))?;
 
     // Copy default settings file
-    create_settings_if_missing(false)?;
+    let info_settings = create_settings_if_missing(false)?;
 
     // Copy default users file
     const DEFAULT_USERS: &str = include_str!("../config/users-default.yaml");
@@ -34,8 +34,15 @@ pub fn init(no_commit: bool) -> Result<Option<String>, String> {
     fs::write(&desc_dst, DEFAULT_DESC).map_err(|e| format!("Failed to write default description to {}: {e}", desc_dst.display()))?;
 
     if !no_commit {
-        return git_commit_non_templated("init");
+        match git_commit_non_templated("init") {
+            Ok(None) => return Ok(info_settings),
+            Ok(Some(info_commit)) => match info_settings {
+                Some(info_settings) => return Ok(Some(format!("{info_settings}\n{info_commit}"))),
+                None => return Ok(Some(info_commit)),
+            },
+            Err(e) => return Err(e),
+        }
     }
 
-    Ok(None)
+    Ok(info_settings)
 }
