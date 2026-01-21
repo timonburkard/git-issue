@@ -3,6 +3,7 @@ use std::cmp::Reverse;
 use std::collections::HashMap;
 use std::fs;
 use std::io::IsTerminal;
+use std::str::FromStr;
 
 use anstyle::{AnsiColor, Effects, Reset, Style};
 use chrono::Utc;

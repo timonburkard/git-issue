@@ -41,8 +41,12 @@ impl Priority {
             Priority::P4 => 4,
         }
     }
+}
 
-    pub fn from_str(s: &str) -> Result<Self, String> {
+impl FromStr for Priority {
+    type Err = String;
+
+    fn from_str(s: &str) -> Result<Self, String> {
         match s {
             "" => Ok(Priority::Empty),
             "p0" => Ok(Priority::P0),
