@@ -436,22 +436,27 @@ cargo test
 
 ### 5.2) Architecture
 
-- `config/`
+- `config/`                -- Configuration files
   - `config-default.yaml`    -- Default configuration, copy-pasted at `git issue init` to `.gitissues/`
   - `description-default.md` -- Default description template, copy-pasted at `git issue init` to `.gitissues/`
   - `users-default.yaml`     -- Default users, copy-pasted at `git issue init` to `.gitissues/`
   - `settings-default.yaml`  -- Default local user settings, copy-pasted at `git issue init` to `.gitissues/`
-- `src/`
-  - `main.rs`  -- CLI parsing with clap
-  - `model.rs` -- Shared data types, functions and utilities
-  - `edit.rs`  -- Edit issue description (markdown) with external text editor
-  - `init.rs`  -- Initialize `.gitissues/` directory and copy default config
-  - `link.rs`  -- Change relationships between issues
-  - `list.rs`  -- List all issues
-  - `new.rs`   -- Create new issues
-  - `set.rs`   -- Change issue meta fields
-  - `show.rs`  -- Show all issue information (markdown) with external text editor
-- `tests/`     -- Automated tests
+- `src/`     -- Source files
+  - `lib.rs`   -- Public library
+  - `cmd/`     -- Core of the application: Commands (CRUD)
+    - `model.rs` -- Shared data types, functions and utilities
+    - `edit.rs`  -- Edit issue description (markdown) with external text editor
+    - `init.rs`  -- Initialize `.gitissues/` directory and copy default config
+    - `link.rs`  -- Change relationships between issues
+    - `list.rs`  -- List all issues
+    - `new.rs`   -- Create new issues
+    - `set.rs`   -- Change issue meta fields
+    - `show.rs`  -- Show all issue information (markdown) with external text editor
+  - `cli/`     -- Binary: CLI -- Command Line Interface
+    - `main.rs`  -- Main entry for CLI: parsing with clap
+    - `cli.rs`   -- Functionality for CLI
+  - `web/`     -- Binary: WEB -- Local web server (🚧)
+- `tests/`   -- Automated tests
 
 ### 5.3) Dependencies
 
