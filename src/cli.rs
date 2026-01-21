@@ -7,15 +7,27 @@ use std::time::Duration;
 use anstyle::{AnsiColor, Effects, Reset, Style};
 use chrono::Utc;
 
+use crate::init;
 use crate::link;
-use crate::list;
-use crate::list::IssueData;
+use crate::list::{self, IssueData};
 use crate::model::{
     Config, Filter, NamedColor, Priority, RelationshipLink, Settings, Sorting, cache_path, current_timestamp, issue_exports_dir,
     load_config, load_settings,
 };
 use crate::new;
 use crate::set;
+
+pub fn init(no_commit: bool) -> Result<(), String> {
+    let info = init::init(no_commit)?;
+
+    if let Some(info) = info {
+        println!("{}", info);
+    }
+
+    println!("Initialization done");
+
+    Ok(())
+}
 
 pub fn new(
     title: String,

@@ -180,7 +180,7 @@ fn main() {
     }
 
     let result = match args.command {
-        Commands::Init { no_commit } => init::run(no_commit),
+        Commands::Init { no_commit } => cli::init(no_commit),
 
         Commands::New {
             title,
