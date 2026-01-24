@@ -9,12 +9,13 @@ use regex::Regex;
 use crate::model::{
     Meta, dash_if_empty, issue_attachments_dir, issue_dir, issue_meta_path, issue_tmp_show_dir, load_description, load_meta,
 };
+use crate::{Cmd, CmdResult};
 
 /// Show the issue with the given ID by generating a markdown file in a temporary directory
 /// The markdown file contains the issue title, meta data in table format and description
 /// The description attachments are also copied to the temporary directory
 /// Returns the path to the markdown file
-pub fn show(id: u32) -> Result<PathBuf, String> {
+pub fn show(id: u32) -> Cmd<PathBuf> {
     let path = issue_dir(id)?;
 
     // Precondition: .gitissues/issues/ID must exist
@@ -45,7 +46,10 @@ pub fn show(id: u32) -> Result<PathBuf, String> {
         copy_dir_recursive(&attachments_src, &tmp_attachments)?;
     }
 
-    Ok(tmp_file)
+    Ok(CmdResult {
+        value: tmp_file,
+        infos: vec![],
+    })
 }
 
 fn generate_content_metadata(id: u32, meta: &Meta) -> String {

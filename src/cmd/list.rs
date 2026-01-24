@@ -10,17 +10,23 @@ use crate::model::{
     Config, Filter, Meta, Operator, Priority, Settings, Sorting, Users, dash_if_empty, issue_desc_path, issues_dir, load_config,
     load_description, load_meta, load_settings, load_users, user_handle_me,
 };
+use crate::{Cmd, CmdResult};
 
 // (ID, {column: value, ...})
-pub type IssueData = (u32, HashMap<String, String>);
+pub struct IssueData {
+    pub id: u32,
+    pub data: HashMap<String, String>,
+}
 
-// (Vec<IssueData>, Vec<column_names>, Option<info>)
-pub type ListResult = (Vec<IssueData>, Vec<String>, Option<String>);
+pub struct ListResult {
+    pub issues: Vec<IssueData>,
+    pub columns: Vec<String>,
+}
 
 /// List issues with optional columns, filters, and sorting
-pub fn list(columns: Option<Vec<String>>, filter: Option<Vec<Filter>>, sort: Option<Vec<Sorting>>) -> Result<ListResult, String> {
+pub fn list(columns: Option<Vec<String>>, filter: Option<Vec<Filter>>, sort: Option<Vec<Sorting>>) -> Cmd<ListResult> {
     let config = load_config()?;
-    let (settings, info) = load_settings()?;
+    let (settings, infos) = load_settings()?;
 
     let mut issues = get_issues_metadata()?;
 
@@ -43,7 +49,7 @@ pub fn list(columns: Option<Vec<String>>, filter: Option<Vec<Filter>>, sort: Opt
 
     validate_column_names(&config, &mut cols, context)?;
 
-    let mut issues_data: Vec<(u32, HashMap<String, String>)> = Vec::new();
+    let mut issues_data: Vec<IssueData> = Vec::new();
 
     for meta in issues {
         let mut map = HashMap::new();
@@ -53,10 +59,16 @@ pub fn list(columns: Option<Vec<String>>, filter: Option<Vec<Filter>>, sort: Opt
             map.insert(col.clone(), value);
         }
 
-        issues_data.push((meta.id, map));
+        issues_data.push(IssueData { id: meta.id, data: map });
     }
 
-    Ok((issues_data, cols, info))
+    Ok(CmdResult {
+        value: ListResult {
+            issues: issues_data,
+            columns: cols,
+        },
+        infos,
+    })
 }
 
 fn get_issues_metadata() -> Result<Vec<Meta>, String> {

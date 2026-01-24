@@ -351,7 +351,7 @@ pub fn load_config() -> Result<Config, String> {
     Ok(config)
 }
 
-pub fn load_settings() -> Result<(Settings, Option<String>), String> {
+pub fn load_settings() -> Result<(Settings, Vec<String>), String> {
     let settings_path = settings_path()?;
 
     let info = create_settings_if_missing(true)?;
@@ -388,22 +388,22 @@ pub fn load_description(path: &Path) -> Result<String, String> {
     Ok(raw)
 }
 
-pub fn create_settings_if_missing(print: bool) -> Result<Option<String>, String> {
+pub fn create_settings_if_missing(print: bool) -> Result<Vec<String>, String> {
     const DEFAULT_SETTINGS: &str = include_str!("../../config/settings-default.yaml");
     let settings_dst = settings_path()?;
 
     if let Ok(true) = fs::exists(&settings_dst) {
-        return Ok(None);
+        return Ok(vec![]);
     }
 
     fs::write(&settings_dst, DEFAULT_SETTINGS)
         .map_err(|e| format!("Failed to write default settings to {}: {e}", settings_dst.display()))?;
 
     if print {
-        return Ok(Some(format!("Created default local user settings at {}", settings_dst.display())));
+        return Ok(vec![format!("Created default local user settings at {}", settings_dst.display())]);
     }
 
-    Ok(None)
+    Ok(vec![])
 }
 
 pub fn issue_title(id: u32) -> Result<String, String> {
@@ -488,12 +488,12 @@ pub fn issue_exports_dir() -> Result<std::path::PathBuf, String> {
 
 /// Git commit based on template and config
 /// This commits all issue changes (.gitissues/issues/)
-pub fn git_commit(id: u32, title: String, action: &str) -> Result<Option<String>, String> {
+pub fn git_commit(id: u32, title: String, action: &str) -> Result<Vec<String>, String> {
     let config = load_config()?;
 
     // Check if auto-commit is enabled
     if !config.commit_auto {
-        return Ok(None);
+        return Ok(vec![]);
     }
 
     // Prepare commit message
@@ -509,7 +509,7 @@ pub fn git_commit(id: u32, title: String, action: &str) -> Result<Option<String>
 
 /// Simple commit message not based on template or config
 /// This commits all changes (.gitissues/)
-pub fn git_commit_non_templated(msg: &str) -> Result<Option<String>, String> {
+pub fn git_commit_non_templated(msg: &str) -> Result<Vec<String>, String> {
     // Prepare commit message
     let commit_message = format!("[issue] {msg}");
 
@@ -584,7 +584,7 @@ pub fn dash_if_empty(value: &str) -> String {
     if value.is_empty() { "-".to_string() } else { value.to_string() }
 }
 
-fn run_git(commit_message: &str, staging_dir: &str) -> Result<Option<String>, String> {
+fn run_git(commit_message: &str, staging_dir: &str) -> Result<Vec<String>, String> {
     // Execute git add
     let add_result = Command::new("git")
         .args(["add", staging_dir])
@@ -611,7 +611,7 @@ fn run_git(commit_message: &str, staging_dir: &str) -> Result<Option<String>, St
             || stdout.contains("no changes added to commit")
             || stdout.contains("nothing added to commit")
         {
-            return Ok(Some("Info: Nothing to commit".to_string()));
+            return Ok(vec!["Info: Nothing to commit".to_string()]);
         }
 
         let error_msg = if !stderr.trim().is_empty() { stderr.trim() } else { stdout.trim() };
@@ -619,5 +619,5 @@ fn run_git(commit_message: &str, staging_dir: &str) -> Result<Option<String>, St
         return Err(format!("Failed to commit: {}", error_msg));
     }
 
-    Ok(None)
+    Ok(vec![])
 }

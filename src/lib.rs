@@ -21,3 +21,10 @@ pub use crate::cmd::model;
 pub use crate::cmd::new::new;
 pub use crate::cmd::set::set;
 pub use crate::cmd::show::show;
+
+pub struct CmdResult<T> {
+    pub value: T,
+    pub infos: Vec<String>,
+}
+
+pub type Cmd<T> = Result<CmdResult<T>, String>;

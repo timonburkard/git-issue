@@ -12,6 +12,7 @@ use crate::model::{
     issue_attachments_dir, issue_desc_path, issue_dir, issue_meta_path, issues_dir, load_config, load_settings, load_users, padded_id,
     user_handle_me,
 };
+use crate::{Cmd, CmdResult};
 
 pub fn new(
     title: String,
@@ -21,13 +22,13 @@ pub fn new(
     priority: Option<Priority>,
     due_date: Option<String>,
     labels: Option<Vec<String>>,
-) -> Result<(u32, Option<String>), String> {
+) -> Cmd<u32> {
     // Step 1: Allocate the next issue ID
     let issue_id = generate_id()?;
 
     // Step 2: Read config
     let config = load_config()?;
-    let (settings, info_settings) = load_settings()?;
+    let (settings, mut infos) = load_settings()?;
     let users = load_users()?;
 
     if config.states.is_empty() {
@@ -132,17 +133,10 @@ pub fn new(
     fs::write(&meta_yaml_path, meta_yaml).map_err(|e| format!("Failed to write meta.yaml: {e}"))?;
 
     // Step 9: git commit
-    match git_commit(issue_id, title, "new") {
-        Ok(None) => Ok((issue_id, info_settings)),
-        Ok(Some(info_commit)) => Ok((
-            issue_id,
-            match info_settings {
-                Some(info_settings) => Some(format!("{info_settings}\n{info_commit}")),
-                None => Some(info_commit),
-            },
-        )),
-        Err(e) => Err(e),
-    }
+    let info_commit = git_commit(issue_id, title, "new")?;
+    infos.extend(info_commit);
+
+    Ok(CmdResult { value: issue_id, infos })
 }
 
 /// Generates new ID

@@ -14,9 +14,9 @@ use git_issue::model::{
 };
 
 pub fn init(no_commit: bool) -> Result<(), String> {
-    let info = git_issue::init(no_commit)?;
+    let result = git_issue::init(no_commit)?;
 
-    if let Some(info) = info {
+    for info in result.infos {
         println!("{}", info);
     }
 
@@ -34,13 +34,13 @@ pub fn new(
     due_date: Option<String>,
     labels: Option<Vec<String>>,
 ) -> Result<(), String> {
-    let (issue_id, info) = git_issue::new(title, type_, reporter, assignee, priority, due_date, labels)?;
+    let result = git_issue::new(title, type_, reporter, assignee, priority, due_date, labels)?;
 
-    if let Some(info) = info {
+    for info in result.infos {
         println!("{}", info);
     }
 
-    println!("Created issue #{issue_id}");
+    println!("Created issue #{}", result.value);
 
     Ok(())
 }
@@ -77,7 +77,7 @@ pub fn set(
         wildcard_confirmation(ids.len())?;
     }
 
-    let (num_updated_issues, infos) = git_issue::set(
+    let result = git_issue::set(
         ids,
         state,
         title,
@@ -91,25 +91,23 @@ pub fn set(
         labels_remove,
     )?;
 
-    if let Some(infos) = infos {
-        for info in infos {
-            println!("{}", info);
-        }
+    for info in result.infos {
+        println!("{}", info);
     }
 
-    match num_updated_issues {
+    match result.value {
         0 => return Err("No fields changed".to_string()),
         1 => println!("Updated issue field(s)"),
-        _ => println!("Updated {} issues' field(s)", num_updated_issues),
+        num => println!("Updated {} issues' field(s)", num),
     };
 
     Ok(())
 }
 
 pub fn link(id: u32, add: Option<Vec<RelationshipLink>>, remove: Option<Vec<RelationshipLink>>) -> Result<(), String> {
-    let info = git_issue::link(id, add, remove)?;
+    let result = git_issue::link(id, add, remove)?;
 
-    if let Some(info) = info {
+    for info in result.infos {
         println!("{}", info);
     }
 
@@ -126,51 +124,59 @@ pub fn list(
     no_color: bool,
 ) -> Result<(), String> {
     let config = load_config()?;
-    let (settings, info) = load_settings()?;
+    let (settings, infos) = load_settings()?;
 
-    if let Some(info) = info {
+    for info in infos {
         println!("{}", info);
     }
 
-    let (issues, columns, info) = git_issue::list(columns, filter, sort)?;
+    let result = git_issue::list(columns, filter, sort)?;
 
-    if let Some(info) = info {
+    for info in result.infos {
         println!("{}", info);
     }
 
-    print_list(&config, &settings, &issues, &columns, print_csv, no_color)?;
+    print_list(&config, &settings, &result.value.issues, &result.value.columns, print_csv, no_color)?;
 
     Ok(())
 }
 
 pub fn show(id: u32) -> Result<(), String> {
-    let (settings, info) = load_settings()?;
+    let (settings, infos) = load_settings()?;
 
-    if let Some(info) = info {
+    for info in infos {
         println!("{}", info);
     }
 
-    let tmp_file = git_issue::show(id)?;
+    let result = git_issue::show(id)?;
 
-    open_editor(settings.editor, tmp_file.to_string_lossy().to_string())?;
+    for info in result.infos {
+        println!("{}", info);
+    }
+
+    open_editor(settings.editor, result.value.to_string_lossy().to_string())?;
 
     Ok(())
 }
 
 pub fn edit(id: u32) -> Result<(), String> {
-    let (settings, info) = load_settings()?;
+    let (settings, infos) = load_settings()?;
 
-    if let Some(info) = info {
+    for info in infos {
         println!("{}", info);
     }
 
-    let description = git_issue::edit_start(id)?;
+    let result = git_issue::edit_start(id)?;
 
-    open_editor(settings.editor, description.to_string_lossy().to_string())?;
+    for info in result.infos {
+        println!("{}", info);
+    }
 
-    let info = git_issue::edit_end(id)?;
+    open_editor(settings.editor, result.value.to_string_lossy().to_string())?;
 
-    if let Some(info) = info {
+    let result = git_issue::edit_end(id)?;
+
+    for info in result.infos {
         println!("{}", info);
     }
 
@@ -261,9 +267,9 @@ fn print_list(
     }
 
     // Print rows
-    for (_, data) in issues {
+    for issue in issues {
         for col in columns {
-            let value = data.get(col).map(String::as_str).unwrap_or("");
+            let value = issue.data.get(col).map(String::as_str).unwrap_or("");
 
             if print_csv {
                 csv_content.push_str(&to_csv_field(value, csv_separator));
@@ -292,7 +298,7 @@ fn print_list(
         fs::write(&export_file, csv_content).map_err(|e| format!("Failed to write {}: {e}", export_file.display()))?;
     }
 
-    cache_issue_ids(&issues.iter().map(|(id, _)| *id).collect::<Vec<u32>>())?; // For `set` command wildcard support
+    cache_issue_ids(&issues.iter().map(|issue| issue.id).collect::<Vec<u32>>())?; // For `set` command wildcard support
 
     Ok(())
 }
@@ -306,9 +312,9 @@ fn calculate_column_widths(issues: &Vec<IssueData>, columns: &[String]) -> Resul
     }
 
     // Update with max content widths
-    for (_, data) in issues {
+    for issue in issues {
         for col in columns {
-            let value = data.get(col).map(String::as_str).unwrap_or("");
+            let value = issue.data.get(col).map(String::as_str).unwrap_or("");
             let width = widths.get(col).copied().unwrap_or(0);
             widths.insert(col.clone(), width.max(value.len()));
         }

@@ -4,6 +4,7 @@ use crate::model::{
     Priority, current_timestamp, git_commit, is_valid_iso_date, is_valid_state, is_valid_type, is_valid_user, issue_dir, issue_meta_path,
     load_config, load_meta, load_settings, load_users, user_handle_me,
 };
+use crate::{Cmd, CmdResult};
 
 /// Set metadata fields of issues
 /// Returns number of issues updated and optional info messages
@@ -20,9 +21,9 @@ pub fn set(
     labels: Option<Vec<String>>,
     labels_add: Option<Vec<String>>,
     labels_remove: Option<Vec<String>>,
-) -> Result<(u32, Option<Vec<String>>), String> {
+) -> Cmd<u32> {
     let config = load_config()?;
-    let (settings, info) = load_settings()?;
+    let (settings, mut infos) = load_settings()?;
     let users = load_users()?;
 
     // Precondition: .gitissues/issues/ID must exist
@@ -36,11 +37,6 @@ pub fn set(
     }
 
     let mut num_updated_issues = 0;
-
-    let mut infos = match info {
-        Some(info) => vec![info],
-        None => Vec::new(),
-    };
 
     for id in ids {
         // Load meta.yaml
@@ -191,18 +187,15 @@ pub fn set(
 
         fs::write(&meta_path, updated_yaml).map_err(|_| "Failed to write meta.yaml".to_string())?;
 
-        match git_commit(id, updated_meta.title, &format!("set {}", fields.join(","))) {
-            Ok(None) => {}
-            Ok(Some(info)) => infos.push(info),
-            Err(e) => return Err(e),
-        }
+        let info_commit = git_commit(id, updated_meta.title, &format!("set {}", fields.join(",")))?;
+
+        infos.extend(info_commit);
 
         num_updated_issues += 1;
     }
 
-    if infos.is_empty() {
-        Ok((num_updated_issues, None))
-    } else {
-        Ok((num_updated_issues, Some(infos)))
-    }
+    Ok(CmdResult {
+        value: num_updated_issues,
+        infos,
+    })
 }
