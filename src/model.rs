@@ -356,7 +356,7 @@ pub fn load_settings() -> Result<(Settings, Vec<String>), String> {
 }
 
 pub fn create_settings_if_missing(print: bool) -> Result<Vec<String>, String> {
-    const DEFAULT_SETTINGS: &str = include_str!("../../config/settings-default.yaml");
+    const DEFAULT_SETTINGS: &str = include_str!("../config/settings-default.yaml");
     let settings_dst = settings_path()?;
 
     if let Ok(true) = fs::exists(&settings_dst) {
