@@ -443,8 +443,8 @@ cargo test
   - `settings-default.yaml`  -- Default local user settings, copy-pasted at `git issue init` to `.gitissues/`
 - `src/`     -- Source files
   - `lib.rs`   -- Public library
+  - `model.rs` -- Shared data types, functions and utilities
   - `cmd/`     -- Core of the application: Commands (CRUD)
-    - `model.rs` -- Shared data types, functions and utilities
     - `edit.rs`  -- Edit issue description (markdown) with external text editor
     - `init.rs`  -- Initialize `.gitissues/` directory and copy default config
     - `link.rs`  -- Change relationships between issues
@@ -452,9 +452,11 @@ cargo test
     - `new.rs`   -- Create new issues
     - `set.rs`   -- Change issue meta fields
     - `show.rs`  -- Show all issue information (markdown) with external text editor
+    - `util.rs`  -- Utility functions for CMD
   - `cli/`     -- Binary: CLI -- Command Line Interface
     - `main.rs`  -- Main entry for CLI: parsing with clap
     - `cli.rs`   -- Functionality for CLI
+    - `util.rs`  -- Utility functions for CLI
   - `web/`     -- Binary: WEB -- Local web server (🚧)
 - `tests/`   -- Automated tests
 
