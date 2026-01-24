@@ -1,5 +1,5 @@
 # YAML schema version: Don't change manually!
-_version: 1
+_version: 2
 
 # Editor to edit/show issue descriptions
 # git = use the git-configured editor
@@ -9,6 +9,9 @@ editor: git
 # Used as default reporter for new issues
 # Must be in users.yaml:users:id or ''
 user: ''
+
+# Separator used when exporting to CSV
+export_csv_separator: ','
 
 # Formatting options for list command
 # User may change colors

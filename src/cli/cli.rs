@@ -9,8 +9,8 @@ use chrono::Utc;
 
 use git_issue::list::IssueData;
 use git_issue::model::{
-    Config, Filter, NamedColor, Priority, RelationshipLink, Settings, Sorting, cache_path, current_timestamp, issue_exports_dir,
-    load_config, load_settings, open_editor,
+    Filter, NamedColor, Priority, RelationshipLink, Settings, Sorting, cache_path, current_timestamp, issue_exports_dir, load_settings,
+    open_editor,
 };
 
 pub fn init(no_commit: bool) -> Result<(), String> {
@@ -123,7 +123,6 @@ pub fn list(
     print_csv: bool,
     no_color: bool,
 ) -> Result<(), String> {
-    let config = load_config()?;
     let (settings, infos) = load_settings()?;
 
     for info in infos {
@@ -136,7 +135,7 @@ pub fn list(
         println!("{}", info);
     }
 
-    print_list(&config, &settings, &result.value.issues, &result.value.columns, print_csv, no_color)?;
+    print_list(&settings, &result.value.issues, &result.value.columns, print_csv, no_color)?;
 
     Ok(())
 }
@@ -228,18 +227,11 @@ fn wildcard_confirmation(num_of_ids: usize) -> Result<(), String> {
 /// - columns: list of columns to print (None means default from config)
 /// - print_csv: whether to print as CSV
 /// - no_color: whether to disable color output
-fn print_list(
-    config: &Config,
-    settings: &Settings,
-    issues: &Vec<IssueData>,
-    columns: &Vec<String>,
-    print_csv: bool,
-    no_color: bool,
-) -> Result<(), String> {
+fn print_list(settings: &Settings, issues: &Vec<IssueData>, columns: &Vec<String>, print_csv: bool, no_color: bool) -> Result<(), String> {
     let column_widths = calculate_column_widths(issues, columns)?;
 
     let mut csv_content = String::new();
-    let csv_separator = config.export_csv_separator;
+    let csv_separator = settings.export_csv_separator;
 
     // Enable colors only for interactive terminals and when NO_COLOR is not set
     let color_enabled = std::env::var("NO_COLOR").is_err() && std::io::stdout().is_terminal() && !no_color;

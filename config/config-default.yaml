@@ -1,5 +1,5 @@
 # YAML schema version: Don't change manually!
-_version: 1
+_version: 2
 
 # Automatically create a git commit after mutating commands
 commit_auto: true
@@ -43,9 +43,6 @@ relationships:
     link: child
   child:
     link: parent
-
-# Separator used when exporting to CSV
-export_csv_separator: ','
 
 # ID generation strategy (always u32)
 # Options:

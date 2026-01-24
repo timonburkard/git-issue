@@ -218,7 +218,6 @@ pub struct Config {
     pub states: Vec<String>,
     pub types: Vec<String>,
     pub relationships: IndexMap<String, Relationship>,
-    pub export_csv_separator: char,
     pub id_generation: IdGeneration,
     pub priority_default: Priority,
 }
@@ -267,6 +266,7 @@ pub struct Settings {
     pub _version: u32,
     pub editor: String,
     pub user: String,
+    pub export_csv_separator: char,
     pub list_formatting: ListFormatting,
 }
 
