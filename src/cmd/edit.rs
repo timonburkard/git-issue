@@ -1,6 +1,7 @@
 use std::path::PathBuf;
 
-use crate::model::{git_commit, issue_desc_path, issue_title};
+use crate::cmd::util::git_commit;
+use crate::model::{issue_desc_path, issue_title};
 use crate::{Cmd, CmdResult};
 
 /// Start editing the description of an issue

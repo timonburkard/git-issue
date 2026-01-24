@@ -7,10 +7,11 @@ use std::str::FromStr;
 use regex::Regex;
 
 use crate::model::{
-    Config, Filter, Meta, Operator, Priority, Settings, Sorting, Users, dash_if_empty, issue_desc_path, issues_dir, load_config,
-    load_description, load_meta, load_settings, load_users, user_handle_me,
+    Config, Filter, Meta, Operator, Priority, Settings, Sorting, Users, issue_desc_path, issues_dir, load_config, load_settings, load_users,
 };
 use crate::{Cmd, CmdResult};
+
+use crate::cmd::util::{dash_if_empty, load_description, load_meta, user_handle_me};
 
 // (ID, {column: value, ...})
 pub struct IssueData {

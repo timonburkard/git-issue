@@ -1,8 +1,7 @@
 use std::fs;
 
-use crate::model::{
-    Config, RelationshipLink, current_timestamp, git_commit, issue_dir, issue_meta_path, issue_title, load_config, load_meta,
-};
+use crate::cmd::util::{git_commit, load_meta};
+use crate::model::{Config, RelationshipLink, current_timestamp, issue_dir, issue_meta_path, issue_title, load_config};
 use crate::{Cmd, CmdResult};
 
 enum Action {

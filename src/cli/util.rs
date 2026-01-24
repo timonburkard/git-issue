@@ -3,15 +3,15 @@ use std::process::Command;
 use git_issue::model::{gitissues_base, issue_tmp_dir};
 
 /// Returns the path to the cache.txt file.
-pub fn cache_path() -> Result<std::path::PathBuf, String> {
+pub(crate) fn cache_path() -> Result<std::path::PathBuf, String> {
     Ok(issue_tmp_dir()?.join("cache.txt"))
 }
 
-pub fn issue_exports_dir() -> Result<std::path::PathBuf, String> {
+pub(crate) fn issue_exports_dir() -> Result<std::path::PathBuf, String> {
     Ok(gitissues_base()?.join("exports"))
 }
 
-pub fn open_editor(mut editor: String, path: String) -> Result<(), String> {
+pub(crate) fn open_editor(mut editor: String, path: String) -> Result<(), String> {
     if editor == "git" {
         // Read git default editor
         let output = Command::new("git")

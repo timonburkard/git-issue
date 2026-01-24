@@ -1,7 +1,8 @@
 use std::fs;
 use std::path::PathBuf;
 
-use crate::model::{config_path, create_settings_if_missing, git_commit_non_templated, gitissues_base, users_path};
+use crate::cmd::util::git_commit_non_templated;
+use crate::model::{config_path, create_settings_if_missing, gitissues_base, users_path};
 use crate::{Cmd, CmdResult};
 
 pub fn init(no_commit: bool) -> Cmd<()> {

@@ -6,9 +6,8 @@ use indexmap::IndexMap;
 
 use regex::Regex;
 
-use crate::model::{
-    Meta, dash_if_empty, issue_attachments_dir, issue_dir, issue_meta_path, issue_tmp_show_dir, load_description, load_meta,
-};
+use crate::cmd::util::{dash_if_empty, load_description, load_meta};
+use crate::model::{Meta, issue_attachments_dir, issue_dir, issue_meta_path, issue_tmp_show_dir};
 use crate::{Cmd, CmdResult};
 
 /// Show the issue with the given ID by generating a markdown file in a temporary directory
