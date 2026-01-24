@@ -220,7 +220,6 @@ fn wildcard_confirmation(num_of_ids: usize) -> Result<(), String> {
 }
 
 /// print list
-/// - config: loaded configuration
 /// - settings: loaded user settings
 /// - issues: list of issue data
 /// - columns: list of columns to print (None means default from config)

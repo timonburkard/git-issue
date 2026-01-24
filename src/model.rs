@@ -3,7 +3,6 @@ use std::fs;
 use std::path::PathBuf;
 use std::str::FromStr;
 
-//use anstyle::{AnsiColor, Effects, Style};
 use chrono::{NaiveDate, Utc};
 use clap::ValueEnum;
 use indexmap::IndexMap;

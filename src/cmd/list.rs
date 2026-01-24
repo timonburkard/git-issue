@@ -25,6 +25,9 @@ pub struct ListResult {
 }
 
 /// List issues with optional columns, filters, and sorting
+/// - columns: list of columns to print (None means default from config)
+/// - filter: list of filters to be applied
+/// - sort: list of sortings to be applied
 pub fn list(columns: Option<Vec<String>>, filter: Option<Vec<Filter>>, sort: Option<Vec<Sorting>>) -> Cmd<ListResult> {
     let config = load_config()?;
     let (settings, infos) = load_settings()?;
