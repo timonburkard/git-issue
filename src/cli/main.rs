@@ -4,9 +4,12 @@ use std::io::ErrorKind;
 
 use clap::{Parser, Subcommand};
 
-use git_issue::model::{Filter, Priority, RelationshipLink, Sorting, cache_path};
+use git_issue::model::{Filter, Priority, RelationshipLink, Sorting};
 
 mod cli;
+mod util;
+
+use util::cache_path;
 
 #[derive(Parser)]
 #[command(name = "git-issue")]

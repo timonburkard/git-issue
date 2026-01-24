@@ -8,10 +8,9 @@ use anstyle::{AnsiColor, Effects, Reset, Style};
 use chrono::Utc;
 
 use git_issue::list::IssueData;
-use git_issue::model::{
-    Filter, NamedColor, Priority, RelationshipLink, Settings, Sorting, cache_path, current_timestamp, issue_exports_dir, load_settings,
-    open_editor,
-};
+use git_issue::model::{Filter, NamedColor, Priority, RelationshipLink, Settings, Sorting, current_timestamp, load_settings};
+
+use crate::util::{cache_path, issue_exports_dir, open_editor};
 
 pub fn init(no_commit: bool) -> Result<(), String> {
     let result = git_issue::init(no_commit)?;
