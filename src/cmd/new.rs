@@ -7,7 +7,7 @@ use chrono::Utc;
 
 use indexmap::IndexMap;
 
-use crate::cmd::model::{
+use crate::model::{
     IdGeneration, Meta, Priority, current_timestamp, git_commit, gitissues_base, is_valid_iso_date, is_valid_type, is_valid_user,
     issue_attachments_dir, issue_desc_path, issue_dir, issue_meta_path, issues_dir, load_config, load_settings, load_users, padded_id,
     user_handle_me,

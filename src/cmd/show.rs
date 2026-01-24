@@ -6,7 +6,7 @@ use indexmap::IndexMap;
 
 use regex::Regex;
 
-use crate::cmd::model::{
+use crate::model::{
     Meta, dash_if_empty, issue_attachments_dir, issue_dir, issue_meta_path, issue_tmp_show_dir, load_description, load_meta,
 };
 

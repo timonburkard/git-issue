@@ -7,20 +7,14 @@ use std::time::Duration;
 use anstyle::{AnsiColor, Effects, Reset, Style};
 use chrono::Utc;
 
-use git_issue::cmd::edit;
-use git_issue::cmd::init;
-use git_issue::cmd::link;
-use git_issue::cmd::list::{self, IssueData};
-use git_issue::cmd::model::{
+use git_issue::list::IssueData;
+use git_issue::model::{
     Config, Filter, NamedColor, Priority, RelationshipLink, Settings, Sorting, cache_path, current_timestamp, issue_exports_dir,
     load_config, load_settings, open_editor,
 };
-use git_issue::cmd::new;
-use git_issue::cmd::set;
-use git_issue::cmd::show;
 
 pub fn init(no_commit: bool) -> Result<(), String> {
-    let info = init::init(no_commit)?;
+    let info = git_issue::init(no_commit)?;
 
     if let Some(info) = info {
         println!("{}", info);
@@ -40,7 +34,7 @@ pub fn new(
     due_date: Option<String>,
     labels: Option<Vec<String>>,
 ) -> Result<(), String> {
-    let (issue_id, info) = new::new(title, type_, reporter, assignee, priority, due_date, labels)?;
+    let (issue_id, info) = git_issue::new(title, type_, reporter, assignee, priority, due_date, labels)?;
 
     if let Some(info) = info {
         println!("{}", info);
@@ -83,7 +77,7 @@ pub fn set(
         wildcard_confirmation(ids.len())?;
     }
 
-    let (num_updated_issues, infos) = set::set(
+    let (num_updated_issues, infos) = git_issue::set(
         ids,
         state,
         title,
@@ -113,7 +107,7 @@ pub fn set(
 }
 
 pub fn link(id: u32, add: Option<Vec<RelationshipLink>>, remove: Option<Vec<RelationshipLink>>) -> Result<(), String> {
-    let info = link::link(id, add, remove)?;
+    let info = git_issue::link(id, add, remove)?;
 
     if let Some(info) = info {
         println!("{}", info);
@@ -138,7 +132,7 @@ pub fn list(
         println!("{}", info);
     }
 
-    let (issues, columns, info) = list::list(columns, filter, sort)?;
+    let (issues, columns, info) = git_issue::list(columns, filter, sort)?;
 
     if let Some(info) = info {
         println!("{}", info);
@@ -156,7 +150,7 @@ pub fn show(id: u32) -> Result<(), String> {
         println!("{}", info);
     }
 
-    let tmp_file = show::show(id)?;
+    let tmp_file = git_issue::show(id)?;
 
     open_editor(settings.editor, tmp_file.to_string_lossy().to_string())?;
 
@@ -170,11 +164,11 @@ pub fn edit(id: u32) -> Result<(), String> {
         println!("{}", info);
     }
 
-    let description = edit::edit_start(id)?;
+    let description = git_issue::edit_start(id)?;
 
     open_editor(settings.editor, description.to_string_lossy().to_string())?;
 
-    let info = edit::edit_end(id)?;
+    let info = git_issue::edit_end(id)?;
 
     if let Some(info) = info {
         println!("{}", info);

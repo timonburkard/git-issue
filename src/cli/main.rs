@@ -4,7 +4,7 @@ use std::io::ErrorKind;
 
 use clap::{Parser, Subcommand};
 
-use git_issue::cmd::model::{Filter, Priority, RelationshipLink, Sorting, cache_path};
+use git_issue::model::{Filter, Priority, RelationshipLink, Sorting, cache_path};
 
 mod cli;
 

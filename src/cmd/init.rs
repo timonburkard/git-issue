@@ -1,7 +1,7 @@
 use std::fs;
 use std::path::PathBuf;
 
-use crate::cmd::model::{config_path, create_settings_if_missing, git_commit_non_templated, gitissues_base, users_path};
+use crate::model::{config_path, create_settings_if_missing, git_commit_non_templated, gitissues_base, users_path};
 
 pub fn init(no_commit: bool) -> Result<Option<String>, String> {
     let root = PathBuf::from(".gitissues");
