@@ -7,7 +7,6 @@
 | **field**         | **value**            |
 | ----------------- | -------------------- |
 | **id**            | 1                    |
-| **title**         | Simple issue         |
 | **state**         | new                  |
 | **type**          | -                    |
 | **labels**        | -                    |
