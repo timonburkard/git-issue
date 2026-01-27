@@ -4,16 +4,12 @@ use std::io::ErrorKind;
 
 use clap::{Parser, Subcommand};
 
-use crate::model::{Filter, Priority, RelationshipLink, Sorting, cache_path};
+use git_issue::model::{Filter, Priority, RelationshipLink, Sorting};
 
-mod edit;
-mod init;
-mod link;
-mod list;
-mod model;
-mod new;
-mod set;
-mod show;
+mod cli;
+mod util;
+
+use util::cache_path;
 
 #[derive(Parser)]
 #[command(name = "git-issue")]
@@ -179,7 +175,7 @@ fn main() {
     }
 
     let result = match args.command {
-        Commands::Init { no_commit } => init::run(no_commit),
+        Commands::Init { no_commit } => cli::init(no_commit),
 
         Commands::New {
             title,
@@ -189,7 +185,7 @@ fn main() {
             priority,
             due_date,
             labels,
-        } => new::run(title, type_, reporter, assignee, priority, due_date, labels),
+        } => cli::new(title, type_, reporter, assignee, priority, due_date, labels),
 
         Commands::List {
             columns,
@@ -197,9 +193,9 @@ fn main() {
             sort,
             csv,
             no_color,
-        } => list::run(columns, filter, sort, csv, no_color),
+        } => cli::list(columns, filter, sort, csv, no_color),
 
-        Commands::Show { id } => show::run(id),
+        Commands::Show { id } => cli::show(id),
 
         Commands::Set {
             ids,
@@ -213,7 +209,7 @@ fn main() {
             labels,
             labels_add,
             labels_remove,
-        } => set::run(
+        } => cli::set(
             ids,
             state,
             title,
@@ -227,9 +223,9 @@ fn main() {
             labels_remove,
         ),
 
-        Commands::Edit { id } => edit::run(id),
+        Commands::Edit { id } => cli::edit(id),
 
-        Commands::Link { id, add, remove } => link::run(id, add, remove),
+        Commands::Link { id, add, remove } => cli::link(id, add, remove),
     };
 
     if let Err(e) = result {

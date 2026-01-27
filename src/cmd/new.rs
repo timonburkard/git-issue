@@ -7,13 +7,14 @@ use chrono::Utc;
 
 use indexmap::IndexMap;
 
+use crate::cmd::util::{git_commit, user_handle_me};
 use crate::model::{
-    IdGeneration, Meta, Priority, current_timestamp, git_commit, gitissues_base, is_valid_iso_date, is_valid_type, is_valid_user,
+    IdGeneration, Meta, Priority, current_timestamp, gitissues_base, is_valid_iso_date, is_valid_type, is_valid_user,
     issue_attachments_dir, issue_desc_path, issue_dir, issue_meta_path, issues_dir, load_config, load_settings, load_users, padded_id,
-    user_handle_me,
 };
+use crate::{Cmd, CmdResult};
 
-pub fn run(
+pub fn new(
     title: String,
     type_: Option<String>,
     reporter: Option<String>,
@@ -21,13 +22,13 @@ pub fn run(
     priority: Option<Priority>,
     due_date: Option<String>,
     labels: Option<Vec<String>>,
-) -> Result<(), String> {
+) -> Cmd<u32> {
     // Step 1: Allocate the next issue ID
     let issue_id = generate_id()?;
 
     // Step 2: Read config
     let config = load_config()?;
-    let settings = load_settings()?;
+    let (settings, mut infos) = load_settings()?;
     let users = load_users()?;
 
     if config.states.is_empty() {
@@ -56,14 +57,13 @@ pub fn run(
             }
         }
         None => {
-            let settings = load_settings()?;
             if !is_valid_user(&users, &settings.user) {
                 return Err(format!(
                     "Invalid reporter \"{}\": settings.yaml::user must be part of users.yaml:users or ''",
-                    settings.user
+                    settings.user.clone()
                 ));
             } else {
-                settings.user
+                settings.user.clone()
             }
         }
     };
@@ -133,11 +133,10 @@ pub fn run(
     fs::write(&meta_yaml_path, meta_yaml).map_err(|e| format!("Failed to write meta.yaml: {e}"))?;
 
     // Step 9: git commit
-    git_commit(issue_id, title, "new")?;
+    let info_commit = git_commit(issue_id, title, "new")?;
+    infos.extend(info_commit);
 
-    println!("Created issue #{issue_id}");
-
-    Ok(())
+    Ok(CmdResult { value: issue_id, infos })
 }
 
 /// Generates new ID

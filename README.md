@@ -195,7 +195,7 @@ This file holds the project configuration. It should be version-controlled.
 
 ```yaml
 # YAML schema version: Don't change manually!
-_version: 1
+_version: 2
 
 # Automatically create a git commit after mutating commands
 commit_auto: true
@@ -240,9 +240,6 @@ relationships:
   child:
     link: parent
 
-# Separator used when exporting to CSV
-export_csv_separator: ','
-
 # ID generation strategy (always u32)
 # Options:
 #  - sequential: Sequential numbers (1, 2, 3, ...)
@@ -266,7 +263,6 @@ priority_default: ''
 - `states` (list of strings): Available issue states. The default for new issues is the first element.
 - `types` (list of strings): Available issue types. The default for new issues is empty.
 - `relationships` (object): Available relationships between issues
-- `export_csv_separator` (char): Separator for CSV file exports
 - `id_generation` (string): ID generation strategy. Supports options:
   - `sequential`: Sequential numbers (1, 2, 3, ...)
   - `timestamp`: Timestamps in seconds since 2025-01-01 (in teams this reduces the chance of merge conflicts)
@@ -297,7 +293,7 @@ It is automatically created when `git issue init` is executed or when it is miss
 
 ```yaml
 # YAML schema version: Don't change manually!
-_version: 1
+_version: 2
 
 # Editor to edit/show issue descriptions
 # git = use the git-configured editor
@@ -307,6 +303,9 @@ editor: git
 # Used as default reporter for new issues
 # Must be in users.yaml:users:id or ''
 user: alice
+
+# Separator used when exporting to CSV
+export_csv_separator: ','
 
 # Formatting options for list command
 # User may change colors
@@ -337,6 +336,7 @@ list_formatting:
 
 - `editor` (string): External text editor (set `git` to use configured git core.editor)
 - `user` (string): User name, used per default as reporter for new issues (can be '')
+- `export_csv_separator` (char): Separator for CSV file exports
 - `list_formatting` (object):
   - `header_separator` (bool): Whether or not to print a dashed line as header row separator
   - `colors` (object): available colors: `bold`, `[bright_]white`, `[bright_]black`, `[bright_]red`, `[bright_]green`, `[bright_]yellow`, `[bright_]blue`, `[bright_]magenta`, `[bright_]cyan`
@@ -436,22 +436,29 @@ cargo test
 
 ### 5.2) Architecture
 
-- `config/`
+- `config/`                -- Configuration files
   - `config-default.yaml`    -- Default configuration, copy-pasted at `git issue init` to `.gitissues/`
   - `description-default.md` -- Default description template, copy-pasted at `git issue init` to `.gitissues/`
   - `users-default.yaml`     -- Default users, copy-pasted at `git issue init` to `.gitissues/`
   - `settings-default.yaml`  -- Default local user settings, copy-pasted at `git issue init` to `.gitissues/`
-- `src/`
-  - `main.rs`  -- CLI parsing with clap
+- `src/`     -- Source files
+  - `lib.rs`   -- Public library
   - `model.rs` -- Shared data types, functions and utilities
-  - `edit.rs`  -- Edit issue description (markdown) with external text editor
-  - `init.rs`  -- Initialize `.gitissues/` directory and copy default config
-  - `link.rs`  -- Change relationships between issues
-  - `list.rs`  -- List all issues
-  - `new.rs`   -- Create new issues
-  - `set.rs`   -- Change issue meta fields
-  - `show.rs`  -- Show all issue information (markdown) with external text editor
-- `tests/`     -- Automated tests
+  - `cmd/`     -- Core of the application: Commands (CRUD)
+    - `edit.rs`  -- Edit issue description (markdown) with external text editor
+    - `init.rs`  -- Initialize `.gitissues/` directory and copy default config
+    - `link.rs`  -- Change relationships between issues
+    - `list.rs`  -- List all issues
+    - `new.rs`   -- Create new issues
+    - `set.rs`   -- Change issue meta fields
+    - `show.rs`  -- Show all issue information (markdown) with external text editor
+    - `util.rs`  -- Utility functions for CMD
+  - `cli/`     -- Binary: CLI -- Command Line Interface
+    - `main.rs`  -- Main entry for CLI: parsing with clap
+    - `cli.rs`   -- Functionality for CLI
+    - `util.rs`  -- Utility functions for CLI
+  - `web/`     -- Binary: WEB -- Local web server (🚧)
+- `tests/`   -- Automated tests
 
 ### 5.3) Dependencies
 

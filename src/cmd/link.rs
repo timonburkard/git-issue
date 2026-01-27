@@ -1,15 +1,15 @@
 use std::fs;
 
-use crate::model::{
-    Config, RelationshipLink, current_timestamp, git_commit, issue_dir, issue_meta_path, issue_title, load_config, load_meta,
-};
+use crate::cmd::util::{git_commit, load_meta};
+use crate::model::{Config, RelationshipLink, current_timestamp, issue_dir, issue_meta_path, issue_title, load_config};
+use crate::{Cmd, CmdResult};
 
 enum Action {
     Add,
     Remove,
 }
 
-pub fn run(id: u32, add: Option<Vec<RelationshipLink>>, remove: Option<Vec<RelationshipLink>>) -> Result<(), String> {
+pub fn link(id: u32, add: Option<Vec<RelationshipLink>>, remove: Option<Vec<RelationshipLink>>) -> Cmd<()> {
     let dir = issue_dir(id)?;
     let path = dir.as_path();
 
@@ -46,11 +46,9 @@ pub fn run(id: u32, add: Option<Vec<RelationshipLink>>, remove: Option<Vec<Relat
 
     let title = issue_title(id)?;
 
-    git_commit(id, title, "links updated")?;
+    let infos = git_commit(id, title, "links updated")?;
 
-    println!("Updated issue relationship(s)");
-
-    Ok(())
+    Ok(CmdResult { value: (), infos })
 }
 
 fn validate_relationships(id: u32, relationships: &[RelationshipLink], config: &Config) -> Result<(), String> {

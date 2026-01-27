@@ -2,26 +2,35 @@ use std::cmp::Ordering;
 use std::cmp::Reverse;
 use std::collections::HashMap;
 use std::fs;
-use std::io::IsTerminal;
+use std::str::FromStr;
 
-use anstyle::{AnsiColor, Effects, Reset, Style};
-use chrono::Utc;
 use regex::Regex;
 
 use crate::model::{
-    Config, Filter, Meta, NamedColor, Operator, Priority, Settings, Sorting, Users, cache_path, current_timestamp, dash_if_empty,
-    issue_desc_path, issue_exports_dir, issues_dir, load_config, load_description, load_meta, load_settings, load_users, user_handle_me,
+    Config, Filter, Meta, Operator, Priority, Settings, Sorting, Users, issue_desc_path, issues_dir, load_config, load_settings, load_users,
 };
+use crate::{Cmd, CmdResult};
 
-pub fn run(
-    columns: Option<Vec<String>>,
-    filter: Option<Vec<Filter>>,
-    sort: Option<Vec<Sorting>>,
-    print_csv: bool,
-    no_color: bool,
-) -> Result<(), String> {
+use crate::cmd::util::{dash_if_empty, load_description, load_meta, user_handle_me};
+
+// (ID, {column: value, ...})
+pub struct IssueData {
+    pub id: u32,
+    pub data: HashMap<String, String>,
+}
+
+pub struct ListResult {
+    pub issues: Vec<IssueData>,
+    pub columns: Vec<String>,
+}
+
+/// List issues with optional columns, filters, and sorting
+/// - columns: list of columns to print (None means default from config)
+/// - filter: list of filters to be applied
+/// - sort: list of sortings to be applied
+pub fn list(columns: Option<Vec<String>>, filter: Option<Vec<Filter>>, sort: Option<Vec<Sorting>>) -> Cmd<ListResult> {
     let config = load_config()?;
-    let settings = load_settings()?;
+    let (settings, infos) = load_settings()?;
 
     let mut issues = get_issues_metadata()?;
 
@@ -29,17 +38,41 @@ pub fn run(
 
     filter_issues(&config, &settings, &mut issues, filter)?;
 
-    // Print
-    match columns {
-        None => {
-            print_list(&config, &settings, &issues, None, print_csv, no_color)?;
+    let mut cols = match &columns {
+        Some(value) => value.clone(),
+        None => config.list_columns.clone(),
+    };
+
+    let context = if columns.is_some() {
+        "--columns"
+    } else {
+        "config.yaml:list_columns"
+    };
+
+    wildcard_expansion(&config, &mut cols);
+
+    validate_column_names(&config, &mut cols, context)?;
+
+    let mut issues_data: Vec<IssueData> = Vec::new();
+
+    for meta in issues {
+        let mut map = HashMap::new();
+
+        for col in &cols {
+            let value = get_column_value(col, &meta)?;
+            map.insert(col.clone(), value);
         }
-        Some(cols) => {
-            print_list(&config, &settings, &issues, Some(cols), print_csv, no_color)?;
-        }
+
+        issues_data.push(IssueData { id: meta.id, data: map });
     }
 
-    Ok(())
+    Ok(CmdResult {
+        value: ListResult {
+            issues: issues_data,
+            columns: cols,
+        },
+        infos,
+    })
 }
 
 fn get_issues_metadata() -> Result<Vec<Meta>, String> {
@@ -116,297 +149,10 @@ fn validate_column_names(config: &Config, columns: &mut [String], context: &str)
     Ok(())
 }
 
-fn print_ln(print_csv: bool, csv_content: &mut String) {
-    if print_csv {
-        csv_content.push('\n');
-    } else {
-        println!();
-    }
-}
-
-fn to_csv_field(value: &str, separator: char) -> String {
-    format!("\"{value}\"{separator}")
-}
-
-fn apply_style(text: &str, style: Style) -> String {
-    format!("{style}{text}{reset}", reset = Reset)
-}
-
-fn fg(color: AnsiColor) -> Style {
-    Style::new().fg_color(Some(color.into()))
-}
-
-fn named_color_to_style(color: NamedColor) -> Style {
-    match color {
-        NamedColor::White => fg(AnsiColor::White),
-        NamedColor::BrightWhite => fg(AnsiColor::BrightWhite),
-        NamedColor::Black => fg(AnsiColor::Black),
-        NamedColor::BrightBlack => fg(AnsiColor::BrightBlack),
-        NamedColor::Red => fg(AnsiColor::Red),
-        NamedColor::BrightRed => fg(AnsiColor::BrightRed),
-        NamedColor::Green => fg(AnsiColor::Green),
-        NamedColor::BrightGreen => fg(AnsiColor::BrightGreen),
-        NamedColor::Yellow => fg(AnsiColor::Yellow),
-        NamedColor::BrightYellow => fg(AnsiColor::BrightYellow),
-        NamedColor::Blue => fg(AnsiColor::Blue),
-        NamedColor::BrightBlue => fg(AnsiColor::BrightBlue),
-        NamedColor::Magenta => fg(AnsiColor::Magenta),
-        NamedColor::BrightMagenta => fg(AnsiColor::BrightMagenta),
-        NamedColor::Cyan => fg(AnsiColor::Cyan),
-        NamedColor::BrightCyan => fg(AnsiColor::BrightCyan),
-        NamedColor::Bold => Style::new().effects(Effects::BOLD),
-    }
-}
-
-fn colorize_state(settings: &Settings, state: &str) -> String {
-    let color = settings
-        .list_formatting
-        .colors
-        .state
-        .get(state)
-        .cloned()
-        .unwrap_or(NamedColor::White);
-
-    apply_style(state, named_color_to_style(color))
-}
-
-fn colorize_priority(settings: &Settings, priority: &str) -> String {
-    let color = settings
-        .list_formatting
-        .colors
-        .priority
-        .get(priority)
-        .cloned()
-        .unwrap_or(NamedColor::White);
-
-    apply_style(priority, named_color_to_style(color))
-}
-
-fn colorize_type(settings: &Settings, type_: &str) -> String {
-    let color = settings
-        .list_formatting
-        .colors
-        .type_
-        .get(type_)
-        .cloned()
-        .unwrap_or(NamedColor::White);
-
-    apply_style(type_, named_color_to_style(color))
-}
-
-fn colorize_value(settings: &Settings, col: &str, value: &str) -> String {
-    match col {
-        "state" => colorize_state(settings, value),
-        "priority" => colorize_priority(settings, value),
-        "type" => colorize_type(settings, value),
-        "assignee" | "reporter" => colorize_me(settings, value),
-        "due_date" => colorize_due_date(settings, value),
-        _ => value.to_string(),
-    }
-}
-
-fn colorize_header(settings: &Settings, header: &str) -> String {
-    let color = settings.list_formatting.colors.header;
-
-    apply_style(header, named_color_to_style(color))
-}
-
-fn colorize_me(settings: &Settings, user: &str) -> String {
-    let me = settings.user.clone();
-
-    if user != me {
-        return user.to_string();
-    }
-
-    let color = settings.list_formatting.colors.me;
-
-    apply_style(user, named_color_to_style(color))
-}
-
-fn colorize_due_date(settings: &Settings, due_date: &str) -> String {
-    let today = Utc::now().naive_utc().date();
-
-    match chrono::NaiveDate::parse_from_str(due_date, "%Y-%m-%d") {
-        Ok(due_date_date) => {
-            if due_date_date >= today {
-                return due_date.to_string();
-            }
-
-            let color = settings.list_formatting.colors.due_date_overdue;
-            apply_style(due_date, named_color_to_style(color))
-        }
-        Err(_) => due_date.to_string(),
-    }
-}
-
-fn print_header_separator(settings: &Settings, cols: &[String], column_widths: &HashMap<String, usize>) {
-    let header_separator = settings.list_formatting.header_separator;
-
-    if !header_separator {
-        return;
-    }
-
-    // Print separator line
-    for col in cols {
-        let width = *column_widths.get(col).unwrap_or(&22);
-        print!("{}", "-".repeat(width));
-    }
-    println!();
-}
-
-/// print list
-/// - config: loaded configuration
-/// - issues: list of issue metadata
-/// - columns: list of columns to print (None means default from config)
-/// - print_csv: whether to print as CSV
-/// - no_color: whether to disable color output
-fn print_list(
-    config: &Config,
-    settings: &Settings,
-    issues: &Vec<Meta>,
-    columns: Option<Vec<String>>,
-    print_csv: bool,
-    no_color: bool,
-) -> Result<(), String> {
-    let mut cols = match &columns {
-        Some(value) => value.clone(),
-        None => config.list_columns.clone(),
-    };
-
-    let context = if columns.is_some() {
-        "--columns"
-    } else {
-        "config.yaml:list_columns"
-    };
-
-    wildcard_expansion(config, &mut cols);
-
-    validate_column_names(config, &mut cols, context)?;
-
-    let column_widths = calculate_column_widths(issues, &cols)?;
-
-    let mut csv_content = String::new();
-    let csv_separator = config.export_csv_separator;
-
-    // Enable colors only for interactive terminals and when NO_COLOR is not set
-    let color_enabled = std::env::var("NO_COLOR").is_err() && std::io::stdout().is_terminal() && !no_color;
-
-    // Print header
-    for col in &cols {
-        if print_csv {
-            csv_content.push_str(&to_csv_field(col, csv_separator));
-        } else {
-            let width = *column_widths.get(col).unwrap_or(&22);
-            let styled = if color_enabled {
-                colorize_header(settings, col)
-            } else {
-                col.to_string()
-            };
-            let padding = width.saturating_sub(col.len());
-            print!("{}{}", styled, " ".repeat(padding));
-        }
-    }
-
-    print_ln(print_csv, &mut csv_content);
-
-    if !print_csv {
-        print_header_separator(settings, &cols, &column_widths);
-    }
-
-    // Print rows
-    for meta in issues {
-        for col in &cols {
-            let value = get_column_value(col, meta)?;
-
-            if print_csv {
-                csv_content.push_str(&to_csv_field(&value.to_string(), csv_separator));
-            } else {
-                let width = *column_widths.get(col).unwrap_or(&22);
-                let colored_value = if color_enabled {
-                    colorize_value(settings, col, &value)
-                } else {
-                    value.clone()
-                };
-                let padding = width.saturating_sub(value.len());
-                print!("{}{}", colored_value, " ".repeat(padding));
-            }
-        }
-
-        print_ln(print_csv, &mut csv_content);
-    }
-
-    if print_csv {
-        // Create exports directory
-        let export_dir = issue_exports_dir()?;
-        fs::create_dir_all(&export_dir).map_err(|e| format!("Failed to create {}: {e}", export_dir.display()))?;
-
-        // Write CSV file
-        let export_file = export_dir.join(format!("{}.csv", current_timestamp().replace(":", "-")));
-        fs::write(&export_file, csv_content).map_err(|e| format!("Failed to write {}: {e}", export_file.display()))?;
-    }
-
-    cache_issue_ids(issues)?; // For `set` command wildcard support
-
-    Ok(())
-}
-
 fn wildcard_expansion(config: &Config, columns: &mut Vec<String>) {
     if columns.contains(&"*".to_string()) {
         *columns = get_all_column_names(config);
     }
-}
-
-fn get_relationship_value(col: &str, meta: &Meta) -> String {
-    match meta.relationships.get(col) {
-        Some(ids) => {
-            let ids_joined = ids.iter().map(|id| id.to_string()).collect::<Vec<_>>().join(",");
-            dash_if_empty(&ids_joined)
-        }
-        None => "-".to_string(),
-    }
-}
-
-fn get_column_value(col: &str, meta: &Meta) -> Result<String, String> {
-    match col {
-        "id" => Ok(meta.id.to_string()),
-        "title" => Ok(meta.title.clone()),
-        "state" => Ok(meta.state.clone()),
-        "type" => Ok(dash_if_empty(&meta.type_)),
-        "labels" => Ok(dash_if_empty(&meta.labels.join(","))),
-        "reporter" => Ok(dash_if_empty(&meta.reporter)),
-        "assignee" => Ok(dash_if_empty(&meta.assignee)),
-        "priority" => Ok(format!("{:?}", meta.priority)),
-        "due_date" => Ok(dash_if_empty(&meta.due_date)),
-        "created" => Ok(meta.created.clone()),
-        "updated" => Ok(meta.updated.clone()),
-        _ => Ok(get_relationship_value(col, meta)),
-    }
-}
-
-fn calculate_column_widths(issues: &[Meta], columns: &[String]) -> Result<std::collections::HashMap<String, usize>, String> {
-    use std::collections::HashMap;
-    let mut widths: HashMap<String, usize> = HashMap::new();
-
-    // Initialize with header widths
-    for col in columns {
-        widths.insert(col.clone(), col.len());
-    }
-
-    // Update with max content widths
-    for meta in issues {
-        for col in columns {
-            let value = get_column_value(col, meta)?;
-            let width = widths.get(col).copied().unwrap_or(0);
-            widths.insert(col.clone(), width.max(value.len()));
-        }
-    }
-
-    // Add padding (2 spaces)
-    for width in widths.values_mut() {
-        *width += 2;
-    }
-
-    Ok(widths)
 }
 
 fn filter_issues(config: &Config, settings: &Settings, issues: &mut Vec<Meta>, filters: Option<Vec<Filter>>) -> Result<(), String> {
@@ -652,16 +398,29 @@ fn sort_issues(config: &Config, issues: &mut [Meta], sorts: Option<Vec<Sorting>>
     Ok(())
 }
 
-fn cache_issue_ids(issues: &[Meta]) -> Result<(), String> {
-    let issue_ids: Vec<String> = issues.iter().map(|m| m.id.to_string()).collect();
-    let cache_content = issue_ids.join(",");
-    let cache_file = cache_path()?;
-
-    if let Some(parent) = cache_file.parent() {
-        fs::create_dir_all(parent).map_err(|e| format!("Failed to create cache directory: {e}"))?;
+fn get_relationship_value(col: &str, meta: &Meta) -> String {
+    match meta.relationships.get(col) {
+        Some(ids) => {
+            let ids_joined = ids.iter().map(|id| id.to_string()).collect::<Vec<_>>().join(",");
+            dash_if_empty(&ids_joined)
+        }
+        None => "-".to_string(),
     }
+}
 
-    fs::write(&cache_file, cache_content).map_err(|e| format!("Failed to write cache file {}: {e}", cache_file.display()))?;
-
-    Ok(())
+fn get_column_value(col: &str, meta: &Meta) -> Result<String, String> {
+    match col {
+        "id" => Ok(meta.id.to_string()),
+        "title" => Ok(meta.title.clone()),
+        "state" => Ok(meta.state.clone()),
+        "type" => Ok(dash_if_empty(&meta.type_)),
+        "labels" => Ok(dash_if_empty(&meta.labels.join(","))),
+        "reporter" => Ok(dash_if_empty(&meta.reporter)),
+        "assignee" => Ok(dash_if_empty(&meta.assignee)),
+        "priority" => Ok(format!("{:?}", meta.priority)),
+        "due_date" => Ok(dash_if_empty(&meta.due_date)),
+        "created" => Ok(meta.created.clone()),
+        "updated" => Ok(meta.updated.clone()),
+        _ => Ok(get_relationship_value(col, meta)),
+    }
 }

@@ -1,15 +1,14 @@
 use std::fmt;
 use std::fs;
-use std::path::Path;
 use std::path::PathBuf;
-use std::process::Command;
 use std::str::FromStr;
 
-//use anstyle::{AnsiColor, Effects, Style};
 use chrono::{NaiveDate, Utc};
 use clap::ValueEnum;
 use indexmap::IndexMap;
 use serde::{Deserialize, Serialize};
+
+use crate::cmd::util::load_meta;
 
 #[derive(Serialize, Deserialize, Clone, Copy, PartialEq, Eq, ValueEnum)]
 pub enum Priority {
@@ -41,8 +40,12 @@ impl Priority {
             Priority::P4 => 4,
         }
     }
+}
 
-    pub fn from_str(s: &str) -> Result<Self, String> {
+impl FromStr for Priority {
+    type Err = String;
+
+    fn from_str(s: &str) -> Result<Self, String> {
         match s {
             "" => Ok(Priority::Empty),
             "p0" => Ok(Priority::P0),
@@ -214,7 +217,6 @@ pub struct Config {
     pub states: Vec<String>,
     pub types: Vec<String>,
     pub relationships: IndexMap<String, Relationship>,
-    pub export_csv_separator: char,
     pub id_generation: IdGeneration,
     pub priority_default: Priority,
 }
@@ -263,6 +265,7 @@ pub struct Settings {
     pub _version: u32,
     pub editor: String,
     pub user: String,
+    pub export_csv_separator: char,
     pub list_formatting: ListFormatting,
 }
 
@@ -318,20 +321,6 @@ pub fn is_valid_user(users: &Users, s: &str) -> bool {
     s.is_empty() || s == "me" || users.users.iter().any(|u| u.id == s)
 }
 
-pub fn user_handle_me(users: &Users, settings: &Settings, value: &mut String) -> Result<(), String> {
-    if *value != "me" {
-        return Ok(());
-    }
-
-    *value = if is_valid_user(users, &settings.user) {
-        settings.user.clone()
-    } else {
-        return Err("Invalid user: settings.yaml::user must be part of users.yaml:users or ''".to_string());
-    };
-
-    Ok(())
-}
-
 pub fn load_config() -> Result<Config, String> {
     let config_path = config_path()?;
     let config_raw = match fs::read_to_string(&config_path) {
@@ -347,10 +336,10 @@ pub fn load_config() -> Result<Config, String> {
     Ok(config)
 }
 
-pub fn load_settings() -> Result<Settings, String> {
+pub fn load_settings() -> Result<(Settings, Vec<String>), String> {
     let settings_path = settings_path()?;
 
-    create_settings_if_missing(true)?;
+    let info = create_settings_if_missing(true)?;
 
     let settings_raw = match fs::read_to_string(&settings_path) {
         Ok(s) => s,
@@ -362,44 +351,25 @@ pub fn load_settings() -> Result<Settings, String> {
         Err(e) => return Err(format!("settings.yaml malformatted: {e}")),
     };
 
-    Ok(settings)
+    Ok((settings, info))
 }
 
-pub fn load_meta(path: &Path) -> Result<Meta, String> {
-    let meta_raw = match fs::read_to_string(path) {
-        Ok(s) => s,
-        Err(_) => return Err(format!("meta.yaml not found: {}", path.display())),
-    };
-
-    let meta: Meta = match serde_yaml::from_str(&meta_raw) {
-        Ok(m) => m,
-        Err(e) => return Err(format!("meta.yaml malformatted: {}: {e}", path.display())),
-    };
-
-    Ok(meta)
-}
-
-pub fn load_description(path: &Path) -> Result<String, String> {
-    let raw = fs::read_to_string(path).map_err(|_| format!("description.md not found: {}", path.display()))?;
-    Ok(raw)
-}
-
-pub fn create_settings_if_missing(print: bool) -> Result<(), String> {
+pub fn create_settings_if_missing(print: bool) -> Result<Vec<String>, String> {
     const DEFAULT_SETTINGS: &str = include_str!("../config/settings-default.yaml");
     let settings_dst = settings_path()?;
 
     if let Ok(true) = fs::exists(&settings_dst) {
-        return Ok(());
+        return Ok(vec![]);
     }
 
     fs::write(&settings_dst, DEFAULT_SETTINGS)
         .map_err(|e| format!("Failed to write default settings to {}: {e}", settings_dst.display()))?;
 
     if print {
-        println!("Created default local user settings at {}", settings_dst.display());
+        return Ok(vec![format!("Created default local user settings at {}", settings_dst.display())]);
     }
 
-    Ok(())
+    Ok(vec![])
 }
 
 pub fn issue_title(id: u32) -> Result<String, String> {
@@ -471,154 +441,4 @@ pub fn issue_tmp_dir() -> Result<std::path::PathBuf, String> {
 
 pub fn issue_tmp_show_dir(id: u32) -> Result<std::path::PathBuf, String> {
     Ok(issue_tmp_dir()?.join(format!("show-{id}")))
-}
-
-/// Returns the path to the cache.txt file.
-pub fn cache_path() -> Result<std::path::PathBuf, String> {
-    Ok(issue_tmp_dir()?.join("cache.txt"))
-}
-
-pub fn issue_exports_dir() -> Result<std::path::PathBuf, String> {
-    Ok(gitissues_base()?.join("exports"))
-}
-
-/// Git commit based on template and config
-/// This commits all issue changes (.gitissues/issues/)
-pub fn git_commit(id: u32, title: String, action: &str) -> Result<(), String> {
-    let config = load_config()?;
-
-    // Check if auto-commit is enabled
-    if !config.commit_auto {
-        return Ok(());
-    }
-
-    // Prepare commit message
-    let commit_message_template = config.commit_message;
-
-    let commit_message = commit_message_template
-        .replace("{action}", action)
-        .replace("{id}", &format!("{id}"))
-        .replace("{title}", &title);
-
-    run_git(&commit_message, &issues_dir()?.to_string_lossy())?;
-
-    Ok(())
-}
-
-/// Simple commit message not based on template or config
-/// This commits all changes (.gitissues/)
-pub fn git_commit_non_templated(msg: &str) -> Result<(), String> {
-    // Prepare commit message
-    let commit_message = format!("[issue] {msg}");
-
-    run_git(&commit_message, &gitissues_base()?.to_string_lossy())?;
-
-    Ok(())
-}
-
-pub fn open_editor(mut editor: String, path: String) -> Result<(), String> {
-    if editor == "git" {
-        // Read git default editor
-        let output = Command::new("git")
-            .args(["config", "--get", "core.editor"])
-            .output()
-            .map_err(|e| format!("Failed to get git editor: {e}"))?;
-
-        if !output.status.success() {
-            return Err("Git config failed or core.editor not set".to_string());
-        }
-
-        editor = String::from_utf8(output.stdout)
-            .map_err(|e| format!("Failed to parse git output: {e}"))?
-            .trim()
-            .to_string();
-    }
-
-    // Parse editor command (handles quoted paths with arguments)
-    let editor_parts = shell_words::split(&editor).map_err(|e| format!("Failed to parse editor command: {e}"))?;
-
-    if editor_parts.is_empty() {
-        return Err("No editor command specified".to_string());
-    }
-
-    // First part is the program, rest are arguments
-    let program = &editor_parts[0];
-    let mut cmd = Command::new(program);
-
-    // Add any existing arguments from the editor config
-    for arg in &editor_parts[1..] {
-        cmd.arg(arg);
-    }
-
-    // Add the file to edit
-    cmd.arg(&path);
-
-    // Execute editor (with Windows-specific shell fallback for PATH/PATHEXT resolution)
-    #[allow(unused_mut)]
-    let mut status = cmd.status();
-
-    #[cfg(windows)]
-    if let Err(e) = &status {
-        use std::io::ErrorKind;
-        if e.kind() == ErrorKind::NotFound {
-            // Build a single command line for cmd.exe to resolve (e.g., code -> code.cmd)
-            let quoted_path = if path.contains(' ') {
-                format!("\"{}\"", path)
-            } else {
-                path.clone()
-            };
-            let full = format!("{} {}", editor, quoted_path);
-            status = Command::new("cmd").args(["/c", &full]).status();
-        }
-    }
-
-    let status = status.map_err(|e| format!("Failed to open editor: {e}"))?;
-    if !status.success() {
-        return Err(format!("Editor exited with error code: {:?}", status.code()));
-    }
-
-    Ok(())
-}
-
-pub fn dash_if_empty(value: &str) -> String {
-    if value.is_empty() { "-".to_string() } else { value.to_string() }
-}
-
-fn run_git(commit_message: &str, staging_dir: &str) -> Result<(), String> {
-    // Execute git add
-    let add_result = Command::new("git")
-        .args(["add", staging_dir])
-        .output()
-        .map_err(|e| format!("Failed to stage .gitissues: {e}"))?;
-
-    if !add_result.status.success() {
-        let stderr = String::from_utf8_lossy(&add_result.stderr);
-        return Err(format!("Failed to stage .gitissues: {}", stderr.trim()));
-    }
-
-    // Execute git commit
-    let commit_result = Command::new("git")
-        .args(["commit", "-m", commit_message])
-        .output()
-        .map_err(|e| format!("Failed to commit: {e}"))?;
-
-    if !commit_result.status.success() {
-        let stdout = String::from_utf8_lossy(&commit_result.stdout);
-        let stderr = String::from_utf8_lossy(&commit_result.stderr);
-
-        // Check if it's just "nothing to commit" - this is not an error
-        if stdout.contains("nothing to commit")
-            || stdout.contains("no changes added to commit")
-            || stdout.contains("nothing added to commit")
-        {
-            println!("Info: Nothing to commit");
-            return Ok(());
-        }
-
-        let error_msg = if !stderr.trim().is_empty() { stderr.trim() } else { stdout.trim() };
-
-        return Err(format!("Failed to commit: {}", error_msg));
-    }
-
-    Ok(())
 }

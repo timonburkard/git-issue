@@ -1,15 +1,17 @@
 use std::fs;
-use std::io::{self, Write};
-use std::time::Duration;
 
+use crate::cmd::util::{git_commit, load_meta, user_handle_me};
 use crate::model::{
-    Priority, cache_path, current_timestamp, git_commit, is_valid_iso_date, is_valid_state, is_valid_type, is_valid_user, issue_dir,
-    issue_meta_path, load_config, load_meta, load_settings, load_users, user_handle_me,
+    Priority, current_timestamp, is_valid_iso_date, is_valid_state, is_valid_type, is_valid_user, issue_dir, issue_meta_path, load_config,
+    load_settings, load_users,
 };
+use crate::{Cmd, CmdResult};
 
+/// Set metadata fields of issues
+/// Returns number of issues updated and optional info messages
 #[allow(clippy::too_many_arguments)]
-pub fn run(
-    ids: Vec<String>,
+pub fn set(
+    ids: Vec<u32>,
     state: Option<String>,
     title: Option<String>,
     type_: Option<String>,
@@ -20,28 +22,10 @@ pub fn run(
     labels: Option<Vec<String>>,
     labels_add: Option<Vec<String>>,
     labels_remove: Option<Vec<String>>,
-) -> Result<(), String> {
+) -> Cmd<u32> {
     let config = load_config()?;
-    let settings = load_settings()?;
+    let (settings, mut infos) = load_settings()?;
     let users = load_users()?;
-
-    let using_wildcard = ids.len() == 1 && ids[0] == "*";
-
-    let ids: Vec<u32> = if using_wildcard {
-        read_cached_issue_ids()?
-    } else {
-        if ids.iter().any(|t| t == "*") {
-            return Err("Cannot mix '*' with explicit IDs".to_string());
-        }
-
-        ids.iter()
-            .map(|t| t.parse::<u32>().map_err(|_| format!("Invalid issue ID: {t}")))
-            .collect::<Result<Vec<u32>, _>>()?
-    };
-
-    if using_wildcard {
-        wildcard_confirmation(ids.len())?;
-    }
 
     // Precondition: .gitissues/issues/ID must exist
     for id in &ids {
@@ -204,54 +188,15 @@ pub fn run(
 
         fs::write(&meta_path, updated_yaml).map_err(|_| "Failed to write meta.yaml".to_string())?;
 
-        git_commit(id, updated_meta.title, &format!("set {}", fields.join(",")))?;
+        let info_commit = git_commit(id, updated_meta.title, &format!("set {}", fields.join(",")))?;
+
+        infos.extend(info_commit);
 
         num_updated_issues += 1;
     }
 
-    match num_updated_issues {
-        0 => return Err("No fields changed".to_string()),
-        1 => println!("Updated issue field(s)"),
-        _ => println!("Updated {} issues' field(s)", num_updated_issues),
-    };
-
-    Ok(())
-}
-
-fn read_cached_issue_ids() -> Result<Vec<u32>, String> {
-    let cache_file = cache_path()?;
-
-    // ensure cache file is not too old
-    let metadata = fs::metadata(&cache_file).map_err(|_| "Cached ID list is empty; run 'git issue list' first.".to_string())?;
-    if let Ok(modified) = metadata.modified()
-        && let Ok(elapsed) = modified.elapsed()
-        && elapsed > Duration::from_secs(300)
-    {
-        return Err("Cached ID list is stale; run 'git issue list' first.".to_string());
-    }
-
-    let cache_content = fs::read_to_string(&cache_file).map_err(|_| "Cached ID list is empty; run 'git issue list' first.".to_string())?;
-    let issue_ids: Result<Vec<u32>, _> = cache_content.split(',').map(|s| s.trim().parse::<u32>()).collect();
-
-    if let Ok(value) = issue_ids {
-        Ok(value)
-    } else {
-        Err("Cached ID list is empty; run 'git issue list' first.".to_string())
-    }
-}
-
-fn wildcard_confirmation(num_of_ids: usize) -> Result<(), String> {
-    println!("Modify {} issues from last list cache.", num_of_ids);
-    print!("Continue? [y/N] ");
-    io::stdout().flush().map_err(|e| format!("Failed to flush stdout: {e}"))?;
-
-    let mut input = String::new();
-    io::stdin()
-        .read_line(&mut input)
-        .map_err(|e| format!("Failed to read input: {e}"))?;
-    if !input.trim().eq_ignore_ascii_case("y") {
-        return Err("Cancelled".to_string());
-    }
-
-    Ok(())
+    Ok(CmdResult {
+        value: num_updated_issues,
+        infos,
+    })
 }

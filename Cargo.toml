@@ -11,6 +11,14 @@ keywords = ["git", "issue", "tracker", "cli", "rust"]
 categories = ["development-tools"]
 exclude = [".gitissues/"]
 
+[lib]
+name = "git_issue"
+path = "src/lib.rs"
+
+[[bin]]
+name = "git-issue"
+path = "src/cli/main.rs"
+
 [dependencies]
 chrono = "0.4.42"
 clap = { version = "4.5.53", features = ["derive"] }
