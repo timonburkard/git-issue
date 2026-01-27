@@ -1,13 +1,13 @@
 _version: 1
 id: 58
 title: '[config] `export_csv_separator` should be moved to local user settings'
-state: new
+state: active
 type: ''
 labels: []
 reporter: t.burkard
-assignee: ''
+assignee: t.burkard
 priority: ''
 due_date: ''
 relationships: {}
 created: 2026-01-27T20:34:16Z
-updated: 2026-01-27T20:34:16Z
+updated: 2026-01-27T20:40:38Z
