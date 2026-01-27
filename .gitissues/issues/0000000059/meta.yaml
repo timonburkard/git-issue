@@ -1,13 +1,13 @@
 _version: 1
 id: 59
 title: '[cmd/show] remove title from metadata table'
-state: new
+state: resolved
 type: ''
 labels: []
 reporter: t.burkard
-assignee: ''
+assignee: t.burkard
 priority: ''
 due_date: ''
 relationships: {}
 created: 2026-01-27T20:35:19Z
-updated: 2026-01-27T20:35:19Z
+updated: 2026-01-27T21:14:20Z
