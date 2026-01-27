@@ -82,12 +82,6 @@
             border-bottom: 1px solid #dee2e6;
         }
 
-        td:first-child,
-        th:first-child {
-            text-align: right;
-            font-variant-numeric: tabular-nums;
-        }
-
         tr:hover {
             background: #e9ecef;
         }
@@ -143,19 +137,17 @@
                 <caption>Issue list</caption>
                 <thead>
                     <tr>
-                        <th scope="col">ID</th>
-                        <th scope="col">Title</th>
-                        <th scope="col">State</th>
-                        <th scope="col">Assignee</th>
+                        {% for col in columns %}
+                        <th scope="col">{{ col }}</th>
+                        {% endfor %}
                     </tr>
                 </thead>
                 <tbody>
-                    {% for issue in issues %}
+                    {% for (idx, id) in ids.iter().enumerate() %}
                     <tr>
-                        <td>{{ issue.id }}</td>
-                        <td>{{ issue.title }}</td>
-                        <td><span class="state {{ issue.state }}">{{ issue.state }}</span></td>
-                        <td>{{ issue.assignee }}</td>
+                        {%for row in rows[idx]%}
+                        <td>{{ row }}</td>
+                        {% endfor %}
                     </tr>
                     {% endfor %}
                 </tbody>

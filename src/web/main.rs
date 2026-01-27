@@ -34,19 +34,14 @@ async fn ping() -> impl IntoResponse {
 #[derive(Template)]
 #[template(path = "list.html")]
 struct ListTemplate {
-    issues: Vec<Issue>,
-}
-
-#[derive(serde::Serialize, serde::Deserialize)]
-struct Issue {
-    id: u32,
-    title: String,
-    state: String,
-    assignee: String,
+    columns: Vec<String>,
+    ids: Vec<u32>,
+    rows: Vec<Vec<String>>,
 }
 
 async fn list() -> Result<Html<String>, ApiError> {
-    let result = git_issue::list(None, None, None);
+    let columns = vec!["id".to_string(), "title".to_string(), "state".to_string(), "assignee".to_string()];
+    let result = git_issue::list(Some(columns), None, None);
 
     let result = match result {
         Ok(result) => result,
@@ -59,18 +54,26 @@ async fn list() -> Result<Html<String>, ApiError> {
         println!("{}", info);
     }
 
-    let mut issues_collection = Vec::new();
+    let columns = result.value.columns;
+
+    let mut ids: Vec<u32> = Vec::new();
+    let mut rows: Vec<Vec<String>> = Vec::new();
 
     for issue in &result.value.issues {
-        issues_collection.push(Issue {
-            id: issue.id,
-            title: issue.data["title"].clone(),
-            state: issue.data["state"].clone(),
-            assignee: issue.data["assignee"].clone(),
-        });
+        ids.push(issue.id);
+
+        let mut issue_rows: Vec<String> = Vec::new();
+
+        for col in &columns {
+            issue_rows.push(issue.data.get(col).cloned().unwrap_or_default());
+        }
+
+        rows.push(issue_rows);
     }
 
-    let html = ListTemplate { issues: issues_collection }.render().unwrap();
+    let issue_collection = ListTemplate { columns, ids, rows };
+
+    let html = issue_collection.render().unwrap();
 
     Ok(Html(html))
 }
