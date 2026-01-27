@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+    - [cmd/show] removed title from metadata table in markdown (#59)
     - [config] moved `export_csv_separator` from config to settings --> YAML schema v2 (#58)
     - [structure] added lib, implemented separation between cmd and cli
 
