@@ -2,6 +2,8 @@ use askama::Template;
 use axum::{Json, Router, extract::Path, response::Html, response::IntoResponse, routing::get};
 use serde_json::{self, Value, json};
 
+use git_issue::model::load_settings;
+
 enum ApiError {
     NotFound,
     BadRequest(String),
@@ -41,6 +43,7 @@ struct Data {
 struct ListTemplate {
     ids: Vec<u32>,
     rows: Vec<Vec<Data>>,
+    user: String,
 }
 
 async fn list() -> Result<Html<String>, ApiError> {
@@ -78,7 +81,18 @@ async fn list() -> Result<Html<String>, ApiError> {
         rows.push(issue_rows);
     }
 
-    let issue_collection = ListTemplate { ids, rows };
+    let (settings, _) = match load_settings() {
+        Ok(settings) => settings,
+        Err(_) => {
+            return Err(ApiError::InternalServerError);
+        }
+    };
+
+    let issue_collection = ListTemplate {
+        ids,
+        rows,
+        user: settings.user.to_string(),
+    };
 
     let html = issue_collection.render().unwrap();
 

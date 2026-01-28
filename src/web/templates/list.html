@@ -145,12 +145,19 @@
                 <tbody>
                     {% for (idx, id) in ids.iter().enumerate() %}
                     <tr>
-                        {% for row in rows[idx] %}
-                        {% if row.key == "state" %}
-                        <td><span class="state {{ row.value }}">{{ row.value }}</span></td>
+                        {% for data in rows[idx] %}
+                        {% match data.key.as_str() %}
+                        {% when "state" %}
+                        <td><span class="state {{ data.value }}">{{ data.value }}</span></td>
+                        {% when "assignee" | "reporter" %}
+                        {% if data.value == user %}
+                        <td><strong>{{ data.value }}</strong></td>
                         {% else %}
-                        <td>{{ row.value }}</td>
+                        <td>{{ data.value }}</td>
                         {% endif %}
+                        {% else %}
+                        <td>{{ data.value }}</td>
+                        {% endmatch %}
                         {% endfor %}
                     </tr>
                     {% endfor %}
