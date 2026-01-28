@@ -1,5 +1,7 @@
 use askama::Template;
+use axum::extract::Query;
 use axum::{Json, Router, extract::Path, response::Html, response::IntoResponse, routing::get};
+use serde::Deserialize;
 use serde_json::{self, Value, json};
 
 use git_issue::model::load_settings;
@@ -44,11 +46,27 @@ struct ListTemplate {
     ids: Vec<u32>,
     rows: Vec<Vec<Data>>,
     user: String,
+    columns: Vec<String>,
 }
 
-async fn list() -> Result<Html<String>, ApiError> {
-    let columns = vec!["id".to_string(), "title".to_string(), "state".to_string(), "assignee".to_string()];
-    let result = git_issue::list(Some(columns), None, None);
+#[derive(Deserialize)]
+struct ListColumnsQuery {
+    #[serde(default, deserialize_with = "comma_separated")]
+    columns: Vec<String>,
+}
+
+fn comma_separated<'de, D>(deserializer: D) -> Result<Vec<String>, D::Error>
+where
+    D: serde::Deserializer<'de>,
+{
+    let s = Option::<String>::deserialize(deserializer)?;
+    Ok(s.unwrap_or_default().split(',').map(|s| s.to_string()).collect())
+}
+
+async fn list(Query(columns): Query<ListColumnsQuery>) -> Result<Html<String>, ApiError> {
+    let columns = if columns.columns.is_empty() { None } else { Some(columns.columns) };
+
+    let result = git_issue::list(columns, None, None);
 
     let result = match result {
         Ok(result) => result,
@@ -92,6 +110,7 @@ async fn list() -> Result<Html<String>, ApiError> {
         ids,
         rows,
         user: settings.user.to_string(),
+        columns,
     };
 
     let html = issue_collection.render().unwrap();
@@ -116,6 +135,7 @@ fn create_app() -> Router {
     Router::new()
         .route("/ping", get(ping))
         .route("/", get(list))
+        .route("/list", get(list))
         .route("/show/{id}", get(show))
         .fallback(not_found)
 }

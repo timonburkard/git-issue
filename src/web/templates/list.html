@@ -133,12 +133,54 @@
         </header>
 
         <div>
+            <form method="GET" action="/list" onsubmit="joinColumns()">
+                <input type="checkbox" id="id" value="id" {% if columns.contains(&"id".to_string()) %}checked{% endif
+                    %}>
+                <label for="id">ID</label>
+                <input type="checkbox" id="title" value="title" {% if columns.contains(&"title".to_string()) %}checked{%
+                    endif %}>
+                <label for="title">Title</label>
+                <input type="checkbox" id="state" value="state" {% if columns.contains(&"state".to_string()) %}checked{%
+                    endif %}>
+                <label for="state">State</label>
+                <input type="checkbox" id="type" value="type" {% if columns.contains(&"type".to_string()) %}checked{%
+                    endif %}>
+                <label for="type">Type</label>
+                <input type="checkbox" id="reporter" value="reporter" {% if columns.contains(&"reporter".to_string())
+                    %}checked{% endif %}>
+                <label for="reporter">Reporter</label>
+                <input type="checkbox" id="assignee" value="assignee" {% if columns.contains(&"assignee".to_string())
+                    %}checked{% endif %}>
+                <label for="assignee">Assignee</label>
+                <input type="checkbox" id="labels" value="labels" {% if columns.contains(&"labels".to_string())
+                    %}checked{% endif %}>
+                <label for="labels">Labels</label>
+                <input type="checkbox" id="priority" value="priority" {% if columns.contains(&"priority".to_string())
+                    %}checked{% endif %}>
+                <label for="priority">Priority</label>
+                <input type="checkbox" id="due_date" value="due_date" {% if columns.contains(&"due_date".to_string())
+                    %}checked{% endif %}>
+                <label for="due_date">Due Date</label>
+                <input type="checkbox" id="created" value="created" {% if columns.contains(&"created".to_string())
+                    %}checked{% endif %}>
+                <label for="created">Created</label>
+                <input type="checkbox" id="updated" value="updated" {% if columns.contains(&"updated".to_string())
+                    %}checked{% endif %}>
+                <label for="updated">Updated</label>
+
+                <input type="hidden" name="columns" id="columns">
+
+                <input type="submit" value="Refresh">
+            </form>
+        </div>
+
+        <div>
             <table style="overflow-x: auto;">
                 <caption>Issue list</caption>
                 <thead>
                     <tr>
-                        {% for row in rows[0] %}
-                        <th scope="col">{{ row.key }}</th>
+                        {% for column in columns %}
+                        <th scope="col">{{ column }}</th>
                         {% endfor %}
                     </tr>
                 </thead>
@@ -168,3 +210,13 @@
 </body>
 
 </html>
+
+<script>
+    function joinColumns() {
+        const checked = Array.from(
+            document.querySelectorAll('input[type=checkbox]:checked')
+        ).map(cb => cb.value);
+
+        document.getElementById('columns').value = checked.join(',');
+    }
+</script>
