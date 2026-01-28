@@ -31,12 +31,16 @@ async fn ping() -> impl IntoResponse {
     }))
 }
 
+struct Data {
+    key: String,
+    value: String,
+}
+
 #[derive(Template)]
 #[template(path = "list.html")]
 struct ListTemplate {
-    columns: Vec<String>,
     ids: Vec<u32>,
-    rows: Vec<Vec<String>>,
+    rows: Vec<Vec<Data>>,
 }
 
 async fn list() -> Result<Html<String>, ApiError> {
@@ -57,21 +61,24 @@ async fn list() -> Result<Html<String>, ApiError> {
     let columns = result.value.columns;
 
     let mut ids: Vec<u32> = Vec::new();
-    let mut rows: Vec<Vec<String>> = Vec::new();
+    let mut rows: Vec<Vec<Data>> = Vec::new();
 
     for issue in &result.value.issues {
         ids.push(issue.id);
 
-        let mut issue_rows: Vec<String> = Vec::new();
+        let mut issue_rows: Vec<Data> = Vec::new();
 
         for col in &columns {
-            issue_rows.push(issue.data.get(col).cloned().unwrap_or_default());
+            issue_rows.push(Data {
+                key: col.clone(),
+                value: issue.data.get(col).cloned().unwrap_or_default(),
+            });
         }
 
         rows.push(issue_rows);
     }
 
-    let issue_collection = ListTemplate { columns, ids, rows };
+    let issue_collection = ListTemplate { ids, rows };
 
     let html = issue_collection.render().unwrap();
 

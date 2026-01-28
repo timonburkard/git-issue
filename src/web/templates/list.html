@@ -137,16 +137,20 @@
                 <caption>Issue list</caption>
                 <thead>
                     <tr>
-                        {% for col in columns %}
-                        <th scope="col">{{ col }}</th>
+                        {% for row in rows[0] %}
+                        <th scope="col">{{ row.key }}</th>
                         {% endfor %}
                     </tr>
                 </thead>
                 <tbody>
                     {% for (idx, id) in ids.iter().enumerate() %}
                     <tr>
-                        {%for row in rows[idx]%}
-                        <td>{{ row }}</td>
+                        {% for row in rows[idx] %}
+                        {% if row.key == "state" %}
+                        <td><span class="state {{ row.value }}">{{ row.value }}</span></td>
+                        {% else %}
+                        <td>{{ row.value }}</td>
+                        {% endif %}
                         {% endfor %}
                     </tr>
                     {% endfor %}
