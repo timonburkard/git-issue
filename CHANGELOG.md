@@ -5,11 +5,17 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [unreleased]
+## [v0.8.0] - 2026-08-01
+
+### Added
+    - [web] added simple web server to list and show issues
 
 ### Changed
 
+    - [cmd/show] ensured metadata table is left aligned
     - [cmd/show] removed title from metadata table in markdown (#59)
+    - [cmd/show] removed id from metadata table in markdown
+    - [cmd/show] added `#` to issue ids in relationships in markdown
     - [config] moved `export_csv_separator` from config to settings --> YAML schema v2 (#58)
     - [structure] added lib, implemented separation between cmd and cli
 
