@@ -63,7 +63,7 @@ fn generate_content_metadata(id: u32, meta: &Meta) -> String {
     content.push_str("## Meta Data\n");
     content.push('\n');
     content.push_str(&format!("| **field**         | {:width$} |\n", "**value**"));
-    content.push_str(&format!("| ----------------- | {} |\n", "-".repeat(width)));
+    content.push_str(&format!("| :---------------- | :{} |\n", "-".repeat(width - 1)));
     content.push_str(&format!("| **id**            | {:width$} |\n", values["id"]));
     content.push_str(&format!("| **state**         | {:width$} |\n", values["state"]));
     content.push_str(&format!("| **type**          | {:width$} |\n", values["type"]));
