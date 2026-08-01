@@ -6,7 +6,6 @@
 
 | **field**         | **value**                                  |
 | :---------------- | :----------------------------------------- |
-| **id**            | 1                                          |
 | **state**         | active                                     |
 | **type**          | feature                                    |
 | **labels**        | ui,driver,backend,api,performance,security |
