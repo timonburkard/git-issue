@@ -36,13 +36,9 @@ pub fn init(no_commit: bool) -> Cmd<()> {
     fs::write(&desc_dst, DEFAULT_DESC).map_err(|e| format!("Failed to write default description to {}: {e}", desc_dst.display()))?;
 
     if !no_commit {
-        match git_commit_non_templated("init") {
-            Ok(infos_commit) => {
-                infos.extend(infos_commit);
-                return Ok(CmdResult { value: (), infos });
-            }
-            Err(e) => return Err(e),
-        }
+        let infos_commit = git_commit_non_templated("init")?;
+        infos.extend(infos_commit);
+        return Ok(CmdResult { value: (), infos });
     }
 
     Ok(CmdResult { value: (), infos })

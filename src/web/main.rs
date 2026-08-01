@@ -1,3 +1,4 @@
+#![deny(warnings, clippy::unwrap_used, clippy::expect_used)]
 use askama::Template;
 use axum::extract::Query;
 use axum::http::header;
@@ -92,7 +93,7 @@ async fn list(Query(columns): Query<ListColumnsQuery>, Query(filters): Query<Lis
             continue;
         }
 
-        let parsed = Filter::from_str(&filter);
+        let parsed = Filter::from_str(filter);
         match parsed {
             Ok(f) => filters_parsed.push(f),
             Err(_) => {
@@ -149,7 +150,7 @@ async fn list(Query(columns): Query<ListColumnsQuery>, Query(filters): Query<Lis
         filters: filters.filters,
     };
 
-    let html = issue_collection.render().unwrap();
+    let html = issue_collection.render().map_err(|_| ApiError::InternalServerError)?;
 
     Ok(Html(html))
 }
@@ -178,19 +179,19 @@ async fn show(Path(id): Path<u32>) -> Result<Html<String>, ApiError> {
     let md_start = "<!-- READ-ONLY VIEW -->\n\n# Issue ";
 
     // Prevent title from being formatted --> remove # from title issue id
-    let re = Regex::new(&format!("^({md_start})#(\\d+)")).unwrap();
+    let re = Regex::new(&format!("^({md_start})#(\\d+)")).map_err(|_| ApiError::InternalServerError)?;
     content = re.replace(&content, "$1$2").to_string();
 
     // Format issue ids with links to the corresponding show page
-    let re = Regex::new(r"#(\d+)").unwrap();
+    let re = Regex::new(r"#(\d+)").map_err(|_| ApiError::InternalServerError)?;
     content = re.replace_all(&content, "[#$1](http://localhost:7878/show/$1)").to_string();
 
     // Put back the # in front of the title issue id
-    let re = Regex::new(&format!("^({md_start})(\\d+)")).unwrap();
+    let re = Regex::new(&format!("^({md_start})(\\d+)")).map_err(|_| ApiError::InternalServerError)?;
     content = re.replace(&content, "$1#$2").to_string();
 
     let template = ShowTemplate { id, content };
-    let html = template.render().unwrap();
+    let html = template.render().map_err(|_| ApiError::InternalServerError)?;
 
     Ok(Html(html))
 }
@@ -218,9 +219,16 @@ fn create_app() -> Router {
 async fn main() {
     let app = create_app();
 
-    let listener = tokio::net::TcpListener::bind("127.0.0.1:7878")
-        .await
-        .expect("Failed to bind listener");
+    let listener = match tokio::net::TcpListener::bind("127.0.0.1:7878").await {
+        Ok(listener) => listener,
+        Err(err) => {
+            eprintln!("Failed to bind listener: {err}");
+            std::process::exit(1);
+        }
+    };
 
-    axum::serve(listener, app).await.expect("Failed to start server");
+    if let Err(err) = axum::serve(listener, app).await {
+        eprintln!("Failed to start server: {err}");
+        std::process::exit(1);
+    }
 }
