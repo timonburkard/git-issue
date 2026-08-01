@@ -13,8 +13,8 @@
 | **assignee**      | bob                                        |
 | **priority**      | P1                                         |
 | **due_date**      | 2026-06-24                                 |
-| **relationships** | related: 2                                 |
-|                   | child: 2, 3                                |
+| **relationships** | related: #2                                |
+|                   | child: #2, #3                              |
 | **created**       | __CREATED__                       |
 | **updated**       | __UPDATED__                       |
 

@@ -115,7 +115,7 @@ fn content_relationships(relationships: &IndexMap<String, Vec<u32>>, min_width: 
 
     let mut first = true;
     for (rel_type, ids) in relationships {
-        let ids_str = ids.iter().map(|id| id.to_string()).collect::<Vec<String>>().join(", ");
+        let ids_str = ids.iter().map(|id| format!("#{id}")).collect::<Vec<String>>().join(", ");
         let string = format!("{}: {}", rel_type, ids_str);
 
         if string.len() > max_width {
