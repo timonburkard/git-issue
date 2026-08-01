@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>git-issue #{{ id }}</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: #f5f5f5;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        header {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+
+        .content-box {
+            background: white;
+            padding: 20px;
+            padding-top: 2px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+
+        header h1 {
+            font-size: 28px;
+            margin-bottom: 10px;
+        }
+
+        .content-box pre {
+            white-space: pre-wrap;
+            word-break: break-word;
+            background: #f8f9fa;
+            padding: 16px;
+            border-radius: 6px;
+            border: 1px solid #dee2e6;
+            font-family: Consolas, Monaco, monospace;
+            line-height: 1.5;
+        }
+
+        .content-box a {
+            color: #0d6efd;
+        }
+
+        #issue-content {
+            margin-top: 0px;
+            line-height: 1.6;
+        }
+
+        #issue-content h1,
+        #issue-content h2,
+        #issue-content h3 {
+            margin: 1rem 0 0.5rem;
+        }
+
+        #issue-content p,
+        #issue-content ul,
+        #issue-content ol {
+            margin-bottom: 0.75rem;
+        }
+
+        #issue-content code {
+            background: #f8f9fa;
+            padding: 0.2rem 0.4rem;
+            border-radius: 4px;
+        }
+
+        #issue-content pre {
+            background: #f8f9fa;
+            padding: 16px;
+            border-radius: 6px;
+            overflow-x: auto;
+        }
+    </style>
+</head>
+
+<body>
+    <main class="container">
+        <header>
+            <div class="header-content">
+                <h1>🗂️ git-issue</h1>
+                <p>Browse and manage your Issues tracked with<code> </code><code
+                        style="background-color: rgb(234, 234, 234); font-size: large;">git-issue</code>
+                </p>
+            </div>
+        </header>
+
+        <section class="content-box">
+            <pre id="issue-source" style="display:none">{{ content }}</pre>
+            <div id="issue-content">{% if content.is_empty() %}No description available.{% endif %}</div>
+        </section>
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <script>
+        const source = document.getElementById('issue-source');
+        const container = document.getElementById('issue-content');
+        const raw = source ? source.textContent : '';
+
+        if (raw && raw.trim()) {
+            container.innerHTML = marked.parse(raw);
+        }
+    </script>
+</body>
+
+</html>

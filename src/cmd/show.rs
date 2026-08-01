@@ -63,8 +63,7 @@ fn generate_content_metadata(id: u32, meta: &Meta) -> String {
     content.push_str("## Meta Data\n");
     content.push('\n');
     content.push_str(&format!("| **field**         | {:width$} |\n", "**value**"));
-    content.push_str(&format!("| ----------------- | {} |\n", "-".repeat(width)));
-    content.push_str(&format!("| **id**            | {:width$} |\n", values["id"]));
+    content.push_str(&format!("| :---------------- | :{} |\n", "-".repeat(width - 1)));
     content.push_str(&format!("| **state**         | {:width$} |\n", values["state"]));
     content.push_str(&format!("| **type**          | {:width$} |\n", values["type"]));
     content.push_str(&format!("| **labels**        | {:width$} |\n", values["labels"]));
@@ -82,7 +81,6 @@ fn generate_content_metadata(id: u32, meta: &Meta) -> String {
 fn get_values(meta: &Meta) -> (usize, HashMap<String, String>) {
     let mut values = HashMap::new();
 
-    values.insert("id".to_string(), meta.id.to_string());
     values.insert("state".to_string(), meta.state.clone());
     values.insert("type".to_string(), dash_if_empty(&meta.type_));
     values.insert("labels".to_string(), dash_if_empty(&meta.labels.join(",")));
@@ -117,7 +115,7 @@ fn content_relationships(relationships: &IndexMap<String, Vec<u32>>, min_width: 
 
     let mut first = true;
     for (rel_type, ids) in relationships {
-        let ids_str = ids.iter().map(|id| id.to_string()).collect::<Vec<String>>().join(", ");
+        let ids_str = ids.iter().map(|id| format!("#{id}")).collect::<Vec<String>>().join(", ");
         let string = format!("{}: {}", rel_type, ids_str);
 
         if string.len() > max_width {

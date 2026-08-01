@@ -22,6 +22,7 @@ Issues live alongside your code inside `.gitissues/`, making them platform-indep
 - ✅ External editor renders issue information as markdown
 - ✅ Git-integration: auto-commit of changes
 - ✅ Possibility to export issue list into CSV file
+- ✅ Small web server to graphically list and show the issues
 - ✅ Automated integration tests
 - 🚧 Comments / discussions
 
@@ -33,20 +34,32 @@ Different installation approaches are explained here.
 
 #### 2.1.1) GitHub Release
 
-Download the latest release from GitHub and put the binary on your PATH.
+Download the latest release from GitHub and put the desired binary on your PATH.
 
-1) Go to the Releases page and download the binary for your platform:
-   - `git-issue-linux-x86_64`
-   - `git-issue-macos-x86_64` or `git-issue-macos-aarch64`
-   - `git-issue-windows-x86_64.exe`
+1) Go to the Releases page and download the binaries for your platform:
+   - CLI: `git-issue-<platform>`
+   - Web UI: `git-issue-web-<platform>`
+   - Examples:
+     - `git-issue-linux-x86_64`
+     - `git-issue-windows-x86_64.exe`
+     - `git-issue-macos-x86_64` or `git-issue-macos-aarch64`
+     - `git-issue-web-linux-x86_64`
+     - `git-issue-web-windows-x86_64.exe`
+     - `git-issue-web-macos-x86_64` or `git-issue-web-macos-aarch64`
 2) Rename to the canonical name and place on your PATH
-   - Linux/macOS:
+   - CLI binary:
      ```bash
      mv git-issue-<your-platform> git-issue
      chmod +x git-issue
      sudo mv git-issue /usr/local/bin/
      ```
-   - Windows: rename `git-issue-windows-x86_64.exe` to `git-issue.exe` and move it to a directory on your PATH.
+   - Web binary:
+     ```bash
+     mv git-issue-web-<your-platform> git-issue-web
+     chmod +x git-issue-web
+     sudo mv git-issue-web /usr/local/bin/
+     ```
+   - Windows: rename the downloaded `.exe` files to `git-issue.exe` or `git-issue-web.exe` and move them to a directory on your PATH.
 3) Verify:
    ```bash
    git issue -h
@@ -64,8 +77,14 @@ cargo install --git https://github.com/timonburkard/git-issue
 
 Package is available on https://crates.io/crates/git-issue, so it can be installed as follows:
 
-```
+```bash
 cargo install git-issue
+```
+
+To install the web UI binary from crates.io instead of the CLI binary, use:
+
+```bash
+cargo install git-issue --bin git-issue-web
 ```
 
 ### 2.2) How To
@@ -107,7 +126,7 @@ This is the suggested content for the `.gitignore`:
 .gitissues/settings.yaml
 ```
 
-### 2.3) Commands
+### 2.3) CLI
 
 ```bash
 # Help page
@@ -171,7 +190,19 @@ git issue link 1234 --add related=5678,3333 parent=9999 --remove child=7777  # b
 git issue edit 1234
 ```
 
-### 2.4) Example
+### 2.4) WEB
+
+For users which prefer graphical representation, there also exists a small web server. It only supports reading/displaying and not editing.
+
+It can:
+- List issues: `http://localhost:7878/` (same as `http://localhost:7878/list/`)
+  - Supports filters
+  - Supports columns
+  - ID is a hyperlink to `http://localhost:7878/show/{id}/`
+- Show issue: `http://localhost:7878/show/{id}/`
+  - Renders markdown info
+
+### 2.5) Example
 
 Example projects to see how `git-issue` is used in a repo:
 
@@ -445,19 +476,21 @@ cargo test
   - `lib.rs`   -- Public library
   - `model.rs` -- Shared data types, functions and utilities
   - `cmd/`     -- Core of the application: Commands (CRUD)
-    - `edit.rs`  -- Edit issue description (markdown) with external text editor
-    - `init.rs`  -- Initialize `.gitissues/` directory and copy default config
-    - `link.rs`  -- Change relationships between issues
-    - `list.rs`  -- List all issues
-    - `new.rs`   -- Create new issues
-    - `set.rs`   -- Change issue meta fields
-    - `show.rs`  -- Show all issue information (markdown) with external text editor
-    - `util.rs`  -- Utility functions for CMD
+    - `edit.rs`    -- Edit issue description (markdown) with external text editor
+    - `init.rs`    -- Initialize `.gitissues/` directory and copy default config
+    - `link.rs`    -- Change relationships between issues
+    - `list.rs`    -- List all issues
+    - `new.rs`     -- Create new issues
+    - `set.rs`     -- Change issue meta fields
+    - `show.rs`    -- Show all issue information (markdown) with external text editor
+    - `util.rs`    -- Utility functions for CMD
   - `cli/`     -- Binary: CLI -- Command Line Interface
-    - `main.rs`  -- Main entry for CLI: parsing with clap
-    - `cli.rs`   -- Functionality for CLI
-    - `util.rs`  -- Utility functions for CLI
-  - `web/`     -- Binary: WEB -- Local web server (🚧)
+    - `main.rs`    -- Main entry for CLI: parsing with clap
+    - `cli.rs`     -- Functionality for CLI
+    - `util.rs`    -- Utility functions for CLI
+  - `web/`     -- Binary: WEB -- Local web server
+    - `main.rs`    -- Main entry for WEB
+    - `templates/` -- HTML templates
 - `tests/`   -- Automated tests
 
 ### 5.3) Dependencies
@@ -466,7 +499,10 @@ cargo test
 - `chrono`      -- Timestamp generation
 - `serde`       -- Serialization framework
 - `serde_yaml`  -- YAML parsing for meta.yaml files
+- `serde_json`  -- JSON parsing
 - `shell-words` -- Process command line according to parsing rules of Unix shell
 - `regex`       -- Regular expressions
 - `indexmap`    -- Provides IndexMap datatype
 - `anstyle`     -- Terminal output coloring
+- `tokio`       -- TCP listener
+- `askama`      -- HTML template rendering
