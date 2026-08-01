@@ -2,6 +2,7 @@ use askama::Template;
 use axum::extract::Query;
 use axum::http::header;
 use axum::{Json, Router, extract::Path, response::Html, response::IntoResponse, routing::get};
+use regex::Regex;
 use serde::Deserialize;
 use serde_json::{self, json};
 use std::fs;
@@ -167,12 +168,26 @@ async fn show(Path(id): Path<u32>) -> Result<Html<String>, ApiError> {
         }
     };
 
-    let content = match fs::read_to_string(&md_path) {
+    let mut content = match fs::read_to_string(&md_path) {
         Ok(content) => content,
         Err(_) => {
             return Err(ApiError::InternalServerError);
         }
     };
+
+    let md_start = "<!-- READ-ONLY VIEW -->\n\n# Issue ";
+
+    // Prevent title from being formatted --> remove # from title issue id
+    let re = Regex::new(&format!("^({md_start})#(\\d+)")).unwrap();
+    content = re.replace(&content, "$1$2").to_string();
+
+    // Format issue ids with links to the corresponding show page
+    let re = Regex::new(r"#(\d+)").unwrap();
+    content = re.replace_all(&content, "[#$1](http://localhost:7878/show/$1)").to_string();
+
+    // Put back the # in front of the title issue id
+    let re = Regex::new(&format!("^({md_start})(\\d+)")).unwrap();
+    content = re.replace(&content, "$1#$2").to_string();
 
     let template = ShowTemplate { id, content };
     let html = template.render().unwrap();
